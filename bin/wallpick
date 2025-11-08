@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="${WALLPAPER_DIR:-$HOME/Pictures}"
+dotfiles_dir="${DOTFILES_DIR:-$HOME/dotfiles}"
+wall_apply="${dotfiles_dir}/bin/dms-wall-apply"
+
+if ! command -v fd >/dev/null 2>&1; then
+    printf 'wallpick: fd is required\n' >&2
+    exit 127
+fi
+
+if ! command -v fzf >/dev/null 2>&1; then
+    printf 'wallpick: fzf is required\n' >&2
+    exit 127
+fi
+
+mapfile -t images < <(fd -t f -e jpg -e jpeg -e png -e webp -e avif . "$root")
+
+if [[ ${#images[@]} -eq 0 ]]; then
+    printf 'wallpick: no images found under %s\n' "$root" >&2
+    exit 1
+fi
+
+selection="$(printf '%s\n' "${images[@]}" | fzf --prompt='wallpaper> ' --height=80% --layout=reverse --border)"
+
+if [[ -n "$selection" ]]; then
+    "$wall_apply" "$selection"
+fi

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CONF="$HOME/dotfiles/config/tmux/tmux.conf"
+SOCKET="${TMUX_SOCKET:-watchdogs}"
+SESSION="${TMUX_SESSION:-matrix}"
+CMD=(tmux -f "$CONF" -L "$SOCKET")
+
+command -v tmux >/dev/null 2>&1 || { echo 'tmux não encontrado'; exit 1; }
+
+if ! "${CMD[@]}" has-session -t "$SESSION" 2>/dev/null; then
+  "${CMD[@]}" new-session -d -s "$SESSION" -n dev "cd \"${PWD}\" && zsh"
+  "${CMD[@]}" new-window -t "$SESSION" -n ops "watch -n 2 'timew summary :day 2>/dev/null | tail -n +3'"
+  "${CMD[@]}" split-window -t "$SESSION":ops -v -p 35 "watch -n 2 'task +PENDING count'"
+  "${CMD[@]}" select-window -t "$SESSION":dev
+fi
+
+exec "${CMD[@]}" attach -t "$SESSION"

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v tmux >/dev/null 2>&1; then
+    printf 'java-dev: tmux is required\n' >&2
+    exit 1
+fi
+
+mise run session:java "$@"

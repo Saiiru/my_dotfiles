@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Colors aligned with tmux palette
+C1="#22d3ee" # cyan
+C2="#e6edf3" # fg
+C3="#7c3aed" # purple accent
+
+# Determine kitty socket
+KITTY_SOCKET=${KITTY_LISTEN_ON:-}
+if [[ -z "${KITTY_SOCKET}" && -S /tmp/kitty ]]; then
+  KITTY_SOCKET="unix:/tmp/kitty"
+fi
+
+if [[ -z "${KITTY_SOCKET}" ]]; then
+  exit 0
+fi
+
+command -v kitty >/dev/null 2>&1 || exit 0
+command -v jq >/dev/null 2>&1 || exit 0
+
+if ! OUT=$(kitty @ --to "$KITTY_SOCKET" ls 2>/dev/null); then
+  exit 0
+fi
+
+TAB_COUNT=$(printf '%s' "$OUT" | jq '[.[].tabs | length] | add' 2>/dev/null || printf '0')
+ACTIVE_TITLE=$(printf '%s' "$OUT" | jq -r '.[] | select(.is_focused==true) | .tabs[] | select(.active==true) | .title' 2>/dev/null | head -n1)
+
+if [[ -z "$ACTIVE_TITLE" || "$ACTIVE_TITLE" == "null" ]]; then
+  ACTIVE_TITLE="kitty"
+fi
+
+SHORT_TITLE=$(printf '%s' "$ACTIVE_TITLE" | cut -c1-18)
+
+printf '#[fg=%s]KIT #[fg=%s]%02d #[fg=%s]%s ' "$C1" "$C2" "$TAB_COUNT" "$C3" "$SHORT_TITLE"
