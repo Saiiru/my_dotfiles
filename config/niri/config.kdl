@@ -1,0 +1,15 @@
+// --- Spawns necessários ---
+spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
+spawn-at-startup "quickshell" "--path" "/home/$USER/dotfiles/config/quickshell/dms"
+
+// --- Regras de layer úteis p/ Quickshell/DMS ---
+layer-rule { match namespace="quickshell" place-within-backdrop true }
+layer-rule { match namespace="dms:blurwallpaper" place-within-backdrop true }
+
+// --- Binds dev (ajuste à sua rotina) ---
+binds {
+  Super+Enter { spawn "kitty"; }
+  Super+D     { spawn "fuzzel"; }
+  Super+G     { spawn "kitty" "-e" "lazygit"; }
+  Super+B     { spawn "bash" "-lc" "make -j$(nproc) || true"; }
+}

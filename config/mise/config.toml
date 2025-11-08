@@ -1,0 +1,624 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# ~/dotfiles/mise/config.toml
+# RED HOOD MISE CONFIG - Complete toolchain + automation
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ═══════════════════════════════════════════════════════════════════
+# TOOLS - Language runtimes e ferramentas
+# ═══════════════════════════════════════════════════════════════════
+[tools]
+# Multi-runtime baseline
+"python@3" = "3.12.1"
+"python@2" = "2.7.18"
+"python@pypy3" = "pypy3.10-7.3.16"
+node = "lts"
+deno = "latest"
+bun = "latest"
+pnpm = "latest"
+go = "1.22.3"
+rust = "stable"
+java = "21"
+"java@temurin" = "21"
+dotnet = "8.0"
+ruby = "3.3.1"
+lua = "5.4.6"
+perl = "5.38.2"
+
+# Native build chain
+llvm = "latest"
+gcc = "latest"
+clang = "latest"
+cmake = "latest"
+ninja = "latest"
+meson = "latest"
+
+# Tooling & Python extras
+maven = "latest"
+gradle = "latest"
+uv = "latest"
+pipx = "latest"
+ruff = "latest"
+black = "latest"
+just = "latest"
+usage = "latest"
+
+# DevOps & Cloud
+kubectl = "latest"
+helm = "latest"
+terraform = "latest"
+awscli = "latest"
+doctl = "latest"
+
+# Framework ecosystem
+spring-boot = "latest"
+groovy = "latest"
+tomcat = "latest"
+
+# ═══════════════════════════════════════════════════════════════════
+# ENV - Environment variables
+# ═══════════════════════════════════════════════════════════════════
+[env]
+# Go module cache
+GOMODCACHE = "~/.cache/go/mod"
+GOCACHE = "~/.cache/go/build"
+WORKON_HOME = "~/.ve"
+PROJECT_HOME = "~/workspace"
+
+# Node
+NODE_OPTIONS = "--max-old-space-size=4096"
+
+# Java
+MAVEN_OPTS = "-Xmx2g"
+GRADLE_OPTS = "-Xmx2g -Dorg.gradle.daemon=true"
+
+# Mise UX
+MISE_AUTO_INSTALL = "0"
+MISE_HIDE_PLUGIN_WARNING = "1"
+
+# ═══════════════════════════════════════════════════════════════════
+# TASKS: NODE.JS
+# ═══════════════════════════════════════════════════════════════════
+
+[tasks."node:install"]
+description = "Install Node.js dependencies"
+run = "pnpm install"
+sources = ["package.json", "pnpm-lock.yaml"]
+outputs = ["node_modules"]
+
+[tasks."node:build"]
+description = "Build Node.js project"
+depends = ["node:install"]
+run = "pnpm run build"
+sources = [
+    "src/**",
+    "index.html",
+    "public/**",
+    "package.json",
+    "pnpm-lock.yaml",
+    "vite.config.*",
+    "webpack.config.*",
+    "rollup.config.*",
+    "tsconfig*.json"
+]
+outputs = ["dist", "build"]
+
+[tasks."node:dev"]
+description = "Start dev server"
+depends = ["node:install"]
+run = "pnpm run dev"
+
+[tasks."node:test"]
+description = "Run Node.js tests"
+depends = ["node:install"]
+run = "pnpm run test"
+sources = ["src/**", "tests/**", "**/*.test.{js,ts}", "**/*.spec.{js,ts}"]
+
+[tasks."node:lint"]
+description = "Lint Node.js code"
+run = [
+    "pnpm run lint",
+    "pnpm run format"
+]
+sources = ["src/**", "**/*.{js,ts,jsx,tsx}"]
+
+# ═══════════════════════════════════════════════════════════════════
+# TASKS: PYTHON
+# ═══════════════════════════════════════════════════════════════════
+
+[tasks."py:install"]
+description = "Install Python dependencies"
+run = [
+    '''sh -c '
+if [ ! -d .venv ]; then
+  echo "No virtualenv detected. Create one with: mise run python:venv"
+  exit 0
+fi
+if [ -f requirements.txt ]; then
+  . .venv/bin/activate
+  if command -v uv >/dev/null 2>&1; then
+    uv pip sync requirements.txt
+  else
+    pip install -r requirements.txt
+  fi
+fi
+' '''
+]
+sources = ["requirements.txt", "pyproject.toml", "requirements/**/*.txt"]
+outputs = [".venv"]
+
+[tasks."python:venv"]
+description = "Create or recreate local Python virtualenv (.venv)"
+run = '''
+    python -m venv .venv
+    echo "✓ Virtualenv ready: .venv"
+'''
+outputs = [".venv"]
+
+[tasks."py:dev-install"]
+description = "Install Python dev dependencies"
+depends = ["py:install"]
+run = [
+    '''sh -c '
+if [ ! -d .venv ]; then
+  echo "No virtualenv detected. Create one with: mise run python:venv"
+  exit 0
+fi
+if [ -f requirements-dev.txt ]; then
+  . .venv/bin/activate
+  pip install -r requirements-dev.txt
+fi
+' '''
+]
+sources = ["requirements-dev.txt"]
+
+[tasks."py:test"]
+description = "Run Python tests"
+depends = ["py:install"]
+run = '''
+    if [ ! -d .venv ]; then
+      echo "No virtualenv detected. Create one with: mise run python:venv"
+      exit 0
+    fi
+    . .venv/bin/activate
+    pytest -v
+'''
+sources = ["**/*.py", "tests/**", "pyproject.toml", "pytest.ini"]
+
+[tasks."py:coverage"]
+description = "Run tests with coverage"
+depends = ["py:install"]
+run = '''
+    if [ ! -d .venv ]; then
+      echo "No virtualenv detected. Create one with: mise run python:venv"
+      exit 0
+    fi
+    . .venv/bin/activate
+    pytest --cov=. --cov-report=html
+'''
+sources = ["**/*.py", "tests/**"]
+outputs = ["htmlcov"]
+
+[tasks."py:fmt"]
+description = "Format Python code"
+run = [
+    '''sh -c '
+if [ -d .venv ]; then
+  . .venv/bin/activate
+fi
+command -v black >/dev/null 2>&1 && black . || true
+' ''',
+    '''sh -c '
+if [ -d .venv ]; then
+  . .venv/bin/activate
+fi
+command -v ruff >/dev/null 2>&1 && ruff check --fix . || true
+' '''
+]
+sources = ["**/*.py"]
+
+[tasks."py:lint"]
+description = "Lint Python code"
+run = [
+    '''sh -c '
+if [ -d .venv ]; then
+  . .venv/bin/activate
+fi
+command -v ruff >/dev/null 2>&1 && ruff check . || true
+' ''',
+    '''sh -c '
+if [ -d .venv ]; then
+  . .venv/bin/activate
+fi
+command -v mypy >/dev/null 2>&1 && mypy . || true
+' '''
+]
+sources = ["**/*.py"]
+
+[tasks."py:global:init"]
+description = "Provision global Watch_Dogs Python toolchains (jupyter/ipython/tools)"
+run = '''
+set -euo pipefail
+mkdir -p "$HOME/.ve" "$HOME/workspace"
+mise exec python@3 -- python -m venv "$HOME/.ve/jupyter3"
+"$HOME/.ve/jupyter3/bin/pip" install --upgrade pip ipykernel jupyter
+"$HOME/.ve/jupyter3/bin/python" -m ipykernel install --user --name watchdogs-py3 --display-name "Python 3 (Watch_Dogs)"
+mise exec python@2 -- python -m virtualenv "$HOME/.ve/ipython2"
+"$HOME/.ve/ipython2/bin/pip" install --upgrade pip ipykernel
+"$HOME/.ve/ipython2/bin/python" -m ipykernel install --user --name watchdogs-py2 --display-name "Python 2 (Watch_Dogs)"
+mise exec python@3 -- python -m venv "$HOME/.ve/tools3"
+"$HOME/.ve/tools3/bin/pip" install youtube-dl rows fabric
+mise exec python@2 -- python -m virtualenv "$HOME/.ve/tools2"
+"$HOME/.ve/tools2/bin/pip" install s3cmd mercurial
+'''
+outputs = ["$HOME/.ve/jupyter3/bin/python", "$HOME/.ve/ipython2/bin/python"]
+
+# ═══════════════════════════════════════════════════════════════════
+# TASKS: GO
+# ═══════════════════════════════════════════════════════════════════
+
+[tasks."go:tidy"]
+description = "Tidy Go modules"
+run = "go mod tidy"
+sources = ["go.mod", "go.sum"]
+outputs = ["go.sum"]
+
+[tasks."go:download"]
+description = "Download Go dependencies"
+depends = ["go:tidy"]
+run = "go mod download"
+sources = ["go.mod", "go.sum"]
+
+[tasks."go:build"]
+description = "Build Go project"
+depends = ["go:tidy"]
+run = "go build -o bin/ ./..."
+sources = ["**/*.go", "go.mod", "go.sum"]
+outputs = ["bin"]
+
+[tasks."go:test"]
+description = "Run Go tests"
+run = "go test -v ./..."
+sources = ["**/*.go", "go.mod", "go.sum"]
+
+[tasks."go:fmt"]
+description = "Format Go code"
+run = "go fmt ./..."
+sources = ["**/*.go"]
+
+[tasks."go:vet"]
+description = "Vet Go code"
+run = "go vet ./..."
+sources = ["**/*.go"]
+
+# ═══════════════════════════════════════════════════════════════════
+# TASKS: JAVA (Maven)
+# ═══════════════════════════════════════════════════════════════════
+
+[tasks."java:maven:clean"]
+description = "Clean Maven project"
+run = "mvn clean"
+
+[tasks."java:maven:compile"]
+description = "Compile Maven project"
+run = "mvn compile"
+sources = ["pom.xml", "src/**"]
+outputs = ["target/classes"]
+
+[tasks."java:maven:test"]
+description = "Run Maven tests"
+depends = ["java:maven:compile"]
+run = "mvn test"
+sources = ["pom.xml", "src/**"]
+
+[tasks."java:maven:package"]
+description = "Package Maven project"
+depends = ["java:maven:compile"]
+run = "mvn package -DskipTests"
+sources = ["pom.xml", "src/**", "settings.xml"]
+outputs = ["target"]
+
+[tasks."java:maven:install"]
+description = "Install Maven project"
+depends = ["java:maven:package"]
+run = "mvn install -DskipTests"
+
+# ═══════════════════════════════════════════════════════════════════
+# TASKS: JAVA (Gradle)
+# ═══════════════════════════════════════════════════════════════════
+
+[tasks."java:gradle:clean"]
+description = "Clean Gradle project"
+run = "gradle clean"
+
+[tasks."java:gradle:compile"]
+description = "Compile Gradle project"
+run = "gradle compileJava"
+sources = ["build.gradle", "settings.gradle", "src/**"]
+outputs = ["build/classes"]
+
+[tasks."java:gradle:test"]
+description = "Run Gradle tests"
+depends = ["java:gradle:compile"]
+run = "gradle test"
+sources = ["build.gradle", "src/**"]
+
+[tasks."java:gradle:build"]
+description = "Build Gradle project"
+depends = ["java:gradle:compile"]
+run = "gradle build -x test"
+sources = ["build.gradle", "gradle.properties", "settings.gradle", "src/**"]
+outputs = ["build"]
+
+# ═══════════════════════════════════════════════════════════════════
+# TASKS: RUST
+# ═══════════════════════════════════════════════════════════════════
+
+[tasks."rust:build"]
+description = "Build Rust project"
+run = "cargo build"
+sources = ["Cargo.toml", "Cargo.lock", "src/**"]
+outputs = ["target"]
+
+[tasks."rust:build-release"]
+description = "Build Rust project (release)"
+run = "cargo build --release"
+sources = ["Cargo.toml", "Cargo.lock", "src/**"]
+outputs = ["target/release"]
+
+[tasks."rust:test"]
+description = "Run Rust tests"
+run = "cargo test"
+sources = ["Cargo.toml", "src/**"]
+
+[tasks."rust:fmt"]
+description = "Format Rust code"
+run = "cargo fmt"
+sources = ["src/**"]
+
+[tasks."rust:clippy"]
+description = "Lint Rust code"
+run = "cargo clippy -- -D warnings"
+sources = ["src/**"]
+
+# ═══════════════════════════════════════════════════════════════════
+# TASKS: C / C++ (CMake)
+# ═══════════════════════════════════════════════════════════════════
+
+[tasks."c:configure"]
+description = "Configure C/C++ project with CMake"
+run = "cmake -S . -B build"
+sources = ["CMakeLists.txt", "src/**", "include/**"]
+outputs = ["build"]
+
+[tasks."c:build"]
+description = "Build C/C++ project"
+depends = ["c:configure"]
+run = "cmake --build build"
+sources = ["CMakeLists.txt", "src/**", "include/**"]
+outputs = ["build"]
+
+[tasks."c:test"]
+description = "Run CTest suite"
+depends = ["c:build"]
+run = "ctest --test-dir build --output-on-failure || true"
+sources = ["tests/**", "src/**"]
+
+[tasks."c:clean"]
+description = "Remove build artifacts"
+run = "rm -rf build"
+outputs = []
+
+# ═══════════════════════════════════════════════════════════════════
+# TASKS: DOCKER
+# ═══════════════════════════════════════════════════════════════════
+
+[tasks."docker:build"]
+description = "Build Docker image"
+run = "docker build -t ${PROJECT_NAME:-app}:latest ."
+sources = ["Dockerfile", "src/**", "package.json"]
+
+[tasks."docker:up"]
+description = "Start Docker Compose services"
+run = "docker compose up -d"
+
+[tasks."docker:down"]
+description = "Stop Docker Compose services"
+run = "docker compose down"
+
+[tasks."docker:logs"]
+description = "Show Docker Compose logs"
+run = "docker compose logs -f"
+
+# ═══════════════════════════════════════════════════════════════════
+# TASKS: PROJECT CREATION
+# ═══════════════════════════════════════════════════════════════════
+
+[tasks."new:node"]
+description = "Create new Node.js project"
+run = '''
+    read -p "Project name: " name
+    mkdir -p "$name"
+    cd "$name"
+    pnpm init
+    pnpm add -D typescript @types/node tsx
+    echo "✓ Node project created: $name"
+'''
+
+[tasks."new:python"]
+description = "Create new Python project"
+run = '''
+    read -p "Project name: " name
+    mkdir -p "$name"
+    cd "$name"
+    python -m venv .venv
+    source .venv/bin/activate
+    pip install pytest black ruff mypy
+    echo "✓ Python project created: $name"
+'''
+
+[tasks."new:go"]
+description = "Create new Go project"
+run = '''
+    read -p "Project name: " name
+    read -p "Module path (github.com/user/$name): " mod
+    mkdir -p "$name"
+    cd "$name"
+    go mod init "${mod:-github.com/$USER/$name}"
+    mkdir -p cmd pkg internal
+    echo "✓ Go project created: $name"
+'''
+
+[tasks."new:spring"]
+description = "Create new Spring Boot project (Maven)"
+run = '''
+    read -p "Project name: " name
+    read -p "Group ID (com.example): " group
+    read -p "Artifact ID ($name): " artifact
+    spring init \
+        --build=maven \
+        --java-version=21 \
+        --packaging=jar \
+        --dependencies=web,data-jpa,postgresql,lombok,actuator,test \
+        --group-id="${group:-com.example}" \
+        --artifact-id="${artifact:-$name}" \
+        --name="$name" \
+        "$name"
+    cd "$name"
+    cat <<'EOF' > .mise.toml
+[tools]
+java = "21"
+maven = "latest"
+
+[env]
+MISE_AUTO_INSTALL = "0"
+EOF
+    cat <<'EOF' > .envrc
+export MISE_AUTO_INSTALL=0
+EOF
+    echo "✓ Spring Boot project created: $name"
+'''
+
+[tasks."new:spring-gradle"]
+description = "Create new Spring Boot project (Gradle)"
+run = '''
+    read -p "Project name: " name
+    read -p "Group ID (com.example): " group
+    read -p "Artifact ID ($name): " artifact
+    spring init \
+        --build=gradle \
+        --java-version=21 \
+        --packaging=jar \
+        --dependencies=web,data-jpa,postgresql,lombok,actuator,test \
+        --group-id="${group:-com.example}" \
+        --artifact-id="${artifact:-$name}" \
+        --name="$name" \
+        "$name"
+    cd "$name"
+    cat <<'EOF' > .mise.toml
+[tools]
+java = "21"
+gradle = "latest"
+
+[env]
+MISE_AUTO_INSTALL = "0"
+EOF
+    cat <<'EOF' > .envrc
+export MISE_AUTO_INSTALL=0
+EOF
+    echo "✓ Spring Boot project created: $name"
+'''
+
+[tasks."session:java"]
+description = "Launch a tmux workspace for the current Java project"
+run = '''
+    project="${1:-$(basename "$PWD")}"
+    session="java:${project}"
+
+    if tmux has-session -t "$session" 2>/dev/null; then
+        tmux attach -t "$session"
+        exit 0
+    fi
+
+    tmux new-session -d -s "$session" -c "$PWD"
+    tmux rename-window -t "$session":0 "editor"
+    tmux send-keys -t "$session":0 'nvim .' C-m
+
+    tmux new-window -t "$session":1 -c "$PWD" -n "run" '
+        if [ -x ./mvnw ]; then ./mvnw spring-boot:run; 
+        elif [ -x ./gradlew ]; then ./gradlew bootRun;
+        elif command -v mvn >/dev/null; then mvn spring-boot:run;
+        elif command -v gradle >/dev/null; then gradle bootRun;
+        else sleep 5; fi'
+
+    tmux new-window -t "$session":2 -c "$PWD" -n "tests" '
+        while true; do
+            if [ -x ./mvnw ]; then ./mvnw test;
+            elif [ -x ./gradlew ]; then ./gradlew test;
+            elif command -v mvn >/dev/null; then mvn test;
+            elif command -v gradle >/dev/null; then gradle test;
+            else sleep 5; fi
+            sleep 2
+        done'
+
+    tmux select-window -t "$session":0
+    tmux attach -t "$session"
+'''
+
+[tasks."new:rust"]
+description = "Create new Rust project"
+run = '''
+    read -p "Project name: " name
+    cargo new "$name"
+    echo "✓ Rust project created: $name"
+'''
+
+# ═══════════════════════════════════════════════════════════════════
+# TASKS: COMPOSITE (Orchestration)
+# ═══════════════════════════════════════════════════════════════════
+
+[tasks.install]
+description = "Install all dependencies"
+run = [
+    { tasks = ["node:install", "py:install", "go:tidy"] }
+]
+
+[tasks.build]
+description = "Build all projects"
+run = [
+    { tasks = ["node:build", "go:build", "java:gradle:build"] }
+]
+
+[tasks.test]
+description = "Run all tests"
+run = [
+    { tasks = ["node:test", "py:test", "go:test"] }
+]
+
+[tasks.fmt]
+description = "Format all code"
+run = [
+    { tasks = ["node:lint", "py:fmt", "go:fmt", "rust:fmt"] }
+]
+
+[tasks.lint]
+description = "Lint all code"
+run = [
+    { tasks = ["node:lint", "py:lint", "go:vet", "rust:clippy"] }
+]
+
+[tasks.clean]
+description = "Clean all build artifacts"
+run = [
+    "rm -rf node_modules dist build target .venv __pycache__ .pytest_cache htmlcov .coverage"
+]
+
+# ═══════════════════════════════════════════════════════════════════
+# SETTINGS
+# ═══════════════════════════════════════════════════════════════════
+[settings]
+experimental = true
+verbose = false
+asdf_compat = false
+legacy_version_file = false
+always_keep_download = false
+plugin_autoupdate_last_check_duration = "7d"

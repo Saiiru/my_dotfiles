@@ -1,0 +1,11 @@
+{
+  "name": "kora-neon",
+  "bg": "#020202",
+  "fg": "#E6E6E6",
+  "cyan": "#22D3EE",
+  "purple": "#7C3AED",
+  "magenta": "#EE79D1",
+  "yellow": "#FACC15",
+  "green": "#10B981",
+  "accentGradient": ["#22D3EE", "#7C3AED"]
+}
