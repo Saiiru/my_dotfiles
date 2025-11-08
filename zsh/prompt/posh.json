@@ -1,0 +1,109 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "properties": {
+            "cache_duration": "none",
+            "display_host": true
+          },
+          "template": "<#7C3AED>\u250c\u2500\u2500(</>{{ .UserName }}{{ if .Root }}💀{{ else }} \udb82\udf5f {{ end }}{{ .HostName }}<#7C3AED>)",
+          "foreground": "#22D3EE",
+          "type": "session",
+          "style": "plain",
+          "foreground_templates": [
+            "{{ if .Root }}#EF4444{{ end }}"
+          ]
+        },
+        {
+          "properties": {
+            "cache_duration": "none",
+            "folder_separator_icon": "<#7C3AED>/</>",
+            "style": "full"
+          },
+          "template": "<#7C3AED>-[</>\udb82\udcd6 {{ .Path }}<#7C3AED>]>",
+          "foreground": "#CDD6F4",
+          "type": "path",
+          "style": "plain"
+        },
+        {
+          "properties": {
+            "cache_duration": "none",
+            "fetch_version": true,
+            "fetch_virtual_env": true
+          },
+          "template": "<#7C3AED>-[</>\ue73c {{ if .Venv }}{{ .Venv }}{{ else if .Pyenv }}{{ .Pyenv }}{{ else }}{{ .Full }}{{ end }}<#7C3AED>]>",
+          "foreground": "#10B981",
+          "type": "python",
+          "style": "plain"
+        },
+        {
+          "properties": {
+            "cache_duration": "none",
+            "fetch_version": true
+          },
+          "template": "<#7C3AED>-[</>\ue718 {{ .Full }}<#7C3AED>]>",
+          "foreground": "#FACC15",
+          "type": "node",
+          "style": "plain"
+        },
+        {
+          "properties": {
+            "cache_duration": "none",
+            "fetch_version": true
+          },
+          "template": "<#7C3AED>-[</>\ue627 {{ .Full }}<#7C3AED>]>",
+          "foreground": "#00ADD8",
+          "type": "go",
+          "style": "plain"
+        },
+        {
+          "properties": {
+            "cache_duration": "none",
+            "fetch_version": true
+          },
+          "template": "<#7C3AED>-[</>\ue256 {{ .Full }}<#7C3AED>]>",
+          "foreground": "#FF2D20",
+          "type": "java",
+          "style": "plain"
+        },
+        {
+          "properties": {
+            "branch_icon": "",
+            "cache_duration": "none",
+            "fetch_status": true,
+            "fetch_upstream_icon": true
+          },
+          "template": "<#7C3AED>-[</>\ue725 {{ .HEAD }}{{ if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf444{{ end }}{{ if .Staging.Changed }} \uf046{{ end }}{{ if .Ahead }} \uf176{{ .Ahead }}{{ end }}{{ if .Behind }} \uf175{{ .Behind }}{{ end }}<#7C3AED>]>",
+          "foreground": "#ee79d1",
+          "type": "git",
+          "style": "plain"
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "right"
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "properties": {
+            "cache_duration": "none"
+          },
+          "template": "<#7C3AED>\u2514\u2500</>{{ if .Root }}<#EF4444>#</>{{ else }}${{ end }} ",
+          "foreground": "#7C3AED",
+          "type": "text",
+          "style": "plain"
+        }
+      ],
+      "newline": true
+    }
+  ],
+  "version": 3
+}
