@@ -1,0 +1,36 @@
+
+  You are a senior tmux/zsh engineer with full network access. Context: Arch Linux workstation, dotfiles live in ~/dotfiles (public repo not
+  yet committed). Goals:
+  1. Inspect ~/.tmux.conf (symlink to ~/dotfiles/config/tmux/tmux.conf) and ensure WATCH_DOGS/Matrix theme works: flat status bar (green
+  on black), central window list `[ #I:#W ]`, right side shows Pomodoro (~/dotfiles/config/tmux/scripts/pomodoro-status.sh), Taskwarrior
+  summary, and 24h clock. Prefix must stay Ctrl+a. Status bar must never disappear unless user hits prefix+b which toggles via toggle-
+  status.sh; verify default state is ON.
+  2. Validate sesh/fzf bindings: K (global catalog), N (sesh ui popup), R (root-filtered catalog), G (grimório popup), T (taskwarrior
+  board), P (pomodoro popup). Ensure each script in config/tmux/scripts/ is executable, runs without return codes 1/2/126, and fails
+  gracefully if deps absent.
+  3. Fix zsh alias error: `aliases.zsh` is complaining “defining function based on alias ‘cheat’ … parse error near ()”. Move any cheat-
+  related functions into zsh/functions.zsh or cheatsheet.zsh so aliases.zsh contains aliases only. Ensure `alias cheat='redhood_cheatsheet'`
+  still works.
+  4. Rebuild tmux cheat sheet (config/tmux/CHEATSHEET.md) summarizing keybindings, scripts, and troubleshooting (status toggle, wl-copy
+  copy-mode, sesh hotkeys, pomodoro/taskwarrior commands, tmux-thumbs usage).
+  5. Double-check ~/.config path expectations (tmux, kitty, zsh) so everything sources correctly. Provide validation steps (tmux source-
+  file, chmod +x scripts, command list to test each binding).
+
+  Deliverables:
+  - Updated tmux.conf if needed (flat style preserved).
+  - Fixed scripts/aliases to eliminate errors.
+  - Verified instructions/tests and refreshed CHEATSHEET.md.
+  - Summary of keybinds + troubleshooting.
+
+  Assume you can run tmux/sesh/task binaries and have internet to consult docs. Always cite references for external facts. Ask for
+  clarification if something is ambiguous.
+
+  Command To Start New Chat (CLI Example)
+  If you’re using the OpenAI CLI with network-enabled browsing:
+
+  openai api chat.completions.create \
+    -m gpt-4.1 \
+    -g \
+    -M 2000 \
+    -p "$(cat prompt.txt)"
+
