@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Exporta configs do ~/.config para ~/dotfiles e cria symlinks de volta.
-# Usa um manifesto (~/dotfiles/config/links.list) para você versionar os mapeamentos.
+# Usa um manifesto (~/dotfiles/config_dotfiles/config/links.list) para você versionar os mapeamentos.
 # Uso:
 #   config-export.sh --all               # exporta quase tudo (com exclusões seguras)
 #   config-export.sh hypr kitty waybar   # exporta apenas esses
@@ -12,10 +12,10 @@
 set -euo pipefail
 
 # --- Parâmetros base (personalize se quiser) ---
-REPO="${REPO:-$HOME/dotfiles}"
+REPO="${REPO:-$HOME/dotfiles/config_dotfiles/config}"
 CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-MANIFEST="${REPO}/config/links.list"
-ROOTFILES_DIR="${REPO}/_configroot"  # onde guardaremos arquivos soltos do ~/.config
+MANIFEST="${REPO}/links.list"
+ROOTFILES_DIR="$HOME/dotfiles/config_dotfiles/_configroot"  # onde guardaremos arquivos soltos do ~/.config
 EXCLUDES_DEFAULT=(
   "mozilla" "pulse" "evolution" "Electron" "discord" "goa-1.0" "yay"
   # adicione aqui coisas volumosas/sensiveis que você NÃO quer versionar
@@ -128,7 +128,8 @@ export_file() {
 auto_detect_items() {
   # Exporta TODOS diretórios do ~/.config (menos EXCLUDES) e TODOS arquivos de nível raiz
   local d f
-  for d in "$CONFIG_HOME"/*; do
+  for d in "$CONFIG_HOME"/*;
+  do
     local base="$(basename "$d")"
     # pular backups e temporários
     [[ "$base" =~ \.bak$ ]] && continue
@@ -141,7 +142,8 @@ auto_detect_items() {
     fi
   done
   # arquivos soltos
-  for f in "$CONFIG_HOME"/*; do
+  for f in "$CONFIG_HOME"/*;
+  do
     [ -f "$f" ] || continue
     ARGS+=("::$(basename "$f")")  # marca arquivos com prefixo '::'
   done
@@ -150,14 +152,14 @@ auto_detect_items() {
 # --- Parse flags ---
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --all) auto_detect_items; shift ;;
-    --dry-run) DRY=1; shift ;;
-    --force) FORCE=1; shift ;;
-    --no-backup) BACKUP=0; shift ;;
-    --yes|-y) ASK=0; shift ;;
-    --) shift; break ;;
-    -*) die "Flag desconhecida: $1" ;;
-    *) ARGS+=("$1"); shift ;;
+    --all) auto_detect_items; shift ;; 
+    --dry-run) DRY=1; shift ;; 
+    --force) FORCE=1; shift ;; 
+    --no-backup) BACKUP=0; shift ;; 
+    --yes|-y) ASK=0; shift ;; 
+    --) shift; break ;; 
+    -*) die "Flag desconhecida: $1" ;; 
+    *) ARGS+=("$1"); shift ;; 
   esac
 done
 
@@ -185,4 +187,3 @@ for item in "${ARGS[@]}"; do
 done
 
 msg "[OK] Export concluído. Manifesto em: $MANIFEST"
-
