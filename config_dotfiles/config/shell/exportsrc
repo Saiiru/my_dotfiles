@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# ------------------------------------------------------------------------------
+# CLEANUP HOME DIRECTORY (XDG-compliant env vars)
+# ------------------------------------------------------------------------------
+# NOTE: Most XDG variables are now set in ~/.config/environment.d/*.conf
+# These are loaded by systemd user session and available to all processes.
+# We keep fallbacks here for non-systemd environments.
+
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export XDG_BIN_HOME="${XDG_BIN_HOME:-$HOME/.local/bin}"
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+
+# ------------------------------------------------------------------------------
+# PATH
+# ------------------------------------------------------------------------------
+export PATH="$PATH:$CARGO_HOME/bin:$RUSTUP_HOME/bin:$GOPATH/bin:$XDG_BIN_HOME:$XDG_DATA_HOME/npm/bin"
+
+# ------------------------------------------------------------------------------
+# COLORS
+# ------------------------------------------------------------------------------
+export MANPAGER="sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"
+export MANROFFOPT="-P -c"
+export LESS='-R --use-color -Dd+r$Du+b$'

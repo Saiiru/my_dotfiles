@@ -1,0 +1,5 @@
+config_dotfiles/config/tmux/tmux.conf
+config_dotfiles/zsh/.zshrc
+config_dotfiles/zsh/.zshenv
+config_dotfiles/vimrc
+config_dotfiles/config/git/config
