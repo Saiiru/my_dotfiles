@@ -1,107 +1,96 @@
 #═══════════════════════════════════════════════════════════════════════
 # GOTHAM SYSTEM — Mise Configuration
-# Toolchain manager com automações táticas
+# Multi-language development environment
 #═══════════════════════════════════════════════════════════════════════
 
 [settings]
 experimental = true
-verbose = false
-legacy_version_file = false
+legacy_version_file = true
 always_keep_download = false
+always_keep_install = false
 plugin_autoupdate_last_check_duration = "7d"
+verbose = false
+asdf_compat = false
+jobs = 4
+raw = false
+yes = false
 
 [env]
-GOMODCACHE = "~/.cache/go/mod"
-GOCACHE = "~/.cache/go/build"
-WORKON_HOME = "~/.ve"
-PROJECT_HOME = "~/projects"
-NODE_OPTIONS = "--max-old-space-size=4096"
-MISE_AUTO_INSTALL = "0"
-MISE_PYTHON_COMPILE = "0"
-MISE_NODE_COMPILE = "0"
+_.path = [
+    "{{ config_root }}/bin",
+    "$HOME/.local/bin"
+]
 
-#═══════════════════════════════════════════════════════════════════════
-# GLOBAL TOOLS
-#═══════════════════════════════════════════════════════════════════════
-
+#───────────────────────────────────────────────────────────────────────
+# PYTHON
+#───────────────────────────────────────────────────────────────────────
 [tools]
-# Core languages
-"python" = "3.12"
-node = "lts"
-go = "latest"
+python = "3.12"
+"python:latest" = "latest"
+"python:3.11" = "3.11"
+
+# Python tools
+pipx = "latest"
+poetry = "latest"
+ruff = "latest"
+black = "latest"
+mypy = "latest"
+
+#───────────────────────────────────────────────────────────────────────
+# NODE.JS
+#───────────────────────────────────────────────────────────────────────
+node = "20"
+"node:lts" = "lts"
+"node:latest" = "latest"
+
+# Node tools
+pnpm = "latest"
+yarn = "latest"
+
+#───────────────────────────────────────────────────────────────────────
+# GO
+#───────────────────────────────────────────────────────────────────────
+go = "1.21"
+"go:latest" = "latest"
+
+# Go tools
+golangci-lint = "latest"
+gopls = "latest"
+delve = "latest"
+
+#───────────────────────────────────────────────────────────────────────
+# RUST
+#───────────────────────────────────────────────────────────────────────
 rust = "stable"
+"rust:nightly" = "nightly"
 
-# Build tools
-just = "latest"
-cmake = "latest"
+#───────────────────────────────────────────────────────────────────────
+# JAVA / JVM
+#───────────────────────────────────────────────────────────────────────
+java = "openjdk-21"
+"java:17" = "openjdk-17"
+"java:11" = "openjdk-11"
 
-# CLI tools
-# httpie = "latest"
+maven = "latest"
+gradle = "latest"
+
+#───────────────────────────────────────────────────────────────────────
+# DATABASE TOOLS
+#───────────────────────────────────────────────────────────────────────
+postgres = "latest"
+
+#───────────────────────────────────────────────────────────────────────
+# DEVOPS / CLOUD
+#───────────────────────────────────────────────────────────────────────
+kubectl = "latest"
+helm = "latest"
+terraform = "latest"
+docker-compose = "latest"
+awscli = "latest"
+
+#───────────────────────────────────────────────────────────────────────
+# UTILITIES
+#───────────────────────────────────────────────────────────────────────
 jq = "latest"
 yq = "latest"
-
-# Python tools (instalados globalmente)
-ruff = "latest"
-uv = "latest"
-black = "latest"
-# pytest = "latest"
-
-# Node tools (instalados globalmente)
-[tools."npm:http-server"]
-version = "latest"
-
-[tools."npm:serve"]
-version = "latest"
-
-[tools."npm:typescript"]
-version = "latest"
-
-#═══════════════════════════════════════════════════════════════════════
-# TASKS
-#═══════════════════════════════════════════════════════════════════════
-
-[tasks.check]
-description = "Verifica ferramentas instaladas"
-run = """
-echo "╔════════════════════════════════════════╗"
-echo "║  TOOL STATUS                           ║"
-echo "╚════════════════════════════════════════╝"
-echo
-echo "Python:  $(python --version 2>&1)"
-echo "Node:    $(node --version 2>&1)"
-echo "Go:      $(go version 2>&1 | awk '{print $3}')"
-echo "Rust:    $(rustc --version 2>&1 | awk '{print $2}')"
-echo
-echo "Mise:    $(mise --version)"
-"""
-
-[tasks.doctor]
-description = "Diagnóstico completo"
-run = """
-echo "╔════════════════════════════════════════╗"
-echo "║  SYSTEM DIAGNOSTIC                     ║"
-echo "╚════════════════════════════════════════╝"
-mise doctor
-"""
-
-[tasks."py:venv"]
-description = "Cria virtualenv Python"
-run = """
-if [[ -d .venv ]]; then
-    echo "✓ .venv exists"
-    exit 0
-fi
-python -m venv .venv
-echo "✓ .venv created"
-"""
-
-[tasks."node:install"]
-description = "Instala dependências Node"
-run = """
-if [[ ! -f package.json ]]; then
-    echo "✗ No package.json"
-    exit 1
-fi
-command -v pnpm &>/dev/null && pnpm install || npm install
-echo "✓ Dependencies installed"
-"""
+github-cli = "latest"
