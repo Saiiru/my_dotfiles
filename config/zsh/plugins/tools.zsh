@@ -43,7 +43,7 @@ fi
 #───────────────────────────────────────────────────────────────────────
 
 if command -v starship >/dev/null 2>&1; then
-    export STARSHIP_CONFIG="$GOTHAM_DIR/shell/starship.toml"
+    export STARSHIP_CONFIG="$GOTHAM_DIR/themes/starship.toml"
     znap eval starship 'starship init zsh --print-full-init'
 fi
 

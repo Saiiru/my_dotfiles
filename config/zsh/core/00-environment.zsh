@@ -106,7 +106,7 @@ fi
 # STARSHIP CONFIG (CRÍTICO: ANTES DO INIT!)
 #───────────────────────────────────────────────────────────────────────
 
-export STARSHIP_CONFIG="$GOTHAM_DIR/shell/starship.toml"
+export STARSHIP_CONFIG="$GOTHAM_DIR/themes/starship.toml"
 
 if [[ ! -f "$STARSHIP_CONFIG" ]]; then
     log_error "Starship config not found: $STARSHIP_CONFIG"
@@ -153,7 +153,10 @@ typeset -U path
 
 path=(
     $HOME/.local/bin
-    $GOTHAM_DIR/scripts
+    $GOTHAM_DIR/bin/system
+    $GOTHAM_DIR/bin/battery
+    $GOTHAM_DIR/bin/theme
+    $GOTHAM_DIR/bin/notifications
     $HOME/.local/share/mise/shims
     $HOME/.local/share/mise/installs/*/bin(N)
     $HOME/.cargo/bin

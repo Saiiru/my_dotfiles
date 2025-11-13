@@ -107,20 +107,20 @@ GOTHAM_DIR="${GOTHAM_DIR:-$HOME/gotham}"
 
 declare -A SYMLINKS=(
     # Zsh
-    ["$GOTHAM_DIR/shell/.zshrc"]="$HOME/.zshrc"
-    ["$GOTHAM_DIR/shell/zsh"]="$HOME/.config/zsh"
+    ["$GOTHAM_DIR/config/zsh/.zshrc"]="$HOME/.zshrc"
+    ["$GOTHAM_DIR/config/zsh"]="$HOME/.config/zsh"
     
     # Starship
-    ["$GOTHAM_DIR/shell/starship.toml"]="$HOME/.config/starship.toml"
+    ["$GOTHAM_DIR/themes/starship.toml"]="$HOME/.config/starship.toml"
     
     # Kitty
-    ["$GOTHAM_DIR/terminal/kitty/kitty.conf"]="$HOME/.config/kitty/kitty.conf"
+    ["$GOTHAM_DIR/config/kitty/kitty.conf"]="$HOME/.config/kitty/kitty.conf"
     
     # Tmux
-    ["$GOTHAM_DIR/terminal/tmux/tmux.conf"]="$HOME/.config/tmux/tmux.conf"
+    ["$GOTHAM_DIR/config/tmux/tmux.conf"]="$HOME/.config/tmux/tmux.conf"
     
     # Mise
-    ["$GOTHAM_DIR/tools/mise/config.toml"]="$HOME/.config/mise/config.toml"
+    ["$GOTHAM_DIR/config/mise/config.toml"]="$HOME/.config/mise/config.toml"
 )
 
 #───────────────────────────────────────────────────────────────────────

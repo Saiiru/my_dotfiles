@@ -161,24 +161,23 @@ create_symlinks() {
     log_step "Creating symlinks"
     
     # Zsh
-    ln -sf "$GOTHAM_DIR/shell/.zshrc" "$HOME/.zshrc"
-    ln -sf "$GOTHAM_DIR/shell/zsh" "$HOME/.config/zsh"
+    ln -sf "$GOTHAM_DIR/config/zsh/.zshrc" "$HOME/.zshrc"
+    ln -sf "$GOTHAM_DIR/config/zsh" "$HOME/.config/zsh"
     
     # Kitty
     mkdir -p "$HOME/.config/kitty"
-    ln -sf "$GOTHAM_DIR/terminal/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
-    ln -sf "$GOTHAM_DIR/terminal/kitty/theme.conf" "$HOME/.config/kitty/theme.conf"
+    ln -sf "$GOTHAM_DIR/config/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
     
     # Tmux
     mkdir -p "$HOME/.config/tmux"
-    ln -sf "$GOTHAM_DIR/terminal/tmux/tmux.conf" "$HOME/.config/tmux/tmux.conf"
+    ln -sf "$GOTHAM_DIR/config/tmux/tmux.conf" "$HOME/.config/tmux/tmux.conf"
     
     # Mise
     mkdir -p "$HOME/.config/mise"
-    ln -sf "$GOTHAM_DIR/tools/mise/config.toml" "$HOME/.config/mise/config.toml"
+    ln -sf "$GOTHAM_DIR/config/mise/config.toml" "$HOME/.config/mise/config.toml"
     
     # Starship
-    ln -sf "$GOTHAM_DIR/shell/starship.toml" "$HOME/.config/starship.toml"
+    ln -sf "$GOTHAM_DIR/themes/starship.toml" "$HOME/.config/starship.toml"
     
     log_success "Symlinks created"
 }
