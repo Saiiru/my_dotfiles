@@ -47,32 +47,27 @@ go = "1.21"
 java = "openjdk-21"
 
 #───────────────────────────────────────────────────────────────────────
-# PYTHON TOOLING (via pipx backend)
+# PYTHON TOOLING (via pipx)
 #───────────────────────────────────────────────────────────────────────
-"pipx:poetry" = "latest"
-"pipx:ruff" = "latest"
-"pipx:black" = "latest"
-"pipx:mypy" = "latest"
+poetry = "latest"
+ruff = "latest"
+black = "latest"
 
 #───────────────────────────────────────────────────────────────────────
-# NODE.JS TOOLING (via npm backend)
+# NODE.JS TOOLING (via npm)
 #───────────────────────────────────────────────────────────────────────
-"npm:pnpm" = "latest"
-"npm:yarn" = "latest"
-"npm:tree-sitter-cli" = "latest"
+pnpm = "latest"
+yarn = "latest"
 
 #───────────────────────────────────────────────────────────────────────
-# RUST TOOLING (via cargo backend)
+# RUST TOOLING
 #───────────────────────────────────────────────────────────────────────
-# Note: Prefer rustup for Rust toolchain management
-"cargo:cargo-binstall" = "latest"
+# Note: Use rustup for Rust toolchain management (better LSP support)
 
 #───────────────────────────────────────────────────────────────────────
-# GO TOOLING (via go install backend)
+# GO TOOLING
 #───────────────────────────────────────────────────────────────────────
-"go:github.com/golangci/golangci-lint/cmd/golangci-lint" = "latest"
-"go:golang.org/x/tools/gopls" = "latest"
-"go:github.com/go-delve/delve/cmd/dlv" = "latest"
+# Note: Install via 'go install' separately if needed
 
 #───────────────────────────────────────────────────────────────────────
 # DEVOPS & CLOUD
@@ -80,12 +75,6 @@ java = "openjdk-21"
 kubectl = "latest"
 helm = "latest"
 terraform = "latest"
-awscli = "latest"
-
-#───────────────────────────────────────────────────────────────────────
-# DATABASE TOOLS
-#───────────────────────────────────────────────────────────────────────
-postgres = "latest"
 
 #───────────────────────────────────────────────────────────────────────
 # UTILITIES
