@@ -31,50 +31,48 @@ _.path = [
 # CORE PROGRAMMING LANGUAGES
 #───────────────────────────────────────────────────────────────────────
 [tools]
-# Python - Use core:python backend
-"core:python" = "3.12"
-"core:python@3.11" = "3.11"
+# Python - Multiple versions
+python = "3.12"
 
 # Node.js - Web development, tooling
-"core:node" = "20"
+node = "20"
 
 # Go - Systems programming, cloud tools
-"core:go" = "1.21"
+go = "1.21"
 
 # Rust - Systems programming (use rustup instead for better compatibility)
-# "core:rust" = "stable"
+# rust = "stable"
 
 # Java - Android development, enterprise
-"core:java" = "openjdk-21"
+java = "openjdk-21"
 
 #───────────────────────────────────────────────────────────────────────
-# PYTHON TOOLING
+# PYTHON TOOLING (via pipx backend)
 #───────────────────────────────────────────────────────────────────────
-pipx = "latest"
-poetry = "latest"
-ruff = "latest"
-black = "latest"
-mypy = "latest"
+"pipx:poetry" = "latest"
+"pipx:ruff" = "latest"
+"pipx:black" = "latest"
+"pipx:mypy" = "latest"
 
 #───────────────────────────────────────────────────────────────────────
-# NODE.JS TOOLING
+# NODE.JS TOOLING (via npm backend)
 #───────────────────────────────────────────────────────────────────────
-pnpm = "latest"
-yarn = "latest"
+"npm:pnpm" = "latest"
+"npm:yarn" = "latest"
+"npm:tree-sitter-cli" = "latest"
 
 #───────────────────────────────────────────────────────────────────────
-# RUST TOOLING
+# RUST TOOLING (via cargo backend)
 #───────────────────────────────────────────────────────────────────────
 # Note: Prefer rustup for Rust toolchain management
-# These are Rust-written tools, not Rust versions
-cargo-binstall = "latest"
+"cargo:cargo-binstall" = "latest"
 
 #───────────────────────────────────────────────────────────────────────
-# GO TOOLING
+# GO TOOLING (via go install backend)
 #───────────────────────────────────────────────────────────────────────
-golangci-lint = "latest"
-gopls = "latest"
-delve = "latest"
+"go:github.com/golangci/golangci-lint/cmd/golangci-lint" = "latest"
+"go:golang.org/x/tools/gopls" = "latest"
+"go:github.com/go-delve/delve/cmd/dlv" = "latest"
 
 #───────────────────────────────────────────────────────────────────────
 # DEVOPS & CLOUD
@@ -82,7 +80,6 @@ delve = "latest"
 kubectl = "latest"
 helm = "latest"
 terraform = "latest"
-docker-compose = "latest"
 awscli = "latest"
 
 #───────────────────────────────────────────────────────────────────────
@@ -96,7 +93,6 @@ postgres = "latest"
 jq = "latest"
 yq = "latest"
 gh = "latest"
-"npm:tree-sitter-cli" = "latest"
 
 #───────────────────────────────────────────────────────────────────────
 # ANDROID DEVELOPMENT
