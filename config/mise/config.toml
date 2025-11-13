@@ -1,6 +1,8 @@
 #═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Mise Configuration
-# Multi-language development environment
+# GOTHAM SYSTEM — Mise Runtime Manager Configuration
+# Professional multi-language development environment
+# Author: Sairu
+# Last Updated: 2024-11-13
 #═══════════════════════════════════════════════════════════════════════
 
 [settings]
@@ -18,46 +20,98 @@ yes = false
 [env]
 _.path = [
     "{{ config_root }}/bin",
-    "$HOME/.local/bin"
+    "$HOME/.local/bin",
+    "$HOME/gotham/bin/system",
+    "$HOME/gotham/bin/battery",
+    "$HOME/gotham/bin/theme",
+    "$HOME/gotham/bin/notifications"
 ]
 
 #───────────────────────────────────────────────────────────────────────
-# PROGRAMMING LANGUAGES
+# CORE PROGRAMMING LANGUAGES
 #───────────────────────────────────────────────────────────────────────
 [tools]
-# Python
-"python:3.12" = "3.12"
+# Python - Data science, scripting, embedded tools
+python = "3.12"
 "python:3.11" = "3.11"
 
-# Node.js
-"node:20" = "20"
-"node:lts" = "lts"
+# Node.js - Web development, tooling
+node = "20"
 
-# Go
-"go:1.21" = "1.21"
+# Go - Systems programming, cloud tools
+go = "1.21"
 
-# Rust
-"rust:stable" = "stable"
+# Rust - Systems programming (managed via rustup preferred)
+rust = "stable"
 
-# Java
-"java:openjdk-21" = "openjdk-21"
+# Java - Android development, enterprise
+java = "openjdk-21"
 "java:17" = "openjdk-17"
 
 #───────────────────────────────────────────────────────────────────────
-# DEVELOPMENT TOOLS
+# PYTHON TOOLING
 #───────────────────────────────────────────────────────────────────────
-# Node tools
+pipx = "latest"
+poetry = "latest"
+ruff = "latest"
+black = "latest"
+mypy = "latest"
+
+#───────────────────────────────────────────────────────────────────────
+# NODE.JS TOOLING
+#───────────────────────────────────────────────────────────────────────
 pnpm = "latest"
 yarn = "latest"
 
-# DevOps
+#───────────────────────────────────────────────────────────────────────
+# RUST TOOLING
+#───────────────────────────────────────────────────────────────────────
+# Note: Prefer rustup for Rust toolchain management
+# These are Rust-written tools, not Rust versions
+cargo-binstall = "latest"
+
+#───────────────────────────────────────────────────────────────────────
+# GO TOOLING
+#───────────────────────────────────────────────────────────────────────
+golangci-lint = "latest"
+gopls = "latest"
+delve = "latest"
+
+#───────────────────────────────────────────────────────────────────────
+# DEVOPS & CLOUD
+#───────────────────────────────────────────────────────────────────────
 kubectl = "latest"
 helm = "latest"
 terraform = "latest"
+docker-compose = "latest"
+awscli = "latest"
 
-# Utilities
+#───────────────────────────────────────────────────────────────────────
+# DATABASE TOOLS
+#───────────────────────────────────────────────────────────────────────
+postgres = "latest"
+
+#───────────────────────────────────────────────────────────────────────
+# UTILITIES
+#───────────────────────────────────────────────────────────────────────
 jq = "latest"
 yq = "latest"
-
-# Tree-sitter CLI for nvim
+gh = "latest"
 "npm:tree-sitter-cli" = "latest"
+
+#───────────────────────────────────────────────────────────────────────
+# ANDROID DEVELOPMENT
+#───────────────────────────────────────────────────────────────────────
+# Note: Android SDK managed separately via android-tools package
+# gradle = "latest"  # Uncomment if needed
+
+#───────────────────────────────────────────────────────────────────────
+# EMBEDDED DEVELOPMENT (Arduino/ESP32)
+#───────────────────────────────────────────────────────────────────────
+# Note: Arduino tooling managed via:
+# - arduino-cli (pacman package)
+# - platformio (pacman package)
+# Python tools for embedded:
+# - esptool installed via pipx
+# - platformio-core via Python above
+
