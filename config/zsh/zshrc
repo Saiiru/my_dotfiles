@@ -1,257 +1,52 @@
 #═══════════════════════════════════════════════════════════════════════
-# ZSH CONFIGURATION — Main Entry Point
-# Author: Senior DevOps Engineer
-# Purpose: Production-grade shell environment
+# GOTHAM SYSTEM — ZSH Configuration
+# Modular shell environment with tactical enhancements
 #═══════════════════════════════════════════════════════════════════════
 
 # ───────────────────────────────────────────────────────────────────────
-# ENVIRONMENT VARIABLES
+# GOTHAM DIRECTORY
 # ───────────────────────────────────────────────────────────────────────
 
-# XDG Base Directory Specification
-export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
-export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
-export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
-
-# Editor preferences
-export EDITOR="nvim"
-export VISUAL="nvim"
-export PAGER="less"
-
-# Locale
-export LANG="en_US.UTF-8"
-export LC_ALL="en_US.UTF-8"
-
-# Terminal
-export TERM="xterm-256color"
+export GOTHAM_DIR="${GOTHAM_DIR:-$HOME/gotham}"
 
 # ───────────────────────────────────────────────────────────────────────
-# PATH CONSTRUCTION
+# LOAD CORE MODULES (in order)
 # ───────────────────────────────────────────────────────────────────────
 
-typeset -U path  # Remove duplicates
-path=(
-    $HOME/.local/bin
-    $HOME/dotfiles/scripts
-    $HOME/.cargo/bin
-    /usr/local/bin
-    $path
-)
-export PATH
+for module in "$GOTHAM_DIR/config/zsh/core"/*.zsh(N); do
+    source "$module" 2>/dev/null || echo "Failed to load: $module"
+done
 
 # ───────────────────────────────────────────────────────────────────────
-# ZSH OPTIONS
+# LOAD PLUGINS
 # ───────────────────────────────────────────────────────────────────────
 
-# History configuration
-HISTFILE="${XDG_STATE_HOME}/zsh/history"
-HISTSIZE=50000
-SAVEHIST=50000
+if [[ -f "$GOTHAM_DIR/config/zsh/plugins/tools.zsh" ]]; then
+    source "$GOTHAM_DIR/config/zsh/plugins/tools.zsh"
+fi
 
-[[ -d "${HISTFILE:h}" ]] || mkdir -p "${HISTFILE:h}"
+# ───────────────────────────────────────────────────────────────────────
+# LOAD ALIASES
+# ───────────────────────────────────────────────────────────────────────
 
-setopt EXTENDED_HISTORY          # Write timestamp to history
-setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicates first
-setopt HIST_FIND_NO_DUPS         # Don't show duplicates in search
-setopt HIST_IGNORE_ALL_DUPS      # Ignore all duplicates
-setopt HIST_IGNORE_DUPS          # Ignore consecutive duplicates
-setopt HIST_IGNORE_SPACE         # Ignore commands starting with space
-setopt HIST_REDUCE_BLANKS        # Remove extra blanks
-setopt HIST_SAVE_NO_DUPS         # Don't save duplicates
-setopt HIST_VERIFY               # Verify history expansion
-setopt INC_APPEND_HISTORY        # Append immediately
-setopt SHARE_HISTORY             # Share between sessions
+if [[ -f "$GOTHAM_DIR/config/zsh/aliases.zsh" ]]; then
+    source "$GOTHAM_DIR/config/zsh/aliases.zsh"
+fi
 
-# Directory navigation
-setopt AUTO_CD                   # cd by typing directory name
-setopt AUTO_PUSHD                # pushd automatically
-setopt PUSHD_IGNORE_DUPS         # No duplicate dirs in stack
-setopt PUSHD_SILENT              # Don't print stack after pushd/popd
-setopt CDABLE_VARS               # cd to variables
+# ───────────────────────────────────────────────────────────────────────
+# LOAD FUNCTIONS
+# ───────────────────────────────────────────────────────────────────────
 
-# Completion
-setopt ALWAYS_TO_END             # Move cursor to end after completion
-setopt AUTO_LIST                 # List choices on ambiguous completion
-setopt AUTO_MENU                 # Show menu after second tab
-setopt AUTO_PARAM_SLASH          # Add slash after directory completion
-setopt COMPLETE_IN_WORD          # Complete from cursor position
-setopt MENU_COMPLETE             # Insert first match immediately
-setopt NO_LIST_BEEP              # No beep on ambiguous completion
-unsetopt FLOW_CONTROL            # Disable Ctrl+S/Ctrl+Q
-
-# Globbing
-setopt EXTENDED_GLOB             # Extended pattern matching
-setopt GLOB_DOTS                 # Include hidden files
-setopt NO_NOMATCH                # Don't error on no match
-setopt NUMERIC_GLOB_SORT         # Sort numerically
-
-# Jobs
-setopt AUTO_RESUME               # Resume suspended job
-setopt LONG_LIST_JOBS            # Show more job info
-setopt NO_BG_NICE                # Don't nice background jobs
-setopt NO_CHECK_JOBS             # Don't warn about jobs on exit
-setopt NO_HUP                    # Don't kill jobs on exit
-setopt NOTIFY                    # Report job status immediately
-
-# Prompt
-setopt PROMPT_SUBST              # Enable substitution in prompt
-
-# Input/Output
-setopt INTERACTIVE_COMMENTS      # Allow comments in interactive shell
-setopt RC_QUOTES                 # Allow '' inside ''
-unsetopt CLOBBER                 # Don't overwrite with >
+if [[ -f "$GOTHAM_DIR/config/zsh/functions.zsh" ]]; then
+    source "$GOTHAM_DIR/config/zsh/functions.zsh"
+fi
 
 # ───────────────────────────────────────────────────────────────────────
 # COMPLETION SYSTEM
 # ───────────────────────────────────────────────────────────────────────
 
-autoload -Uz compinit
-
-typeset -g ZCOMPDUMP="${XDG_CACHE_HOME}/zsh/zcompdump"
-
-# Compile zcompdump once per day
-if [[ -n $ZCOMPDUMP(#qNmh-24) ]]; then
-    compinit -C -d "$ZCOMPDUMP"
-else
-    compinit -d "$ZCOMPDUMP"
-    { zcompile "$ZCOMPDUMP" } &!
-fi
-
-# Completion styles
-zstyle ':completion:*' menu select
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-zstyle ':completion:*' group-name ''
-zstyle ':completion:*' verbose yes
-zstyle ':completion:*' rehash true
-
-# Completion formatting
-zstyle ':completion:*:descriptions' format '%F{green}━━ %d ━━%f'
-zstyle ':completion:*:warnings' format '%F{red}━━ no matches ━━%f'
-zstyle ':completion:*:messages' format '%F{cyan}━━ %d ━━%f'
-zstyle ':completion:*:corrections' format '%F{yellow}━━ %d (errors: %e) ━━%f'
-
-# Kill completion
-zstyle ':completion:*:*:kill:*' menu yes select
-zstyle ':completion:*:kill:*' force-list always
-zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+# Note: Completion is configured in core/03-completion.zsh
 
 # ───────────────────────────────────────────────────────────────────────
-# KEY BINDINGS
+# END OF CONFIGURATION
 # ───────────────────────────────────────────────────────────────────────
-
-# Vi mode
-bindkey -v
-export KEYTIMEOUT=1
-
-# KEYBIND: Ctrl+A — Move to beginning of line
-bindkey '^A' beginning-of-line
-
-# KEYBIND: Ctrl+E — Move to end of line
-bindkey '^E' end-of-line
-
-# KEYBIND: Ctrl+K — Delete from cursor to end of line
-bindkey '^K' kill-line
-
-# KEYBIND: Ctrl+U — Delete from cursor to beginning of line
-bindkey '^U' backward-kill-line
-
-# KEYBIND: Ctrl+W — Delete word backward
-bindkey '^W' backward-kill-word
-
-# KEYBIND: Ctrl+Y — Paste (yank)
-bindkey '^Y' yank
-
-# KEYBIND: Ctrl+→ — Move word forward
-bindkey '^[[1;5C' forward-word
-
-# KEYBIND: Ctrl+← — Move word backward
-bindkey '^[[1;5D' backward-word
-
-# KEYBIND: Ctrl+P — Previous command
-bindkey '^P' history-search-backward
-
-# KEYBIND: Ctrl+N — Next command
-bindkey '^N' history-search-forward
-
-# KEYBIND: ↑ — History substring search up
-bindkey '^[[A' history-substring-search-up
-
-# KEYBIND: ↓ — History substring search down
-bindkey '^[[B' history-substring-search-down
-
-# KEYBIND: Ctrl+R — FZF history search (if fzf installed)
-# Note: This is set by fzf key-bindings, included below
-
-# ───────────────────────────────────────────────────────────────────────
-# SOURCE MODULES
-# ───────────────────────────────────────────────────────────────────────
-
-# Source all configuration modules
-for config in ~/dotfiles/zsh/*.zsh(N); do
-    source "$config"
-done
-
-# ───────────────────────────────────────────────────────────────────────
-# TOOL INTEGRATIONS
-# ───────────────────────────────────────────────────────────────────────
-
-# Starship prompt
-if command -v starship >/dev/null 2>&1; then
-    eval "$(starship init zsh)"
-fi
-
-# Zoxide (smart cd)
-if command -v zoxide >/dev/null 2>&1; then
-    eval "$(zoxide init zsh)"
-fi
-
-# Mise (version manager)
-if command -v mise >/dev/null 2>&1; then
-    eval "$(mise activate zsh)"
-fi
-
-# FZF key bindings and completion
-if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
-    source /usr/share/fzf/key-bindings.zsh
-fi
-
-if [[ -f /usr/share/fzf/completion.zsh ]]; then
-    source /usr/share/fzf/completion.zsh
-fi
-
-# FZF configuration
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
-export FZF_DEFAULT_OPTS="
---height=60%
---layout=reverse
---border=rounded
---inline-info
---prompt='❯ '
---pointer='▶'
---marker='✓'
---color=fg:#00ff00,bg:#000000,hl:#ff073a
---color=fg+:#ffffff,bg+:#1a1a1a,hl+:#ff073a
---color=info:#00ffff,prompt:#00ff00,pointer:#ff073a
---color=marker:#00ff00,spinner:#00ffff,header:#ff00ff
---color=border:#ff073a
---bind='ctrl-/:toggle-preview'
---bind='ctrl-u:preview-half-page-up'
---bind='ctrl-d:preview-half-page-down'
---bind='ctrl-y:execute-silent(echo {+} | wl-copy)'
---preview-window='right:60%:wrap'
-"
-
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
-export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
-export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --icons --color=always {}'"
-
-# ───────────────────────────────────────────────────────────────────────
-# DIRENV (auto-load environment per directory)
-# ───────────────────────────────────────────────────────────────────────
-
-if command -v direnv >/dev/null 2>&1; then
-    eval "$(direnv hook zsh)"
-fi

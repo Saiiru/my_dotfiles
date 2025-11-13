@@ -106,7 +106,9 @@ fi
 # STARSHIP CONFIG (CRÍTICO: ANTES DO INIT!)
 #───────────────────────────────────────────────────────────────────────
 
-export STARSHIP_CONFIG="$GOTHAM_DIR/themes/starship.toml"
+# Force correct starship config
+STARSHIP_CONFIG="$GOTHAM_DIR/themes/starship.toml"
+export STARSHIP_CONFIG
 
 if [[ ! -f "$STARSHIP_CONFIG" ]]; then
     log_error "Starship config not found: $STARSHIP_CONFIG"
