@@ -21,9 +21,17 @@ done
 # LOAD PLUGINS
 # ───────────────────────────────────────────────────────────────────────
 
-if [[ -f "$GOTHAM_DIR/config/zsh/plugins/tools.zsh" ]]; then
-    source "$GOTHAM_DIR/config/zsh/plugins/tools.zsh"
+# Load plugin manager first
+if [[ -f "$GOTHAM_DIR/config/zsh/plugins/00-init.zsh" ]]; then
+    source "$GOTHAM_DIR/config/zsh/plugins/00-init.zsh"
 fi
+
+# Load all other plugins
+for plugin in "$GOTHAM_DIR/config/zsh/plugins"/*.zsh(N); do
+    # Skip 00-init.zsh as it's already loaded
+    [[ "$plugin" == *"00-init.zsh" ]] && continue
+    source "$plugin" 2>/dev/null
+done
 
 # ───────────────────────────────────────────────────────────────────────
 # LOAD ALIASES
