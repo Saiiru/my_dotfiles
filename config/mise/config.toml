@@ -94,3 +94,7 @@ awscli = "latest"
 jq = "latest"
 yq = "latest"
 github-cli = "latest"
+
+# Editor tools
+[tools]
+"npm:tree-sitter-cli" = "latest"
