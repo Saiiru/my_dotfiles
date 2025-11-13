@@ -60,11 +60,6 @@ list-tools:
 # 🔧 SYSTEM MANAGEMENT
 #───────────────────────────────────────────────────────────────────────
 
-# Backup current configuration
-backup:
-    @echo "💾 Creating backup..."
-    bin/system/backup.sh
-
 # Clean temporary files and caches
 clean:
     @echo "🧹 Cleaning..."
