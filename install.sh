@@ -161,7 +161,7 @@ create_symlinks() {
     log_step "Creating symlinks"
     
     # Zsh
-    ln -sf "$GOTHAM_DIR/config/zsh/.zshrc" "$HOME/.zshrc"
+    ln -sf "$GOTHAM_DIR/config/zsh/zshrc" "$HOME/.zshrc"
     ln -sf "$GOTHAM_DIR/config/zsh" "$HOME/.config/zsh"
     
     # Kitty

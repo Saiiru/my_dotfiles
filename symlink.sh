@@ -107,7 +107,7 @@ GOTHAM_DIR="${GOTHAM_DIR:-$HOME/gotham}"
 
 declare -A SYMLINKS=(
     # Zsh
-    ["$GOTHAM_DIR/config/zsh/.zshrc"]="$HOME/.zshrc"
+    ["$GOTHAM_DIR/config/zsh/zshrc"]="$HOME/.zshrc"
     ["$GOTHAM_DIR/config/zsh"]="$HOME/.config/zsh"
     
     # Starship
