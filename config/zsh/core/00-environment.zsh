@@ -156,8 +156,10 @@ typeset -U path
 path=(
     $HOME/.local/bin
     $GOTHAM_DIR/bin/system
-    $GOTHAM_DIR/bin/battery
-    $GOTHAM_DIR/bin/theme
+    $GOTHAM_DIR/config/noctalia/Bin
+    $GOTHAM_DIR/config/noctalia/Bin/battery-manager
+    $GOTHAM_DIR/config/noctalia/Bin/dev
+    $GOTHAM_DIR/config/waybar/modules
     $HOME/.local/share/mise/shims
     $HOME/.local/share/mise/installs/*/bin(N)
     $HOME/.cargo/bin
