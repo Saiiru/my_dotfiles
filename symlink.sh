@@ -60,7 +60,7 @@ create_symlink() {
         
         if [[ "$current_source" == "$expected_source" ]]; then
             log_info "Already linked: $target → $source"
-            ((SKIPPED++))
+            ((SKIPPED++)) || true
             return 0
         else
             log_warn "Incorrect link: $target → $current_source (expected: $source)"
@@ -79,7 +79,7 @@ create_symlink() {
     # Cria symlink
     if ln -sf "$source" "$target"; then
         log_success "Created: $target → $source${description:+ ($description)}"
-        ((CREATED++))
+        ((CREATED++)) || true
     else
         log_error "Failed to create: $target"
         return 1
@@ -114,13 +114,22 @@ declare -A SYMLINKS=(
     ["$GOTHAM_DIR/themes/starship.toml"]="$HOME/.config/starship.toml"
     
     # Kitty
-    ["$GOTHAM_DIR/config/kitty/kitty.conf"]="$HOME/.config/kitty/kitty.conf"
+    ["$GOTHAM_DIR/config/kitty"]="$HOME/.config/kitty"
     
     # Tmux
-    ["$GOTHAM_DIR/config/tmux/tmux.conf"]="$HOME/.config/tmux/tmux.conf"
+    ["$GOTHAM_DIR/config/tmux"]="$HOME/.config/tmux"
     
     # Mise
-    ["$GOTHAM_DIR/config/mise/config.toml"]="$HOME/.config/mise/config.toml"
+    ["$GOTHAM_DIR/config/mise"]="$HOME/.config/mise"
+    
+    # Waybar
+    ["$GOTHAM_DIR/config/waybar"]="$HOME/.config/waybar"
+    
+    # Niri
+    ["$GOTHAM_DIR/config/niri"]="$HOME/.config/niri"
+    
+    # Wlogout
+    ["$GOTHAM_DIR/config/wlogout"]="$HOME/.config/wlogout"
 )
 
 #───────────────────────────────────────────────────────────────────────

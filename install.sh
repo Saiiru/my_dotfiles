@@ -164,20 +164,27 @@ create_symlinks() {
     ln -sf "$GOTHAM_DIR/config/zsh/zshrc" "$HOME/.zshrc"
     ln -sf "$GOTHAM_DIR/config/zsh" "$HOME/.config/zsh"
     
-    # Kitty
-    mkdir -p "$HOME/.config/kitty"
-    ln -sf "$GOTHAM_DIR/config/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
-    
-    # Tmux
-    mkdir -p "$HOME/.config/tmux"
-    ln -sf "$GOTHAM_DIR/config/tmux/tmux.conf" "$HOME/.config/tmux/tmux.conf"
-    
-    # Mise
-    mkdir -p "$HOME/.config/mise"
-    ln -sf "$GOTHAM_DIR/config/mise/config.toml" "$HOME/.config/mise/config.toml"
-    
     # Starship
     ln -sf "$GOTHAM_DIR/themes/starship.toml" "$HOME/.config/starship.toml"
+    
+    # Kitty
+    mkdir -p "$HOME/.config"
+    ln -sf "$GOTHAM_DIR/config/kitty" "$HOME/.config/kitty"
+    
+    # Tmux
+    ln -sf "$GOTHAM_DIR/config/tmux" "$HOME/.config/tmux"
+    
+    # Mise
+    ln -sf "$GOTHAM_DIR/config/mise" "$HOME/.config/mise"
+    
+    # Waybar
+    ln -sf "$GOTHAM_DIR/config/waybar" "$HOME/.config/waybar"
+    
+    # Niri
+    ln -sf "$GOTHAM_DIR/config/niri" "$HOME/.config/niri"
+    
+    # Wlogout
+    ln -sf "$GOTHAM_DIR/config/wlogout" "$HOME/.config/wlogout"
     
     log_success "Symlinks created"
 }
