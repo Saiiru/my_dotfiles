@@ -1,0 +1,58 @@
+# Zsh
+.zcompdump*
+*.zwc
+
+# Cache
+.cache/
+
+# Logs
+*.log
+
+# Backup files
+*.bak
+*.bak.*
+*bak/
+kitybak/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Mise
+.mise.lock
+
+# Node
+node_modules/
+.npm/
+.pnpm-store/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Go
+/bin/
+/pkg/
+
+# Rust
+/target/
+Cargo.lock
+
+# Local overrides
+local.toml
+.env
+.env.local
+
+# Temporary files
+*.tmp
+text.txt

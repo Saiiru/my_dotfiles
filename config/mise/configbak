@@ -1,0 +1,161 @@
+#═══════════════════════════════════════════════════════════════════════
+# BATCOMPUTER — Mise Toolchain Manager
+# Config minimalista e 100% validado (sem warnings)
+#═══════════════════════════════════════════════════════════════════════
+
+[settings]
+experimental = true
+verbose = false
+legacy_version_file = false
+always_keep_download = false
+plugin_autoupdate_last_check_duration = "7d"
+
+[env]
+GOMODCACHE = "~/.cache/go/mod"
+GOCACHE = "~/.cache/go/build"
+WORKON_HOME = "~/.ve"
+PROJECT_HOME = "~/workspace"
+NODE_OPTIONS = "--max-old-space-size=4096"
+MAVEN_OPTS = "-Xmx2g"
+GRADLE_OPTS = "-Xmx2g -Dorg.gradle.daemon=true"
+MISE_AUTO_INSTALL = "0"
+MISE_PYTHON_COMPILE = "0"
+
+#═══════════════════════════════════════════════════════════════════════
+# TOOLS — Apenas essenciais (instalados via mise)
+#═══════════════════════════════════════════════════════════════════════
+
+[tools]
+just = "latest"
+uv = "latest"
+ruff = "latest"
+
+#═══════════════════════════════════════════════════════════════════════
+# TASKS
+#═══════════════════════════════════════════════════════════════════════
+
+[tasks.check]
+run = """
+echo "╔════════════════════════════════════════╗"
+echo "║  BATCOMPUTER — Tool Status             ║"
+echo "╚════════════════════════════════════════╝"
+echo
+echo "Python:  $(python --version 2>&1)"
+echo "Node:    $(node --version 2>&1)"
+echo "Go:      $(go version 2>&1 | awk '{print $3}')"
+echo "Rust:    $(rustc --version 2>&1 | awk '{print $2}')"
+echo
+echo "Mise:    $(mise --version)"
+echo "Just:    $(just --version 2>&1)"
+echo "UV:      $(uv --version 2>&1)"
+echo "Ruff:    $(ruff --version 2>&1)"
+"""
+
+[tasks.doctor]
+run = """
+echo "╔════════════════════════════════════════╗"
+echo "║  BATCOMPUTER — Diagnostic              ║"
+echo "╚════════════════════════════════════════╝"
+echo
+echo "[System Tools]"
+for tool in python node go rust java git nvim tmux; do
+    if command -v $tool &>/dev/null; then
+        echo "  ✓ $tool"
+    else
+        echo "  ✗ $tool"
+    fi
+done
+echo
+echo "[Mise Tools]"
+mise list
+"""
+
+[tasks."py:venv"]
+run = """
+if [[ -d .venv ]]; then
+    echo "✓ .venv exists"
+    exit 0
+fi
+python -m venv .venv
+echo "✓ .venv created"
+"""
+
+[tasks."py:install"]
+run = """
+[[ ! -d .venv ]] && echo "✗ Run: mise run py:venv" && exit 1
+source .venv/bin/activate
+[[ -f requirements.txt ]] && uv pip sync requirements.txt || pip install -r requirements.txt
+echo "✓ Dependencies installed"
+"""
+
+[tasks."node:install"]
+run = """
+[[ ! -f package.json ]] && echo "✗ No package.json" && exit 1
+command -v pnpm &>/dev/null && pnpm install || npm install
+echo "✓ Dependencies installed"
+"""
+
+[tasks."session:python"]
+run = """
+PROJECT="$(basename "$PWD")"
+SESSION="py:$PROJECT"
+[[ -n "$(tmux ls 2>/dev/null | grep $SESSION)" ]] && tmux attach -t "$SESSION" && exit 0
+tmux new-session -d -s "$SESSION" -c "$PWD"
+tmux rename-window -t "$SESSION":1 "editor"
+tmux send-keys -t "$SESSION":1 'nvim .' C-m
+tmux new-window -t "$SESSION":2 -c "$PWD" -n "shell"
+tmux send-keys -t "$SESSION":2 'source .venv/bin/activate 2>/dev/null' C-m
+tmux select-window -t "$SESSION":1
+tmux attach -t "$SESSION"
+"""
+
+[tasks."session:node"]
+run = """
+PROJECT="$(basename "$PWD")"
+SESSION="node:$PROJECT"
+[[ -n "$(tmux ls 2>/dev/null | grep $SESSION)" ]] && tmux attach -t "$SESSION" && exit 0
+tmux new-session -d -s "$SESSION" -c "$PWD"
+tmux rename-window -t "$SESSION":1 "editor"
+tmux send-keys -t "$SESSION":1 'nvim .' C-m
+tmux new-window -t "$SESSION":2 -c "$PWD" -n "dev"
+tmux select-window -t "$SESSION":1
+tmux attach -t "$SESSION"
+"""
+
+[tasks.clean]
+run = "rm -rf node_modules dist build target .venv __pycache__ .pytest_cache"
+
+#═══════════════════════════════════════════════════════════════════════
+# ZELLIJ INTEGRATION TASKS
+#═══════════════════════════════════════════════════════════════════════
+
+[tasks."zellij:python"]
+description = "Launch Zellij with Python layout"
+run = """
+#!/usr/bin/env bash
+PROJECT="$(basename "$PWD")"
+zellij --layout python-dev --session "py:$PROJECT"
+"""
+
+[tasks."zellij:node"]
+description = "Launch Zellij with Node layout"
+run = """
+#!/usr/bin/env bash
+PROJECT="$(basename "$PWD")"
+zellij --layout node-dev --session "node:$PROJECT"
+"""
+
+[tasks."zellij:fullstack"]
+description = "Launch Zellij with Full Stack layout"
+run = """
+#!/usr/bin/env bash
+PROJECT="$(basename "$PWD")"
+zellij --layout full-stack --session "fs:$PROJECT"
+"""
+
+[tasks."zellij:attach"]
+description = "Attach to existing Zellij session"
+run = """
+#!/usr/bin/env bash
+zellij attach "$(zellij list-sessions | fzf | awk '{print $1}')"
+"""

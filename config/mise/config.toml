@@ -1,0 +1,107 @@
+#═══════════════════════════════════════════════════════════════════════
+# GOTHAM SYSTEM — Mise Configuration
+# Toolchain manager com automações táticas
+#═══════════════════════════════════════════════════════════════════════
+
+[settings]
+experimental = true
+verbose = false
+legacy_version_file = false
+always_keep_download = false
+plugin_autoupdate_last_check_duration = "7d"
+
+[env]
+GOMODCACHE = "~/.cache/go/mod"
+GOCACHE = "~/.cache/go/build"
+WORKON_HOME = "~/.ve"
+PROJECT_HOME = "~/projects"
+NODE_OPTIONS = "--max-old-space-size=4096"
+MISE_AUTO_INSTALL = "0"
+MISE_PYTHON_COMPILE = "0"
+MISE_NODE_COMPILE = "0"
+
+#═══════════════════════════════════════════════════════════════════════
+# GLOBAL TOOLS
+#═══════════════════════════════════════════════════════════════════════
+
+[tools]
+# Core languages
+"python" = "3.12"
+node = "lts"
+go = "latest"
+rust = "stable"
+
+# Build tools
+just = "latest"
+cmake = "latest"
+
+# CLI tools
+# httpie = "latest"
+jq = "latest"
+yq = "latest"
+
+# Python tools (instalados globalmente)
+ruff = "latest"
+uv = "latest"
+black = "latest"
+# pytest = "latest"
+
+# Node tools (instalados globalmente)
+[tools."npm:http-server"]
+version = "latest"
+
+[tools."npm:serve"]
+version = "latest"
+
+[tools."npm:typescript"]
+version = "latest"
+
+#═══════════════════════════════════════════════════════════════════════
+# TASKS
+#═══════════════════════════════════════════════════════════════════════
+
+[tasks.check]
+description = "Verifica ferramentas instaladas"
+run = """
+echo "╔════════════════════════════════════════╗"
+echo "║  TOOL STATUS                           ║"
+echo "╚════════════════════════════════════════╝"
+echo
+echo "Python:  $(python --version 2>&1)"
+echo "Node:    $(node --version 2>&1)"
+echo "Go:      $(go version 2>&1 | awk '{print $3}')"
+echo "Rust:    $(rustc --version 2>&1 | awk '{print $2}')"
+echo
+echo "Mise:    $(mise --version)"
+"""
+
+[tasks.doctor]
+description = "Diagnóstico completo"
+run = """
+echo "╔════════════════════════════════════════╗"
+echo "║  SYSTEM DIAGNOSTIC                     ║"
+echo "╚════════════════════════════════════════╝"
+mise doctor
+"""
+
+[tasks."py:venv"]
+description = "Cria virtualenv Python"
+run = """
+if [[ -d .venv ]]; then
+    echo "✓ .venv exists"
+    exit 0
+fi
+python -m venv .venv
+echo "✓ .venv created"
+"""
+
+[tasks."node:install"]
+description = "Instala dependências Node"
+run = """
+if [[ ! -f package.json ]]; then
+    echo "✗ No package.json"
+    exit 1
+fi
+command -v pnpm &>/dev/null && pnpm install || npm install
+echo "✓ Dependencies installed"
+"""

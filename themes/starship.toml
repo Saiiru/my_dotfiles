@@ -1,0 +1,145 @@
+#═══════════════════════════════════════════════════════════════════════
+# BATCOMPUTER — Starship "Neon Vigilante Edition"
+# Com Transient Prompt para eliminar duplicações
+#═══════════════════════════════════════════════════════════════════════
+
+command_timeout = 500
+scan_timeout = 10
+add_newline = false
+
+#═══════════════════════════════════════════════════════════════════════
+# LAYOUT PRINCIPAL
+#═══════════════════════════════════════════════════════════════════════
+
+format = """
+[┌──\\[](bold #ff073a)\
+$username\
+[@](bold #ff073a)\
+$hostname\
+[\\]─\\[](bold #ff073a)\
+$directory\
+[\\]](bold #ff073a)\
+$python\
+$nodejs\
+$golang\
+$java\
+$rust\
+$docker_context\
+$git_branch\
+$git_status\
+[
+└─](bold #ff073a)\
+$character\
+"""
+
+#═══════════════════════════════════════════════════════════════════════
+# CHARACTER
+#═══════════════════════════════════════════════════════════════════════
+
+[character]
+success_symbol = "[\\$](bold #00ff00)"
+error_symbol = "[\\$](bold #ff073a)"
+vimcmd_symbol = "[❮](bold #00ff00)"
+
+#═══════════════════════════════════════════════════════════════════════
+# USERNAME/HOSTNAME
+#═══════════════════════════════════════════════════════════════════════
+
+[username]
+show_always = true
+format = "[$user]($style)"
+style_user = "bold #00ffff"
+style_root = "bold #ff073a"
+
+[hostname]
+ssh_only = false
+format = "[$hostname]($style)"
+style = "bold #00ffff"
+
+#═══════════════════════════════════════════════════════════════════════
+# DIRECTORY
+#═══════════════════════════════════════════════════════════════════════
+
+[directory]
+format = "[$path]($style)[$read_only]($read_only_style)"
+style = "bold #ffff00"
+read_only = " 🔒"
+read_only_style = "bold #ff073a"
+truncation_length = 3
+truncate_to_repo = true
+truncation_symbol = "…/"
+
+#═══════════════════════════════════════════════════════════════════════
+# LANGUAGE ENVIRONMENTS
+#═══════════════════════════════════════════════════════════════════════
+
+[python]
+symbol = " "
+format = "─\\[[$symbol${version}( \\($virtualenv\\))]($style)\\]"
+style = "bold #00ff00"
+detect_files = ["requirements.txt", "pyproject.toml", ".python-version"]
+
+[nodejs]
+symbol = " "
+format = "─\\[[$symbol${version}]($style)\\]"
+style = "bold #ffff00"
+detect_files = ["package.json", ".node-version"]
+
+[golang]
+symbol = " "
+format = "─\\[[$symbol${version}]($style)\\]"
+style = "bold #00ffff"
+
+[java]
+symbol = " "
+format = "─\\[[$symbol${version}]($style)\\]"
+style = "bold #ff073a"
+
+[rust]
+symbol = " "
+format = "─\\[[$symbol${version}]($style)\\]"
+style = "bold #ff6600"
+
+[docker_context]
+symbol = " "
+format = "─\\[[$symbol$context]($style)\\]"
+style = "bold #0099ff"
+only_with_files = true
+
+#═══════════════════════════════════════════════════════════════════════
+# GIT
+#═══════════════════════════════════════════════════════════════════════
+
+[git_branch]
+symbol = " "
+format = "─\\[[$symbol$branch]($style)\\]"
+style = "bold #ff00ff"
+truncation_length = 20
+truncation_symbol = "…"
+
+[git_status]
+format = "─\\[[$all_status$ahead_behind]($style)\\]"
+style = "bold #ff00ff"
+ahead = "[⇡${count}](bold #00ff00)"
+behind = "[⇣${count}](bold #ff073a)"
+conflicted = "[${count}](bold #ff073a)"
+deleted = "[${count}](bold #ff073a)"
+modified = "[!${count}](bold #ffff00)"
+staged = "[+${count}](bold #00ff00)"
+untracked = "[?${count}](bold #00ffff)"
+stashed = "[📦](bold #ff6600)"
+
+#═══════════════════════════════════════════════════════════════════════
+# DISABLE UNNECESSARY
+#═══════════════════════════════════════════════════════════════════════
+
+[aws]
+disabled = true
+[gcloud]
+disabled = true
+[package]
+disabled = true
+[time]
+disabled = true
+[cmd_duration]
+disabled = true
