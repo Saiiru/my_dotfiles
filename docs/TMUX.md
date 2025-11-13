@@ -90,7 +90,7 @@ Terminal multiplexer with Gruvbox Material theme, vim-style navigation, and sesh
 ### TPM (Tmux Plugin Manager)
 **Installation**:
 ```bash
-git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+git clone https://github.com/tmux-plugins/tpm ~/gotham/config/tmux/plugins/tpm
 ```
 
 **Install plugins**: `Prefix + I`
@@ -303,7 +303,7 @@ Ctrl-A :source-file ~/.config/tmux/tmux.conf
 ### Plugins Not Loading
 ```bash
 # Install TPM
-git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+git clone https://github.com/tmux-plugins/tpm ~/gotham/config/tmux/plugins/tpm
 
 # Inside tmux
 Ctrl-A I                # Install plugins
