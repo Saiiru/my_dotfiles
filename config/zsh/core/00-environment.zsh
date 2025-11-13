@@ -156,7 +156,6 @@ path=(
     $GOTHAM_DIR/bin/system
     $GOTHAM_DIR/bin/battery
     $GOTHAM_DIR/bin/theme
-    $GOTHAM_DIR/bin/notifications
     $HOME/.local/share/mise/shims
     $HOME/.local/share/mise/installs/*/bin(N)
     $HOME/.cargo/bin
