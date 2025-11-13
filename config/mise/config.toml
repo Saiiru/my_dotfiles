@@ -31,22 +31,21 @@ _.path = [
 # CORE PROGRAMMING LANGUAGES
 #───────────────────────────────────────────────────────────────────────
 [tools]
-# Python - Data science, scripting, embedded tools
-python = "3.12"
-"python:3.11" = "3.11"
+# Python - Use core:python backend
+"core:python" = "3.12"
+"core:python@3.11" = "3.11"
 
 # Node.js - Web development, tooling
-node = "20"
+"core:node" = "20"
 
 # Go - Systems programming, cloud tools
-go = "1.21"
+"core:go" = "1.21"
 
-# Rust - Systems programming (managed via rustup preferred)
-rust = "stable"
+# Rust - Systems programming (use rustup instead for better compatibility)
+# "core:rust" = "stable"
 
 # Java - Android development, enterprise
-java = "openjdk-21"
-"java:17" = "openjdk-17"
+"core:java" = "openjdk-21"
 
 #───────────────────────────────────────────────────────────────────────
 # PYTHON TOOLING
