@@ -1,15 +1,16 @@
 #!/usr/bin/env zsh
-#═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Environment Configuration
-# PATH construction, XDG compliance, global variables
-# VERSION: 2.0 (com sistema de logging integrado)
-#═══════════════════════════════════════════════════════════════════════
+# -----------------------------------------------------------------------------
+# Gotham Shell · Environment bootstrap
+# -----------------------------------------------------------------------------
+# Responsibilities
+#   • define ANSI palettes for log helpers
+#   • configure XDG paths and global directories
+#   • build PATH deterministically (honouring mise, cargo, go, etc.)
+#   • expose helper functions (log_success/log_error/arcade)
+# Any new environment variable shared by all shells must be declared here.
+# -----------------------------------------------------------------------------
 
-#───────────────────────────────────────────────────────────────────────
-# COLOR SYSTEM (Semantic Colors)
-#───────────────────────────────────────────────────────────────────────
-
-# ANSI escape codes para cores consistentes
+# --- ANSI colour helpers -----------------------------------------------------
 export COLOR_RESET='\033[0m'
 
 # Success states (Verde)
@@ -36,11 +37,7 @@ export COLOR_DEBUG_BOLD='\033[1;35m'    # Magenta bold
 export COLOR_WHITE='\033[0;37m'
 export COLOR_GRAY='\033[0;90m'
 
-#───────────────────────────────────────────────────────────────────────
-# LOGGING FUNCTIONS
-#───────────────────────────────────────────────────────────────────────
-
-# Log file
+# --- Logging helpers ---------------------------------------------------------
 export GOTHAM_LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/gotham/shell.log"
 [[ -d "$(dirname "$GOTHAM_LOG_FILE")" ]] || mkdir -p "$(dirname "$GOTHAM_LOG_FILE")"
 
@@ -76,9 +73,7 @@ log_debug() {
     echo "[$timestamp] [DEBUG] $*" >> "$GOTHAM_LOG_FILE"
 }
 
-#───────────────────────────────────────────────────────────────────────
-# XDG Base Directory Specification
-#───────────────────────────────────────────────────────────────────────
+# --- XDG base directories ----------------------------------------------------
 
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
@@ -87,9 +82,7 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 
 log_debug "XDG directories initialized"
 
-#───────────────────────────────────────────────────────────────────────
-# Project Directories
-#───────────────────────────────────────────────────────────────────────
+# --- Project directories -----------------------------------------------------
 
 export GOTHAM_DIR="$HOME/gotham"
 export PROJECTS_DIR="$HOME/projects"
@@ -102,9 +95,7 @@ else
     log_debug "Gotham directory: $GOTHAM_DIR"
 fi
 
-#───────────────────────────────────────────────────────────────────────
-# STARSHIP CONFIG (CRÍTICO: ANTES DO INIT!)
-#───────────────────────────────────────────────────────────────────────
+# --- Prompt renderer (Starship) ---------------------------------------------
 
 # Force correct starship config
 STARSHIP_CONFIG="$GOTHAM_DIR/themes/starship.toml"
@@ -116,9 +107,7 @@ else
     log_debug "Starship config: $STARSHIP_CONFIG"
 fi
 
-#───────────────────────────────────────────────────────────────────────
-# Editor Configuration
-#───────────────────────────────────────────────────────────────────────
+# --- Preferred editors/pagers ------------------------------------------------
 
 export EDITOR="nvim"
 export VISUAL="nvim"
@@ -133,23 +122,17 @@ if ! command -v "$EDITOR" >/dev/null 2>&1; then
     export EDITOR="vi"
 fi
 
-#───────────────────────────────────────────────────────────────────────
-# Locale
-#───────────────────────────────────────────────────────────────────────
+# --- Locale ------------------------------------------------------------------
 
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
-#───────────────────────────────────────────────────────────────────────
-# Terminal
-#───────────────────────────────────────────────────────────────────────
+# --- Terminal capabilities ---------------------------------------------------
 
 export TERM="xterm-256color"
 export COLORTERM="truecolor"
 
-#───────────────────────────────────────────────────────────────────────
-# PATH Construction
-#───────────────────────────────────────────────────────────────────────
+# --- PATH construction -------------------------------------------------------
 
 typeset -U path
 
@@ -162,6 +145,7 @@ path=(
     $GOTHAM_DIR/config/waybar/modules
     $HOME/.local/share/mise/shims
     $HOME/.local/share/mise/installs/*/bin(N)
+    $HOME/.local/share/nvim/mason/bin(N)
     $HOME/.cargo/bin
     $HOME/.go/bin(N)
     /usr/local/sbin
@@ -179,9 +163,7 @@ export PATH
 
 log_debug "PATH configured: ${#path} entries"
 
-#───────────────────────────────────────────────────────────────────────
-# FZF Configuration
-#───────────────────────────────────────────────────────────────────────
+# --- FZF defaults ------------------------------------------------------------
 
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_DEFAULT_OPTS="
@@ -262,5 +244,65 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 #───────────────────────────────────────────────────────────────────────
 
 skip_global_compinit=1
+
+#───────────────────────────────────────────────────────────────────────
+# Zsh Syntax Highlighting & Keymap
+#───────────────────────────────────────────────────────────────────────
+
+export ZSH_HIGHLIGHT_HIGHLIGHTERS=(main cursor)
+typeset -gA ZSH_HIGHLIGHT_STYLES
+
+ZSH_HIGHLIGHT_STYLES[comment]='fg=#6272A4'
+ZSH_HIGHLIGHT_STYLES[alias]='fg=#50FA7B'
+ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=#50FA7B'
+ZSH_HIGHLIGHT_STYLES[global-alias]='fg=#50FA7B'
+ZSH_HIGHLIGHT_STYLES[function]='fg=#50FA7B'
+ZSH_HIGHLIGHT_STYLES[command]='fg=#50FA7B'
+ZSH_HIGHLIGHT_STYLES[precommand]='fg=#50FA7B,italic'
+ZSH_HIGHLIGHT_STYLES[autodirectory]='fg=#FFB86C,italic'
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#FFB86C'
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#FFB86C'
+ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='fg=#BD93F9'
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=#8BE9FD'
+ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=#8BE9FD'
+ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=#8BE9FD'
+ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=#FF79C6'
+ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter-unquoted]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[process-substitution-delimiter]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[back-quoted-argument-delimiter]='fg=#FF79C6'
+ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]='fg=#FF79C6'
+ZSH_HIGHLIGHT_STYLES[back-dollar-quoted-argument]='fg=#FF79C6'
+ZSH_HIGHLIGHT_STYLES[command-substitution-quoted]='fg=#F1FA8C'
+ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter-quoted]='fg=#F1FA8C'
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#F1FA8C'
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument-unclosed]='fg=#FF5555'
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#F1FA8C'
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument-unclosed]='fg=#FF5555'
+ZSH_HIGHLIGHT_STYLES[rc-quote]='fg=#F1FA8C'
+ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument-unclosed]='fg=#FF5555'
+ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[assign]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[named-fd]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[numeric-fd]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#FF5555'
+ZSH_HIGHLIGHT_STYLES[path]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[path_pathseparator]='fg=#FF79C6'
+ZSH_HIGHLIGHT_STYLES[path_prefix]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[path_prefix_pathseparator]='fg=#FF79C6'
+ZSH_HIGHLIGHT_STYLES[globbing]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=#BD93F9'
+ZSH_HIGHLIGHT_STYLES[back-quoted-argument-unclosed]='fg=#FF5555'
+ZSH_HIGHLIGHT_STYLES[redirection]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[arg0]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[default]='fg=#F8F8F2'
+ZSH_HIGHLIGHT_STYLES[cursor]='standout'
+
+bindkey "^[[H" beginning-of-line
+bindkey "^[[F" end-of-line
+bindkey "^[[3~" delete-char
+bindkey "^[[1;3C" forward-word
+bindkey "^[[1;3D" backward-word
 
 log_debug "Environment configuration loaded successfully"

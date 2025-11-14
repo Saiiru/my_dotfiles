@@ -1,21 +1,19 @@
 #!/usr/bin/env zsh
-#═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Completion System
-# Sistema avançado de auto-completion
-#═══════════════════════════════════════════════════════════════════════
+# -----------------------------------------------------------------------------
+# Gotham Shell · Completion tuning
+# -----------------------------------------------------------------------------
+# Responsible for configuring compinit, caching, matchers and aesthetics. This
+# file should remain focused on zstyle/compinit directives only.
+# -----------------------------------------------------------------------------
 
-#───────────────────────────────────────────────────────────────────────
-# Cache Configuration
-#───────────────────────────────────────────────────────────────────────
+# --- Cache config ------------------------------------------------------------
 
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompcache"
 
 [[ -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh" ]] || mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 
-#───────────────────────────────────────────────────────────────────────
-# Behavior
-#───────────────────────────────────────────────────────────────────────
+# --- Behaviour ---------------------------------------------------------------
 
 zstyle ':completion:*' menu select=2
 zstyle ':completion:*' matcher-list \
@@ -30,9 +28,7 @@ zstyle ':completion:*' insert-tab false
 zstyle ':completion:*' list-packed yes
 zstyle ':completion:*' squeeze-slashes true
 
-#───────────────────────────────────────────────────────────────────────
-# Neon Vigilante Formatting
-#───────────────────────────────────────────────────────────────────────
+# --- Prompt formatting -------------------------------------------------------
 
 zstyle ':completion:*:descriptions' format '%F{#00ff00}━━ %d ━━%f'
 zstyle ':completion:*:warnings' format '%F{#ff073a}━━ no matches ━━%f'
@@ -45,9 +41,7 @@ zstyle ':completion:*:*:*:*:*' menu select
 zstyle ':completion:*' select-prompt '%F{#000000}%K{#ff073a} %p %k%f'
 zstyle ':completion:*' list-prompt '%F{#00ff00}%SAt %p: Hit TAB for more%s%f'
 
-#───────────────────────────────────────────────────────────────────────
-# Specific Completions
-#───────────────────────────────────────────────────────────────────────
+# --- Service specific tweaks -------------------------------------------------
 
 # Kill
 zstyle ':completion:*:*:kill:*' menu yes select
@@ -71,9 +65,7 @@ zstyle ':completion:*:-tilde-:*' group-order 'named-directories' 'path-directori
 # Git
 zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}/git-/}
 
-#───────────────────────────────────────────────────────────────────────
-# Init (otimizado com cache de 24h)
-#───────────────────────────────────────────────────────────────────────
+# --- Compinit bootstrap ------------------------------------------------------
 
 autoload -Uz compinit
 typeset -g ZCOMPDUMP="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"

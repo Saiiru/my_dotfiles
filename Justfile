@@ -82,7 +82,8 @@ health:
 # Run complete system test
 test:
     @echo "🧪 Running tests..."
-    ./test-complete-setup.sh
+    @chmod +x bin/system/system-health.sh
+    @bin/system/system-health.sh
 
 #───────────────────────────────────────────────────────────────────────
 # 🎨 THEMING & UI

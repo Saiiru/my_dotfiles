@@ -1,12 +1,13 @@
 #!/usr/bin/env zsh
-#═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — History Configuration
-# Gerenciamento avançado de histórico de comandos
-#═══════════════════════════════════════════════════════════════════════
+# -----------------------------------------------------------------------------
+# Gotham Shell · History policies
+# -----------------------------------------------------------------------------
+# Defines where history lives, ensures persistence and exposes helper widgets
+# (fzf-powered search, statistics, dedupe). Use this file to keep history
+# hygiene decisions centralised.
+# -----------------------------------------------------------------------------
 
-#───────────────────────────────────────────────────────────────────────
-# History File Configuration
-#───────────────────────────────────────────────────────────────────────
+# --- Storage -----------------------------------------------------------------
 
 HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"
 HISTSIZE=50000
@@ -15,9 +16,7 @@ SAVEHIST=50000
 # Cria diretório se não existir
 [[ -d "${HISTFILE:h}" ]] || mkdir -p "${HISTFILE:h}"
 
-#───────────────────────────────────────────────────────────────────────
-# History Search Widget (Ctrl+R com FZF)
-#───────────────────────────────────────────────────────────────────────
+# --- FZF search widget (Ctrl+R) ---------------------------------------------
 
 fzf-history-widget-enhanced() {
     local selected
@@ -42,12 +41,10 @@ fzf-history-widget-enhanced() {
 
 zle -N fzf-history-widget-enhanced
 
-# KEYBIND: Ctrl+R — Busca inteligente no histórico
+# Keybind: Ctrl+R
 bindkey '^R' fzf-history-widget-enhanced
 
-#───────────────────────────────────────────────────────────────────────
-# History Analysis Functions
-#───────────────────────────────────────────────────────────────────────
+# --- Analysis helpers --------------------------------------------------------
 
 # Mostra comandos mais usados
 history-top() {

@@ -1,0 +1,37 @@
+#═══════════════════════════════════════════════════════════════════════
+# GOTHAM SYSTEM — Ghostty Terminal Configuration
+# Mirrors the Red Hood Kitty profile for a consistent experience
+#═══════════════════════════════════════════════════════════════════════
+
+# Fonts
+font-family = "DankMono Nerd Font"
+font-size = 12.5
+font-feature = default
+
+# Window styling
+window-decoration = false
+window-padding-x = 8
+window-padding-y = 6
+background-opacity = 0.92
+background-blur-radius = 10
+scrollback-limit = 10000
+
+# Cursor & selection
+cursor-style = block
+cursor-style-blink = false
+selection-background = #32302F
+selection-foreground = #f2e5bc
+cursor-color = #ea6962
+
+# Behavior
+mouse-hide-while-typing = true
+copy-on-select = true
+confirm-close-surface = false
+app-notifications = no-clipboard-copy,no-config-reload
+gtk-titlebar = false
+gtk-single-instance = true
+shell-integration = detect
+shell-integration-features = cursor,sudo,title,no-cursor
+
+# Color palette
+config-file = ./theme-batman.conf

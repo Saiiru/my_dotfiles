@@ -40,11 +40,21 @@ node = "20"
 # Go - Systems programming, cloud tools
 go = "1.21"
 
-# Rust - Systems programming (use rustup instead for better compatibility)
-# rust = "stable"
-
 # Java - Android development, enterprise
 java = "openjdk-21"
+
+# .NET ecosystem (fsautocomplete, etc.)
+dotnet = "latest"
+
+# Lua (Neovim) runtime
+lua = "5.4"
+
+# Ruby (rails tooling + gems managed via tasks)
+ruby = "3.3"
+
+# Modern JS runtimes
+bun = "latest"
+deno = "latest"
 
 #───────────────────────────────────────────────────────────────────────
 # PYTHON TOOLING (via pipx)
@@ -98,4 +108,3 @@ gh = "latest"
 # Python tools for embedded:
 # - esptool installed via pipx
 # - platformio-core via Python above
-

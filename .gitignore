@@ -56,3 +56,8 @@ local.toml
 # Temporary files
 *.tmp
 text.txt
+my-fonts/
+
+# Documentation (ignore all .md except main README)
+*.md
+!README.md

@@ -317,10 +317,10 @@
         "wezterm": false
     },
     "ui": {
-        "fontDefault": "Roboto",
-        "fontDefaultScale": 1,
-        "fontFixed": "DejaVu Sans Mono",
-        "fontFixedScale": 1,
+        "fontDefault": "Inter",
+        "fontDefaultScale": 1.05,
+        "fontFixed": "JetBrainsMonoNL Nerd Font",
+        "fontFixedScale": 1.0,
         "panelsAttachedToBar": true,
         "settingsPanelAttachToBar": true,
         "tooltipsEnabled": true

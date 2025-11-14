@@ -1,2 +1,63 @@
 [tools]
 python = "3.11"
+
+[tasks.install-lsp]
+description = "Install required language servers (pyright, jdtls, arduino)"
+run = '''
+set -euo pipefail
+
+mkdir -p "$HOME/.local/bin"
+export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
+
+if command -v npm >/dev/null 2>&1; then
+  echo "Installing pyright & cspell via npm..."
+  npm install -g pyright cspell
+else
+  echo "npm not found; please install Node.js to get pyright." >&2
+fi
+
+if command -v go >/dev/null 2>&1; then
+  echo "Installing arduino-language-server via go install..."
+  GOBIN="$HOME/.local/bin" go install github.com/arduino/arduino-language-server@latest
+else
+  echo "go not found; skipping arduino-language-server install." >&2
+fi
+
+echo "Installing arduino-cli binary release..."
+ARDUINO_CLI_DIR="$HOME/.local/bin"
+CLI_OS=$(uname -s)
+CLI_ARCH=$(uname -m)
+CLI_URL=""
+if [ "$CLI_OS" = "Linux" ] && [ "$CLI_ARCH" = "x86_64" ]; then
+  CLI_URL="https://downloads.arduino.cc/arduino-cli/arduino-cli_latest_Linux_64bit.tar.gz"
+elif [ "$CLI_OS" = "Linux" ] && [ "$CLI_ARCH" = "aarch64" ]; then
+  CLI_URL="https://downloads.arduino.cc/arduino-cli/arduino-cli_latest_Linux_ARM64.tar.gz"
+elif [ "$CLI_OS" = "Darwin" ] && [ "$CLI_ARCH" = "arm64" ]; then
+  CLI_URL="https://downloads.arduino.cc/arduino-cli/arduino-cli_latest_macOS_ARM64.tar.gz"
+elif [ "$CLI_OS" = "Darwin" ]; then
+  CLI_URL="https://downloads.arduino.cc/arduino-cli/arduino-cli_latest_macOS_64bit.tar.gz"
+fi
+if [ -n "$CLI_URL" ]; then
+  TMP_CLI=$(mktemp -d)
+  curl -sSL -o "$TMP_CLI/arduino-cli.tar.gz" "$CLI_URL"
+  tar -xzf "$TMP_CLI/arduino-cli.tar.gz" -C "$TMP_CLI"
+  install -m 0755 "$TMP_CLI"/arduino-cli "$ARDUINO_CLI_DIR/arduino-cli"
+  rm -rf "$TMP_CLI"
+else
+  echo "Unsupported platform $(uname -s)-$(uname -m) for arduino-cli auto install." >&2
+fi
+
+if command -v nvim >/dev/null 2>&1; then
+  echo "Installing Mason packages (jdtls, pyright, arduino-language-server)..."
+  NVIM_CONFIG_HOME="${NVIM_CONFIG_HOME:-$HOME/gotham/config}"
+  XDG_CONFIG_HOME="$NVIM_CONFIG_HOME" \
+    nvim --headless \
+      "+lua require('lazy').load({ plugins = { 'mason.nvim', 'mason-lspconfig.nvim' } })" \
+      "+lua require('mason.api.command').MasonInstall({ 'jdtls', 'pyright', 'arduino-language-server' })" \
+      +qa || true
+else
+  echo "nvim not found; skipping Mason installs." >&2
+fi
+
+echo "Language server installation complete. Ensure \"$HOME/.local/bin\" and \"$HOME/.local/share/nvim/mason/bin\" are on your PATH."
+'''

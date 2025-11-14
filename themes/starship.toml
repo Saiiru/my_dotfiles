@@ -24,6 +24,11 @@ $nodejs\
 $golang\
 $java\
 $rust\
+$dotnet\
+$ruby\
+$lua\
+$bun\
+$deno\
 $docker_context\
 $git_branch\
 $git_status\
@@ -37,9 +42,9 @@ $character\
 #═══════════════════════════════════════════════════════════════════════
 
 [character]
-success_symbol = "[\\$](bold #00ff00)"
-error_symbol = "[\\$](bold #ff073a)"
-vimcmd_symbol = "[❮](bold #00ff00)"
+success_symbol = "[λ](fg:#41ff7c)"
+error_symbol = "[☢](fg:#ff073a)"
+vimcmd_symbol = "[❮](fg:#00ffff)"
 
 #═══════════════════════════════════════════════════════════════════════
 # USERNAME/HOSTNAME
@@ -62,56 +67,82 @@ style = "bold #00ffff"
 
 [directory]
 format = "[$path]($style)[$read_only]($read_only_style)"
-style = "bold #ffff00"
-read_only = " 🔒"
-read_only_style = "bold #ff073a"
+style = "bold #ffd166"
 truncation_length = 3
 truncate_to_repo = true
-truncation_symbol = "…/"
+truncation_symbol = "󰇘/"
+read_only = " "
+read_only_style = "bold #ff073a"
 
 #═══════════════════════════════════════════════════════════════════════
 # LANGUAGE ENVIRONMENTS
 #═══════════════════════════════════════════════════════════════════════
 
 [python]
-symbol = " "
+symbol = "󰌠 "
 format = "─\\[[$symbol${version}( \\($virtualenv\\))]($style)\\]"
-style = "bold #00ff00"
+style = "bold #41ff7c"
 detect_files = ["requirements.txt", "pyproject.toml", ".python-version"]
 
 [nodejs]
-symbol = " "
+symbol = "󰎙 "
 format = "─\\[[$symbol${version}]($style)\\]"
-style = "bold #ffff00"
+style = "bold #c5ff5e"
 detect_files = ["package.json", ".node-version"]
 
 [golang]
-symbol = " "
+symbol = "󰟓 "
 format = "─\\[[$symbol${version}]($style)\\]"
-style = "bold #00ffff"
+style = "bold #25b7ff"
 
 [java]
-symbol = " "
+symbol = " "
 format = "─\\[[$symbol${version}]($style)\\]"
-style = "bold #ff073a"
+style = "bold #ff6ec7"
 
 [rust]
-symbol = " "
+symbol = " "
 format = "─\\[[$symbol${version}]($style)\\]"
 style = "bold #ff6600"
 
 [docker_context]
-symbol = " "
+symbol = " "
 format = "─\\[[$symbol$context]($style)\\]"
-style = "bold #0099ff"
+style = "bold #00f5ff"
 only_with_files = true
+
+[dotnet]
+symbol = " "
+format = "─\\[[$symbol$version]($style)\\]"
+style = "bold #b39cfe"
+
+[ruby]
+symbol = " "
+format = "─\\[[$symbol$version]($style)\\]"
+style = "bold #ff4b6e"
+
+[lua]
+symbol = " "
+format = "─\\[[$symbol$version]($style)\\]"
+style = "bold #7ab0ff"
+
+[bun]
+symbol = " "
+format = "─\\[[$symbol$version]($style)\\]"
+style = "bold #ffaf5f"
+detect_files = ["bun.lockb"]
+
+[deno]
+symbol = "󱙺 "
+format = "─\\[[$symbol$version]($style)\\]"
+style = "bold #5fdfff"
 
 #═══════════════════════════════════════════════════════════════════════
 # GIT
 #═══════════════════════════════════════════════════════════════════════
 
 [git_branch]
-symbol = " "
+symbol = " "
 format = "─\\[[$symbol$branch]($style)\\]"
 style = "bold #ff00ff"
 truncation_length = 20
@@ -120,14 +151,14 @@ truncation_symbol = "…"
 [git_status]
 format = "─\\[[$all_status$ahead_behind]($style)\\]"
 style = "bold #ff00ff"
-ahead = "[⇡${count}](bold #00ff00)"
+ahead = "[⇡${count}](bold #41ff7c)"
 behind = "[⇣${count}](bold #ff073a)"
-conflicted = "[${count}](bold #ff073a)"
-deleted = "[${count}](bold #ff073a)"
-modified = "[!${count}](bold #ffff00)"
-staged = "[+${count}](bold #00ff00)"
-untracked = "[?${count}](bold #00ffff)"
-stashed = "[📦](bold #ff6600)"
+conflicted = "[ ${count}](bold #ff073a)"
+deleted = "[ ${count}](bold #ff073a)"
+modified = "[ ${count}](bold #ffd166)"
+staged = "[ ${count}](bold #41ff7c)"
+untracked = "[ ${count}](bold #00ffff)"
+stashed = "[](bold #ff6600)"
 
 #═══════════════════════════════════════════════════════════════════════
 # DISABLE UNNECESSARY

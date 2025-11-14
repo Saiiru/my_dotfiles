@@ -1,60 +1,126 @@
-#═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — ZSH Configuration
-# Modular shell environment with tactical enhancements
-#═══════════════════════════════════════════════════════════════════════
-
-# ───────────────────────────────────────────────────────────────────────
-# GOTHAM DIRECTORY
-# ───────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
+# Gotham Shell Bootstrap
+# -----------------------------------------------------------------------------
+# This file wires the entire shell stack in the following order:
+#   1. Define the root of the Gotham workspace.
+#   2. Load deterministic core modules (environment, options, history...).
+#   3. Load plugins/aliases/functions provided by the userland tree.
+# All heavy lifting (completion, history policies, keybinds, etc.) lives inside
+# `config/zsh/core`. Only add glue logic here.
+# -----------------------------------------------------------------------------
 
 export GOTHAM_DIR="${GOTHAM_DIR:-$HOME/gotham}"
 
-# ───────────────────────────────────────────────────────────────────────
-# LOAD CORE MODULES (in order)
-# ───────────────────────────────────────────────────────────────────────
-
+# --- Core modules ------------------------------------------------------------
 for module in "$GOTHAM_DIR/config/zsh/core"/*.zsh(N); do
-    source "$module" 2>/dev/null || echo "Failed to load: $module"
+  source "$module" 2>/dev/null || echo "[zshrc] failed to load $module" >&2
 done
 
-# ───────────────────────────────────────────────────────────────────────
-# LOAD PLUGINS
-# ───────────────────────────────────────────────────────────────────────
-
-# Load plugin manager first
+# --- Plugins -----------------------------------------------------------------
 if [[ -f "$GOTHAM_DIR/config/zsh/plugins/00-init.zsh" ]]; then
-    source "$GOTHAM_DIR/config/zsh/plugins/00-init.zsh"
+  source "$GOTHAM_DIR/config/zsh/plugins/00-init.zsh"
 fi
-
-# Load all other plugins
 for plugin in "$GOTHAM_DIR/config/zsh/plugins"/*.zsh(N); do
-    # Skip 00-init.zsh as it's already loaded
-    [[ "$plugin" == *"00-init.zsh" ]] && continue
-    source "$plugin" 2>/dev/null
+  [[ "$plugin" == *"00-init.zsh" ]] && continue
+  source "$plugin" 2>/dev/null || echo "[zshrc] failed to load $plugin" >&2
 done
 
-# ───────────────────────────────────────────────────────────────────────
-# LOAD ALIASES
-# ───────────────────────────────────────────────────────────────────────
+# --- Aliases -----------------------------------------------------------------
+[[ -f "$GOTHAM_DIR/config/zsh/aliases.zsh" ]] && source "$GOTHAM_DIR/config/zsh/aliases.zsh"
 
-if [[ -f "$GOTHAM_DIR/config/zsh/aliases.zsh" ]]; then
-    source "$GOTHAM_DIR/config/zsh/aliases.zsh"
-fi
+# --- Functions ---------------------------------------------------------------
+[[ -f "$GOTHAM_DIR/config/zsh/functions.zsh" ]] && source "$GOTHAM_DIR/config/zsh/functions.zsh"
 
-# ───────────────────────────────────────────────────────────────────────
-# LOAD FUNCTIONS
-# ───────────────────────────────────────────────────────────────────────
-
-if [[ -f "$GOTHAM_DIR/config/zsh/functions.zsh" ]]; then
-    source "$GOTHAM_DIR/config/zsh/functions.zsh"
-fi
+# Completion system lives in core/03-completion.zsh. Nothing else here.
 
 # ───────────────────────────────────────────────────────────────────────
-# COMPLETION SYSTEM
+# BATCOMPUTER — Taskwarrior / XP Helpers
 # ───────────────────────────────────────────────────────────────────────
 
-# Note: Completion is configured in core/03-completion.zsh
+ARC_MANA_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/arcane"
+ARC_MANA_LOG="${ARC_MANA_DIR}/mana_log.dat"
 
-# ───────────────────────────────────────────────────────────────────────
-# END OF CONFIGURATION
-# ───────────────────────────────────────────────────────────────────────
+arc_init() {
+  mkdir -p "$ARC_MANA_DIR"
+  [[ -f "$ARC_MANA_LOG" ]] || echo 0 >"$ARC_MANA_LOG"
+}
+
+arc_init
+
+arc_xp() {
+  arc_init
+  local delta="${1:-0}"
+  [[ "$delta" =~ ^-?[0-9]+$ ]] || { echo "XP inválido"; return 1; }
+  local current
+  current=$(<"$ARC_MANA_LOG")
+  printf '%s\n' "$(( current + delta ))" >"$ARC_MANA_LOG"
+  echo "XP total: $(( current + delta ))"
+}
+
+tw_grant_xp_from_desc() {
+  local id="$1"
+  [[ -z "$id" ]] && { echo "Informe ID"; return 1; }
+  local desc token xp
+  desc=$(task _get "${id}.description" 2>/dev/null)
+  token=$(printf '%s\n' "$desc" | grep -o '\[XP:[0-9]\+\]')
+  xp=${token#[XP:}; xp=${xp%]}
+  xp=${xp:-0}
+  arc_xp "$xp"
+}
+
+tw_done() {
+  local id="$1"
+  [[ -z "$id" ]] && { echo "Uso: tw_done <id>"; return 1; }
+  local desc token xp
+  desc=$(task _get "${id}.description" 2>/dev/null)
+  task "$id" done
+  token=$(printf '%s\n' "$desc" | grep -o '\[XP:[0-9]\+\]')
+  xp=${token#[XP:}; xp=${xp%]}
+  xp=${xp:-0}
+  arc_xp "$xp"
+}
+
+arc_panel() {
+  arc_init
+  local xp lvl rem filled empty
+  xp=$(<"$ARC_MANA_LOG")
+  lvl=$(( xp / 100 ))
+  rem=$(( xp % 100 ))
+  filled=$(( rem / 5 ))
+  empty=$(( 20 - filled ))
+  printf 'XP total: %s | Nível: %s | ' "$xp" "$lvl"
+  printf '%.0s█' $(seq 1 $filled)
+  printf '%.0s░' $(seq 1 $empty)
+  printf '\nPróximas missões:\n'
+  task arrow limit:5 rc.verbose=nothing 2>/dev/null
+}
+
+alias arc='arc_panel'
+alias tw='task'
+alias twn='task next'
+
+pom() {
+  local minutes="${1:-25}"
+  local seconds=$(( minutes * 60 ))
+  while (( seconds > 0 )); do
+    printf '\r⏳ %02d:%02d ' $(( seconds / 60 )) $(( seconds % 60 ))
+    sleep 1
+    seconds=$(( seconds - 1 ))
+  done
+  printf '\n'
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send "Pomodoro" "Bloco de ${minutes} minutos finalizado."
+  else
+    echo "Pomodoro finalizado!"
+  fi
+}
+
+arc_xp_status() {
+  arc_init
+  local xp lvl
+  xp=$(<"$ARC_MANA_LOG")
+  lvl=$(( xp / 100 ))
+  printf 'XP:%s Lvl:%s' "$xp" "$lvl"
+}
+
+export -f arc_init arc_xp arc_panel arc_xp_status 2>/dev/null || true

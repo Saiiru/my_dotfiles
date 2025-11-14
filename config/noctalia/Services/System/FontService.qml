@@ -116,11 +116,11 @@ Singleton {
   function finalizeFontLoading() {
     // Add fallbacks if needed (models are already sorted)
     if (monospaceFonts.count === 0) {
-      addFallbackFonts(monospaceFonts, ["DejaVu Sans Mono"])
+      addFallbackFonts(monospaceFonts, ["JetBrainsMonoNL Nerd Font", "JetBrainsMono Nerd Font", "DejaVu Sans Mono"])
     }
 
     if (displayFonts.count === 0) {
-      addFallbackFonts(displayFonts, ["Inter", "Roboto", "DejaVu Sans"])
+      addFallbackFonts(displayFonts, ["Inter", "Inter Display", "Roboto"])
     }
 
     fontsLoaded = true
@@ -170,7 +170,7 @@ Singleton {
     }
 
     // Essential fallback fonts only
-    var essentialFonts = ["Inter", "Roboto", "DejaVu Sans"]
+    var essentialFonts = ["Inter", "Inter Display", "Roboto", "JetBrainsMonoNL Nerd Font"]
     if (essentialFonts.indexOf(fontName) !== -1) {
       result = true
     }

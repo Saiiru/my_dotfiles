@@ -76,10 +76,10 @@
     "language": ""
   },
   "ui": {
-    "fontDefault": "Roboto",
-    "fontFixed": "DejaVu Sans Mono",
-    "fontDefaultScale": 1,
-    "fontFixedScale": 1,
+    "fontDefault": "Inter",
+    "fontFixed": "JetBrainsMonoNL Nerd Font",
+    "fontDefaultScale": 1.05,
+    "fontFixedScale": 1.0,
     "tooltipsEnabled": true,
     "panelsAttachedToBar": true,
     "settingsPanelAttachToBar": false

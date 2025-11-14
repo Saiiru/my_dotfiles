@@ -208,9 +208,9 @@ Singleton {
 
     // ui
     property JsonObject ui: JsonObject {
-      property string fontDefault: "Roboto"
-      property string fontFixed: "DejaVu Sans Mono"
-      property real fontDefaultScale: 1.0
+      property string fontDefault: "Inter"
+      property string fontFixed: "JetBrainsMonoNL Nerd Font"
+      property real fontDefaultScale: 1.05
       property real fontFixedScale: 1.0
       property bool tooltipsEnabled: true
       property bool panelsAttachedToBar: true

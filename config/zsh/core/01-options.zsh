@@ -1,12 +1,13 @@
 #!/usr/bin/env zsh
-#═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Zsh Options
-# Configuração de comportamento do shell
-#═══════════════════════════════════════════════════════════════════════
+# -----------------------------------------------------------------------------
+# Gotham Shell · Core options
+# -----------------------------------------------------------------------------
+# Curated `setopt`/`unsetopt` directives for interactive shells. These values
+# favour predictable navigation, completion and history behaviour. Adjust with
+# caution and keep the grouping documented.
+# -----------------------------------------------------------------------------
 
-#───────────────────────────────────────────────────────────────────────
-# Navigation
-#───────────────────────────────────────────────────────────────────────
+# --- Navigation --------------------------------------------------------------
 
 setopt AUTO_CD                  # cd digitando apenas nome do diretório
 setopt AUTO_PUSHD               # cd adiciona ao stack automaticamente
@@ -15,9 +16,7 @@ setopt PUSHD_SILENT             # Não imprime stack
 setopt PUSHD_TO_HOME            # pushd sem args vai para $HOME
 setopt CDABLE_VARS              # cd para variáveis
 
-#───────────────────────────────────────────────────────────────────────
-# Completion
-#───────────────────────────────────────────────────────────────────────
+# --- Completion --------------------------------------------------------------
 
 setopt ALWAYS_TO_END            # Cursor vai ao fim após completion
 setopt AUTO_LIST                # Lista opções automaticamente
@@ -28,9 +27,7 @@ setopt LIST_PACKED              # Usa menos linhas
 setopt MENU_COMPLETE            # Insere primeira opção automaticamente
 unsetopt FLOW_CONTROL           # Desabilita Ctrl+S/Ctrl+Q
 
-#───────────────────────────────────────────────────────────────────────
-# History
-#───────────────────────────────────────────────────────────────────────
+# --- History -----------------------------------------------------------------
 
 setopt EXTENDED_HISTORY          # Salva timestamp
 setopt HIST_EXPIRE_DUPS_FIRST    # Expira duplicatas primeiro
@@ -44,25 +41,19 @@ setopt HIST_VERIFY               # Não executa imediatamente expansão
 setopt INC_APPEND_HISTORY        # Adiciona imediatamente
 setopt SHARE_HISTORY             # Compartilha entre sessões
 
-#───────────────────────────────────────────────────────────────────────
-# Correction
-#───────────────────────────────────────────────────────────────────────
+# --- Correction --------------------------------------------------------------
 
 unsetopt CORRECT                 # Desabilita correção automática
 unsetopt CORRECT_ALL
 
-#───────────────────────────────────────────────────────────────────────
-# Globbing
-#───────────────────────────────────────────────────────────────────────
+# --- Globbing ----------------------------------------------------------------
 
 setopt EXTENDED_GLOB             # Padrões avançados
 setopt GLOB_DOTS                 # Inclui arquivos ocultos
 setopt NO_NOMATCH                # Não erro se glob não encontrar
 setopt NUMERIC_GLOB_SORT         # Ordena numericamente
 
-#───────────────────────────────────────────────────────────────────────
-# Jobs
-#───────────────────────────────────────────────────────────────────────
+# --- Jobs --------------------------------------------------------------------
 
 setopt AUTO_RESUME               # Resume job suspenso
 setopt LONG_LIST_JOBS            # Lista jobs com mais info
@@ -71,16 +62,12 @@ setopt NO_CHECK_JOBS             # Não avisa sobre jobs ao sair
 setopt NO_HUP                    # Não mata jobs ao fechar
 setopt NOTIFY                    # Notifica mudanças imediatamente
 
-#───────────────────────────────────────────────────────────────────────
-# Prompt
-#───────────────────────────────────────────────────────────────────────
+# --- Prompt ------------------------------------------------------------------
 
 setopt PROMPT_SUBST              # Permite expansão
 setopt TRANSIENT_RPROMPT         # Remove right prompt após comando
 
-#───────────────────────────────────────────────────────────────────────
-# Input/Output
-#───────────────────────────────────────────────────────────────────────
+# --- I/O behaviour -----------------------------------------------------------
 
 setopt INTERACTIVE_COMMENTS      # Permite # em comandos
 setopt RC_QUOTES                 # Permite '' dentro de ''
