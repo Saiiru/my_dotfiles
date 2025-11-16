@@ -109,7 +109,8 @@ The [Justfile](./Justfile) exposes a few high-signal recipes:
 
 ### Niri / Wayland Stack
 - Run `scripts/bootstrap_niri.sh` to clone reference configs, install Waybar/Dunst themes, and update symlinks automatically.
-- Curated settings live in `config/niri/` (with `scripts/autostart.sh` for services) plus `config/waybar/` and `config/dunst/`.
+- Use `scripts/sync-niriconf.sh` whenever you want to pull the latest upstream `niriconf` presets into `config/niri/` (the script automatically switches the keyboard layout to `br` and keeps Waybar/Swaync disabled by default).
+- Curated settings live in `config/niri/` (now mirroring `niriconf`), `config/waybar/`, and `config/dunst/`.
 - `install/modules/symlinks.sh` (and `scripts/create-symlinks.sh`) push everything into `~/.config`, so running the bootstrapper is enough to deploy.
 - After making manual tweaks, re-run `scripts/bootstrap_niri.sh` to pull upstream improvements without losing local overrides.
 

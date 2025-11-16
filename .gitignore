@@ -61,3 +61,4 @@ my-fonts/
 # Documentation (ignore all .md except main README)
 *.md
 !README.md
+niriconf/
