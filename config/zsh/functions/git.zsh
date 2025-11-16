@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 #═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Git Functions
+# WORKSTATION OPS — Git Functions
 # Workflows táticos para Git
 #═══════════════════════════════════════════════════════════════════════
 

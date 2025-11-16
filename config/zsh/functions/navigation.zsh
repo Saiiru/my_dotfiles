@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 #═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Navigation Functions
+# WORKSTATION OPS — Navigation Functions
 # Sistema avançado de navegação e manipulação de diretórios
 #═══════════════════════════════════════════════════════════════════════
 

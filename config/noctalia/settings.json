@@ -327,21 +327,21 @@
     },
     "wallpaper": {
         "defaultWallpaper": "/etc/xdg/quickshell/noctalia-shell/Assets/Wallpaper/noctalia.png",
-        "directory": "/home/sairu/gotham/wallpapers",
+        "directory": "/home/sairu/workstation/wallpapers",
         "enableMultiMonitorDirectories": true,
         "enabled": true,
         "fillColor": "#000000",
         "fillMode": "crop",
         "monitors": [
             {
-                "directory": "/home/sairu/gotham/wallpapers",
+                "directory": "/home/sairu/workstation/wallpapers",
                 "name": "DP-2",
-                "wallpaper": "/home/sairu/gotham/wallpapers/backdrop.jpg"
+                "wallpaper": "/home/sairu/workstation/wallpapers/backdrop.jpg"
             },
             {
-                "directory": "/home/sairu/gotham/wallpapers",
+                "directory": "/home/sairu/workstation/wallpapers",
                 "name": "HDMI-A-1",
-                "wallpaper": "/home/sairu/gotham/wallpapers/workspace.jpg"
+                "wallpaper": "/home/sairu/workstation/wallpapers/workspace.jpg"
             }
         ],
         "overviewEnabled": false,

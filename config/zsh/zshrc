@@ -1,35 +1,35 @@
 # -----------------------------------------------------------------------------
-# Gotham Shell Bootstrap
+# Workstation Shell Bootstrap
 # -----------------------------------------------------------------------------
 # This file wires the entire shell stack in the following order:
-#   1. Define the root of the Gotham workspace.
+#   1. Define the root of the workstation workspace.
 #   2. Load deterministic core modules (environment, options, history...).
 #   3. Load plugins/aliases/functions provided by the userland tree.
 # All heavy lifting (completion, history policies, keybinds, etc.) lives inside
 # `config/zsh/core`. Only add glue logic here.
 # -----------------------------------------------------------------------------
 
-export GOTHAM_DIR="${GOTHAM_DIR:-$HOME/gotham}"
+export WORKSTATION_DIR="${WORKSTATION_DIR:-$HOME/workstation}"
 
 # --- Core modules ------------------------------------------------------------
-for module in "$GOTHAM_DIR/config/zsh/core"/*.zsh(N); do
+for module in "$WORKSTATION_DIR/config/zsh/core"/*.zsh(N); do
   source "$module" 2>/dev/null || echo "[zshrc] failed to load $module" >&2
 done
 
 # --- Plugins -----------------------------------------------------------------
-if [[ -f "$GOTHAM_DIR/config/zsh/plugins/00-init.zsh" ]]; then
-  source "$GOTHAM_DIR/config/zsh/plugins/00-init.zsh"
+if [[ -f "$WORKSTATION_DIR/config/zsh/plugins/00-init.zsh" ]]; then
+  source "$WORKSTATION_DIR/config/zsh/plugins/00-init.zsh"
 fi
-for plugin in "$GOTHAM_DIR/config/zsh/plugins"/*.zsh(N); do
+for plugin in "$WORKSTATION_DIR/config/zsh/plugins"/*.zsh(N); do
   [[ "$plugin" == *"00-init.zsh" ]] && continue
   source "$plugin" 2>/dev/null || echo "[zshrc] failed to load $plugin" >&2
 done
 
 # --- Aliases -----------------------------------------------------------------
-[[ -f "$GOTHAM_DIR/config/zsh/aliases.zsh" ]] && source "$GOTHAM_DIR/config/zsh/aliases.zsh"
+[[ -f "$WORKSTATION_DIR/config/zsh/aliases.zsh" ]] && source "$WORKSTATION_DIR/config/zsh/aliases.zsh"
 
 # --- Functions ---------------------------------------------------------------
-[[ -f "$GOTHAM_DIR/config/zsh/functions.zsh" ]] && source "$GOTHAM_DIR/config/zsh/functions.zsh"
+[[ -f "$WORKSTATION_DIR/config/zsh/functions.zsh" ]] && source "$WORKSTATION_DIR/config/zsh/functions.zsh"
 
 # Completion system lives in core/03-completion.zsh. Nothing else here.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 #═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Tool Integrations
+# WORKSTATION OPS — Tool Integrations
 # Integração de ferramentas modernas
 #═══════════════════════════════════════════════════════════════════════
 

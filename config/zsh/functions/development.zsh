@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 #═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Development Functions
+# WORKSTATION OPS — Development Functions
 # Ferramentas táticas de desenvolvimento
 #═══════════════════════════════════════════════════════════════════════
 

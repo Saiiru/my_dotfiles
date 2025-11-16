@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # -----------------------------------------------------------------------------
-# Gotham Shell · Environment bootstrap
+# Workstation Shell · Environment bootstrap
 # -----------------------------------------------------------------------------
 # Responsibilities
 #   • define ANSI palettes for log helpers
@@ -38,39 +38,39 @@ export COLOR_WHITE='\033[0;37m'
 export COLOR_GRAY='\033[0;90m'
 
 # --- Logging helpers ---------------------------------------------------------
-export GOTHAM_LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/gotham/shell.log"
-[[ -d "$(dirname "$GOTHAM_LOG_FILE")" ]] || mkdir -p "$(dirname "$GOTHAM_LOG_FILE")"
+export WORKSTATION_LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/workstation/shell.log"
+[[ -d "$(dirname "$WORKSTATION_LOG_FILE")" ]] || mkdir -p "$(dirname "$WORKSTATION_LOG_FILE")"
 
 # Logging functions
 log_success() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     echo -e "${COLOR_SUCCESS_BOLD}[✓]${COLOR_RESET} $*"
-    echo "[$timestamp] [SUCCESS] $*" >> "$GOTHAM_LOG_FILE"
+    echo "[$timestamp] [SUCCESS] $*" >> "$WORKSTATION_LOG_FILE"
 }
 
 log_error() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     echo -e "${COLOR_ERROR_BOLD}[✗]${COLOR_RESET} $*" >&2
-    echo "[$timestamp] [ERROR] $*" >> "$GOTHAM_LOG_FILE"
+    echo "[$timestamp] [ERROR] $*" >> "$WORKSTATION_LOG_FILE"
 }
 
 log_warn() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     echo -e "${COLOR_WARN_BOLD}[⚠]${COLOR_RESET} $*"
-    echo "[$timestamp] [WARN] $*" >> "$GOTHAM_LOG_FILE"
+    echo "[$timestamp] [WARN] $*" >> "$WORKSTATION_LOG_FILE"
 }
 
 log_info() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     echo -e "${COLOR_INFO_BOLD}[ℹ]${COLOR_RESET} $*"
-    echo "[$timestamp] [INFO] $*" >> "$GOTHAM_LOG_FILE"
+    echo "[$timestamp] [INFO] $*" >> "$WORKSTATION_LOG_FILE"
 }
 
 log_debug() {
-    [[ -n "$GOTHAM_DEBUG" ]] || return 0
+    [[ -n "$WORKSTATION_DEBUG" ]] || return 0
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     echo -e "${COLOR_DEBUG}[DEBUG]${COLOR_RESET} $*"
-    echo "[$timestamp] [DEBUG] $*" >> "$GOTHAM_LOG_FILE"
+    echo "[$timestamp] [DEBUG] $*" >> "$WORKSTATION_LOG_FILE"
 }
 
 # --- XDG base directories ----------------------------------------------------
@@ -84,21 +84,21 @@ log_debug "XDG directories initialized"
 
 # --- Project directories -----------------------------------------------------
 
-export GOTHAM_DIR="$HOME/gotham"
+export WORKSTATION_DIR="$HOME/workstation"
 export PROJECTS_DIR="$HOME/projects"
 export WORKSPACE_DIR="$HOME/workspace"
 
-# Validate Gotham directory
-if [[ ! -d "$GOTHAM_DIR" ]]; then
-    log_error "Gotham directory not found: $GOTHAM_DIR"
+# Validate Workstation directory
+if [[ ! -d "$WORKSTATION_DIR" ]]; then
+    log_error "Workstation directory not found: $WORKSTATION_DIR"
 else
-    log_debug "Gotham directory: $GOTHAM_DIR"
+    log_debug "Workstation directory: $WORKSTATION_DIR"
 fi
 
 # --- Prompt renderer (Starship) ---------------------------------------------
 
 # Force correct starship config
-STARSHIP_CONFIG="$GOTHAM_DIR/themes/starship.toml"
+STARSHIP_CONFIG="$WORKSTATION_DIR/themes/starship.toml"
 export STARSHIP_CONFIG
 
 if [[ ! -f "$STARSHIP_CONFIG" ]]; then
@@ -138,11 +138,9 @@ typeset -U path
 
 path=(
     $HOME/.local/bin
-    $GOTHAM_DIR/bin/system
-    $GOTHAM_DIR/config/noctalia/Bin
-    $GOTHAM_DIR/config/noctalia/Bin/battery-manager
-    $GOTHAM_DIR/config/noctalia/Bin/dev
-    $GOTHAM_DIR/config/waybar/modules
+    $WORKSTATION_DIR/config/noctalia/Bin
+    $WORKSTATION_DIR/config/noctalia/Bin/battery-manager
+    $WORKSTATION_DIR/config/noctalia/Bin/dev
     $HOME/.local/share/mise/shims
     $HOME/.local/share/mise/installs/*/bin(N)
     $HOME/.local/share/nvim/mason/bin(N)

@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 #═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Keybindings Configuration
+# WORKSTATION OPS — Keybindings Configuration
 # Sistema tático de atalhos de teclado
 #═══════════════════════════════════════════════════════════════════════
 

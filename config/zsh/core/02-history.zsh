@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # -----------------------------------------------------------------------------
-# Gotham Shell · History policies
+# Workstation Shell · History policies
 # -----------------------------------------------------------------------------
 # Defines where history lives, ensures persistence and exposes helper widgets
 # (fzf-powered search, statistics, dedupe). Use this file to keep history

@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 #═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Aliases
+# WORKSTATION OPS — Aliases
 # Atalhos de comando centralizados
 #═══════════════════════════════════════════════════════════════════════
 
@@ -40,7 +40,7 @@ alias -- -='cd -'
 
 alias work='cd ~/workspace'
 alias proj='cd ~/projects'
-alias dots='cd ~/gotham'
+alias dots='cd ~/workstation'
 alias conf='cd ~/.config'
 
 #───────────────────────────────────────────────────────────────────────

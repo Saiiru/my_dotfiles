@@ -1,5 +1,5 @@
 #═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Mise Runtime Manager Configuration
+# WORKSTATION OPS — Mise Runtime Manager Configuration
 # Professional multi-language development environment
 # Author: Sairu
 # Last Updated: 2024-11-13
@@ -19,12 +19,8 @@ yes = false
 
 [env]
 _.path = [
-    "{{ config_root }}/bin",
     "$HOME/.local/bin",
-    "$HOME/gotham/bin/system",
-    "$HOME/gotham/bin/battery",
-    "$HOME/gotham/bin/theme",
-    "$HOME/gotham/bin/notifications"
+    "$HOME/workstation/scripts"
 ]
 
 #───────────────────────────────────────────────────────────────────────

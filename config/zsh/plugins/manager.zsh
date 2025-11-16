@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 #═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Plugin Manager (Znap)
+# WORKSTATION OPS — Plugin Manager (Znap)
 # Sistema de carregamento de plugins otimizado
 #═══════════════════════════════════════════════════════════════════════
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # -----------------------------------------------------------------------------
-# Gotham Shell · Completion tuning
+# Workstation Shell · Completion tuning
 # -----------------------------------------------------------------------------
 # Responsible for configuring compinit, caching, matchers and aesthetics. This
 # file should remain focused on zstyle/compinit directives only.

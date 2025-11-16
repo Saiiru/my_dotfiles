@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 #═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Project Management Functions
+# WORKSTATION OPS — Project Management Functions
 # Workflows táticos para gerenciamento de projetos
 #═══════════════════════════════════════════════════════════════════════
 

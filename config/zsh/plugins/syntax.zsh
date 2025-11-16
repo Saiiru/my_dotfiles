@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 #═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Syntax Highlighting
+# WORKSTATION OPS — Syntax Highlighting
 # Sistema de colorização de sintaxe (SEMPRE POR ÚLTIMO)
 #═══════════════════════════════════════════════════════════════════════
 

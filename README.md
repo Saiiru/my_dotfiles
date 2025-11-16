@@ -1,4 +1,4 @@
-# Sairu's Development Environment
+# Sairu's Workstation
 
 [![Tmux](https://img.shields.io/badge/tmux-3.4-1BB91F?style=flat&logo=tmux&logoColor=white)](https://github.com/tmux/tmux)
 [![Neovim](https://img.shields.io/badge/neovim-0.10+-57A143?style=flat&logo=neovim&logoColor=white)](https://neovim.io/)
@@ -6,170 +6,144 @@
 [![Kitty](https://img.shields.io/badge/kitty-0.35+-3B5998?style=flat&logo=iterm2&logoColor=white)](https://sw.kovidgoyal.net/kitty/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> Professional terminal-based development environment with modern tools and workflows
+> Cyberpunk-friendly terminal environment tuned for Wayland, tmux, Neovim and daily operator work.
 
-## ✨ Features
+## ✨ Highlights
 
-- **🔧 Modern Shell**: Zsh with Starship prompt and intelligent completions
-- **📝 Powerful Editor**: Neovim with LSP, Treesitter, and custom colorscheme
-- **🖥️ Terminal Multiplexer**: Tmux with Sesh session management
-- **🎨 Consistent Theming**: Gruvbox Material across all tools
-- **⚡ Performance**: Optimized for speed with lazy loading
-- **📦 Version Management**: Mise for multi-language development
-- **🚀 Task Runner**: Just for common workflows
+- **🔧 Modern Shell** – Modular Zsh stack with deterministic PATH, logs, and Starship prompt.
+- **📝 Neovim First** – Treesitter/LSP tuned config, lazy-loaded plugins, Snacks picker.
+- **🖥️ Multiplexing** – Tmux + TPM + Sesh-ready keymaps with sane defaults.
+- **🎨 Unified Theme** – Kitty, Ghostty, tmux, Starship share the same palette.
+- **⚡ Toolchains** – Mise manages Python/Node/Rust/Go/Java versions per project.
+- **🧰 Automation** – Install scripts + Justfile commands cover installs, updates, and tests.
 
-## 📋 Requirements
+## 📦 Requirements
 
-### Core
-- Git
-- Zsh
-- Curl/Wget
+| Component | Notes |
+|-----------|-------|
+| Git, Curl, Zsh | Required for installation script |
+| Package manager | pacman or apt supported out of the box |
+| Tmux ≥ 3.4 | Multiplexer |
+| Neovim ≥ 0.10 | Editor |
+| Kitty / Ghostty | Terminal configs provided |
+| Starship, FZF, Eza, Bat, Ripgrep | Optional but recommended |
 
-### Tools
-- Neovim (≥0.10)
-- Tmux (≥3.4)
-- Kitty terminal
-- Starship prompt
-- Mise (toolchain manager)
-- Just (task runner)
-
-### Optional
-- FZF, Eza, Bat, Fd, Ripgrep
-- Lazygit
-- Sesh (session manager)
-
-## 🚀 Installation
+## 🚀 Install
 
 ```bash
-# Clone repository
-git clone https://github.com/Sairu/my_dotfiles.git ~/gotham
-cd ~/gotham
+# Clone (replace URL with your fork if needed)
+git clone https://github.com/Saiiru/workstation.git ~/workstation
+cd ~/workstation
 
-# Run installation
-./install.sh
+# Deploy configs, dependencies, tmux TPM, etc.
+./install/install.sh
 
-# Reload shell
+# Reload shell for new PATH + aliases
 exec zsh
 ```
 
-## 📁 Structure
+What the installer does:
 
-```
-gotham/
-├── config/              # All configuration files
-│   ├── kitty/          # Terminal emulator
-│   ├── tmux/           # Terminal multiplexer
-│   ├── zsh/            # Shell configuration
-│   ├── nvim/           # Editor configuration
-│   ├── mise/           # Toolchain manager
-│   ├── waybar/         # Status bar (Wayland)
-│   ├── niri/           # Compositor (Wayland)
-│   └── wlogout/        # Logout menu
-├── bin/                # Executable scripts
-│   └── system/         # System utilities
-├── themes/             # Theme files
-│   ├── starship.toml  # Prompt theme
-│   └── kitty/         # Terminal themes
-├── wallpapers/        # Background images
-├── docs/              # Documentation
-├── install.sh         # Installation script
-└── symlink.sh         # Symlink manager
+1. Validates Git/Curl/Zsh.
+2. Installs base packages (pacman/apt aware).
+3. Installs Mise toolchain manager if missing.
+4. Creates all symlinks from `config/` into `~/.config` + `~/.zshrc`.
+5. Sets up Zsh caches + Starship reference.
+6. Installs/updates `~/.tmux/plugins/tpm` so tmux can be sourced cleanly.
+
+Symlinks can be refreshed anytime with:
+
+```bash
+./install/symlinks-only.sh
 ```
 
-## �� Customization
+## 🗂️ Layout
 
-### Colorscheme
-
-The environment uses a custom cyberpunk-inspired colorscheme with transparency support:
-
-```vim
-:GothamTheme              " Activate theme
-:GothamTransparent toggle " Toggle transparency
-:GothamBoost 1           " Adjust accent intensity (0-2)
+```
+workstation/
+├── config/          # All app/service configs (zsh, tmux, kitty, niri, quickshell...)
+├── install/         # Modular installer + symlink helpers
+│   ├── install.sh   # Main entrypoint
+│   ├── symlinks-only.sh
+│   └── modules/     # packages.sh, mise.sh, symlinks.sh, tmux.sh, zsh.sh
+├── scripts/         # Utility scripts (e.g. taskwarrior seeds)
+├── themes/          # Shared starship/kitty color assets
+├── fonts/           # Custom font payloads (synced via scripts)
+├── wallpapers/      # Assets for background rotation
+├── docs/            # Architecture notes, migration logs, references
+├── Justfile         # Common tasks (`just install`, `just test`, ...)
+├── test-complete-setup.sh
+└── TODO.md
 ```
 
-### Tmux
+## 🧰 Daily Commands
 
-Configuration: `config/tmux/tmux.conf`
+The [Justfile](./Justfile) exposes a few high-signal recipes:
 
-- **Prefix**: `Ctrl-A`
-- **Session Manager**: Sesh with fuzzy finding
-- See `docs/TMUX_CHEATSHEET.md` for keybindings
+| Command | Action |
+|---------|--------|
+| `just install` | Run the end-to-end installer |
+| `just symlink` | Only recreate config symlinks |
+| `just install-dev-tools` | `mise install` for language toolchains |
+| `just update-dev-tools` | Upgrade existing Mise installs |
+| `just clean` | Purge Zsh caches/zwc files |
+| `just test` | Execute `test-complete-setup.sh` health suite |
+
+## 🪟 Config Notes
 
 ### Zsh
+- Rooted at `config/zsh/` with core modules (`core/`), plugins, aliases and custom functions.
+- Environment bootstrap exports `WORKSTATION_DIR`, deterministic PATH, and log helpers that write to `${XDG_STATE_HOME}/workstation/shell.log`.
+- Plugin manager: [zsh-snap](https://github.com/marlonrichert/zsh-snap) installed under `~/.local/share/znap` by the installer.
 
-Configuration: `config/zsh/`
+### Tmux
+- Config lives in `config/tmux/tmux.conf` (symlinked to `~/.config/tmux`).
+- TPM is installed into `~/.tmux/plugins/tpm` automatically. Launch tmux and hit `Ctrl-A I` to fetch/update plugins.
+- Prefix = `Ctrl-A`, and Sesh integration is prewired.
+- Session persistence via [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect): `Ctrl-A Ctrl-S` saves, `Ctrl-A Ctrl-R` restores (state stored under `~/.local/state/tmux`).
+- Quick reload: `Ctrl-A r` (or `Ctrl-A R`) re-sources the config without restarting tmux.
 
-- Modular structure with organized modules
-- Znap for plugin management
-- Starship for prompt
+### Terminals
+- Kitty + Ghostty share the same palette (`themes/`).
+- Fonts live in `fonts/`; scripts in `~/.local/share/fonts` keep them in sync (outside the repo).
 
-## 📚 Documentation
+### Wayland Stack
+- `config/niri`, `config/quickshell`, `config/systemd` capture compositor/services.
+- `install/modules/symlinks.sh` links these into `~/.config` so user services (e.g. quickshell, pipewire tweaks) pick up the right files.
 
-- [Keybindings Reference](docs/KEYBINDINGS.md) - All keyboard shortcuts
-- [Tmux Guide](docs/TMUX.md) - Complete tmux documentation
-- [Tmux Cheatsheet](docs/TMUX_CHEATSHEET.md) - Quick reference
-- [Development Guide](docs/DEVELOPMENT.md) - Dev environment setup
-- [Path Migration](docs/PATH_MIGRATION.md) - Structure changes
+## 🧪 Validation
 
-## 🛠️ Development
-
-### Mise Tools
-
-```bash
-just install-dev-tools   # Install all tools
-just list-tools         # List available tools
-just update-dev-tools   # Update tools
-```
-
-### Just Commands
+Run:
 
 ```bash
-just --list             # List all commands
-just install           # Install system
-just test              # Run tests
-just clean             # Clean caches
+just test
 ```
 
-## 🔑 Key Features
+This executes `test-complete-setup.sh`, which checks:
+- Presence of key directories (`config`, `install`, `docs`, `themes`, `fonts`, `wallpapers`, `scripts`).
+- Installer + module files.
+- Symlinks in `~/.config` and `~/.zshrc`.
+- Tool availability (zsh/tmux/nvim/mise) and tmux TPM installation.
 
-### Session Management
+## 📚 Docs & Roadmap
 
-Tmux + Sesh integration for fast project switching:
-- `Ctrl-A K` - Fuzzy find sessions
-- `Ctrl-A Z` - Quick switcher
-- `Ctrl-A L` - Last session toggle
-
-### Development Environment
-
-Multi-language support via Mise:
-- Python, Node.js, Go, Rust, Java
-- DevOps tools: kubectl, terraform, docker-compose
-- Automatic version management per project
-
-### Workflow Automation
-
-Just task runner with 70+ commands:
-- Development tasks (build, test, lint)
-- Docker operations
-- Kubernetes management
-- Git shortcuts
+| File | Purpose |
+|------|---------|
+| [STRUCTURE.md](./STRUCTURE.md) | Repository map and migration notes |
+| [PATH_MIGRATION.md](./PATH_MIGRATION.md) | Historical re-org log |
+| [SCRIPTS_CLEANUP.md](./SCRIPTS_CLEANUP.md) | Script consolidation decisions |
+| [TODO.md](./TODO.md) | Active setup tasks (zram, fonts, Wayland services, etc.) |
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+Issues/PRs welcome. Fork, hack, and keep the `/install` modules in sync so the automation stays predictable.
 
 ## 📄 License
 
-MIT License - See [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE).
 
 ## 👤 Author
 
 **Sairu**
-
 - GitHub: [@Sairu](https://github.com/Sairu)
-- Repository: [my_dotfiles](https://github.com/Sairu/my_dotfiles)
-
----
-
-**⭐ If you find this helpful, consider giving it a star!**
+- Repository: [workstation](https://github.com/Sairu/workstation)

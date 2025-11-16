@@ -46,7 +46,7 @@ Antes (incorreto):
 Depois (correto):
 - ✅ ~/.local/share/znap/ (plugin manager)
 - ✅ ~/.cache/znap/ (cache)
-- ✅ ~/gotham/config/zsh/plugins/ (configurações)
+- ✅ ~/workstation/config/zsh/plugins/ (configurações)
 
 ## Znap Commands
 

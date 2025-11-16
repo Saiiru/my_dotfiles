@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # -----------------------------------------------------------------------------
-# Gotham Shell · Core options
+# Workstation Shell · Core options
 # -----------------------------------------------------------------------------
 # Curated `setopt`/`unsetopt` directives for interactive shells. These values
 # favour predictable navigation, completion and history behaviour. Adjust with

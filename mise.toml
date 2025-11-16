@@ -49,7 +49,7 @@ fi
 
 if command -v nvim >/dev/null 2>&1; then
   echo "Installing Mason packages (jdtls, pyright, arduino-language-server)..."
-  NVIM_CONFIG_HOME="${NVIM_CONFIG_HOME:-$HOME/gotham/config}"
+  NVIM_CONFIG_HOME="${NVIM_CONFIG_HOME:-$HOME/workstation/config}"
   XDG_CONFIG_HOME="$NVIM_CONFIG_HOME" \
     nvim --headless \
       "+lua require('lazy').load({ plugins = { 'mason.nvim', 'mason-lspconfig.nvim' } })" \

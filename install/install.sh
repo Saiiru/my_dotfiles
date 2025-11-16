@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — Complete Installation
-# Automated deployment of tactical development environment
+# WORKSTATION OPS — Complete Installation
+# Automated deployment of the workstation environment
 #═══════════════════════════════════════════════════════════════════════
 
 set -euo pipefail
@@ -15,12 +15,19 @@ readonly MAGENTA='\033[0;35m'
 readonly RESET='\033[0m'
 
 # Paths
-readonly GOTHAM_DIR="${HOME}/gotham"
+readonly SCRIPT_DIR="$(cd -- "$(dirname "$0")" && pwd)"
+readonly WORKSTATION_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+readonly MODULE_DIR="$SCRIPT_DIR/modules"
+
+source "$MODULE_DIR/packages.sh"
+source "$MODULE_DIR/mise.sh"
+source "$MODULE_DIR/symlinks.sh"
+source "$MODULE_DIR/tmux.sh"
+source "$MODULE_DIR/zsh.sh"
 
 #───────────────────────────────────────────────────────────────────────
-# Logging
+# Logging helpers
 #───────────────────────────────────────────────────────────────────────
-
 log_info() { echo -e "${CYAN}[INFO]${RESET} $*"; }
 log_success() { echo -e "${GREEN}[SUCCESS]${RESET} $*"; }
 log_warn() { echo -e "${YELLOW}[WARN]${RESET} $*"; }
@@ -34,11 +41,12 @@ log_step() { echo -e "\n${MAGENTA}━━━ $* ━━━${RESET}\n"; }
 echo -e "${CYAN}"
 cat << "HEADER"
 ╔══════════════════════════════════════════════════════════════╗
-║            GOTHAM SYSTEM INSTALLATION                        ║
+║            WORKSTATION OPS INSTALLER                         ║
 ║            Tactical Development Environment                  ║
 ╚══════════════════════════════════════════════════════════════╝
 HEADER
 echo -e "${RESET}\n"
+log_info "Repository root: $WORKSTATION_DIR"
 
 #───────────────────────────────────────────────────────────────────────
 # 1. Check Dependencies
@@ -46,132 +54,60 @@ echo -e "${RESET}\n"
 
 log_step "Checking dependencies"
 
-MISSING=()
+missing=()
 for dep in git zsh curl; do
     if command -v "$dep" &>/dev/null; then
         log_success "$dep found"
     else
         log_warn "$dep not found"
-        MISSING+=("$dep")
+        missing+=("$dep")
     fi
 done
 
-if [[ ${#MISSING[@]} -gt 0 ]]; then
-    log_error "Missing dependencies: ${MISSING[*]}"
-    log_info "Install with: sudo pacman -S ${MISSING[*]}"
+if [[ ${#missing[@]} -gt 0 ]]; then
+    log_error "Missing dependencies: ${missing[*]}"
+    log_info "Install with: sudo pacman -S ${missing[*]}"
     exit 1
 fi
 
 #───────────────────────────────────────────────────────────────────────
-# 2. Clone/Update Repository
+# 2. Install System Packages
 #───────────────────────────────────────────────────────────────────────
 
-log_step "Setting up Gotham repository"
-
-if [[ -d "$GOTHAM_DIR" ]]; then
-    log_warn "Directory exists. Updating..."
-    cd "$GOTHAM_DIR" && git pull
-else
-    log_info "Cloning repository..."
-    git clone https://github.com/Saiiru/my_dotfiles.git "$GOTHAM_DIR"
-fi
-
-cd "$GOTHAM_DIR"
-log_success "Repository ready"
-
-#───────────────────────────────────────────────────────────────────────
-# 3. Install System Packages
-#───────────────────────────────────────────────────────────────────────
-
-log_step "Installing system packages"
-
-packages=(
-    zsh git curl wget
-    kitty tmux
-    eza bat fd ripgrep fzf zoxide starship
-    neovim
-    just
-    fastfetch
-)
-
-log_info "Packages: ${packages[*]}"
-
-if command -v pacman &>/dev/null; then
-    sudo pacman -S --needed --noconfirm "${packages[@]}" || log_warn "Some packages failed"
-elif command -v apt &>/dev/null; then
-    sudo apt install -y "${packages[@]}" || log_warn "Some packages failed"
-else
-    log_warn "Package manager not found, skipping"
-fi
-
+log_step "Installing base packages"
+install_core_packages
 log_success "Packages installed"
 
 #───────────────────────────────────────────────────────────────────────
-# 4. Install Mise
+# 3. Install Mise
 #───────────────────────────────────────────────────────────────────────
 
 log_step "Installing Mise"
-
-if ! command -v mise &>/dev/null; then
-    log_info "Installing mise..."
-    curl https://mise.run | sh
-    export PATH="$HOME/.local/bin:$PATH"
-    log_success "Mise installed"
-else
-    log_info "Mise already installed"
-fi
+install_mise
+log_success "Mise configured"
 
 #───────────────────────────────────────────────────────────────────────
-# 5. Create Symlinks
+# 4. Create Symlinks
 #───────────────────────────────────────────────────────────────────────
 
 log_step "Creating symlinks"
-
-# Remove old
-rm -f ~/.zshrc ~/.config/{zsh,kitty,tmux,mise,waybar,niri,wlogout,starship.toml} 2>/dev/null || true
-mkdir -p ~/.config
-
-# Create all symlinks
-ln -sf "$GOTHAM_DIR/config/zsh/zshrc" "$HOME/.zshrc"
-ln -sf "$GOTHAM_DIR/config/zsh" "$HOME/.config/zsh"
-ln -sf "$GOTHAM_DIR/themes/starship.toml" "$HOME/.config/starship.toml"
-ln -sf "$GOTHAM_DIR/config/kitty" "$HOME/.config/kitty"
-ln -sf "$GOTHAM_DIR/config/tmux" "$HOME/.config/tmux"
-ln -sf "$GOTHAM_DIR/config/mise" "$HOME/.config/mise"
-ln -sf "$GOTHAM_DIR/config/waybar" "$HOME/.config/waybar"
-ln -sf "$GOTHAM_DIR/config/niri" "$HOME/.config/niri"
-ln -sf "$GOTHAM_DIR/config/wlogout" "$HOME/.config/wlogout"
-
-log_success "Symlinks created (9 total)"
+create_symlinks "$WORKSTATION_DIR"
+log_success "Symlinks created"
 
 #───────────────────────────────────────────────────────────────────────
-# 6. Setup Zsh
+# 5. Configure Shell & Tooling
 #───────────────────────────────────────────────────────────────────────
 
-log_step "Configuring Zsh"
-
-# Change shell
-if [[ "$SHELL" != "$(which zsh)" ]]; then
-    log_info "Changing default shell to Zsh..."
-    chsh -s "$(which zsh)" || log_warn "Shell change requires sudo"
-fi
-
-# Create directories
-mkdir -p "$HOME/.cache/zsh"
-mkdir -p "$HOME/.local/state/zsh"
-mkdir -p "$HOME/.local/share/zsh"
-
-# Install znap
-if [[ ! -d "$HOME/.local/share/znap" ]]; then
-    log_info "Installing znap..."
-    git clone --depth 1 https://github.com/marlonrichert/zsh-snap.git "$HOME/.local/share/znap"
-    log_success "Znap installed"
-fi
-
+log_step "Configuring shell"
+configure_zsh
 log_success "Zsh configured"
 
+log_step "Ensuring tmux plugins"
+setup_tmux_plugins
+log_success "Tmux TPM ready"
+
 #───────────────────────────────────────────────────────────────────────
-# 7. Complete
+# 6. Complete
 #───────────────────────────────────────────────────────────────────────
 
 log_step "Installation Complete!"
@@ -179,18 +115,18 @@ log_step "Installation Complete!"
 echo -e "${GREEN}"
 cat << "DONE"
 ╔══════════════════════════════════════════════════════════════╗
-║                  GOTHAM SYSTEM READY                         ║
+║                  WORKSTATION READY                           ║
 ╚══════════════════════════════════════════════════════════════╝
 DONE
 echo -e "${RESET}\n"
 
-log_success "Gotham installed successfully!"
+log_success "Workstation installed successfully!"
 echo ""
 log_info "Next steps:"
 echo ""
 echo -e "  ${CYAN}exec zsh${RESET}                  # Start new shell"
-echo -e "  ${CYAN}just --list${RESET}               # See all commands"
-echo -e "  ${CYAN}just install-dev-tools${RESET}    # Install dev tools"
-echo -e "  ${CYAN}just test${RESET}                  # Test system"
+echo -e "  ${CYAN}just --list${RESET}               # Explore commands"
+echo -e "  ${CYAN}just install-dev-tools${RESET}    # Install dev toolchains"
+echo -e "  ${CYAN}just test${RESET}                  # Validate setup"
 echo ""
 log_success "Happy hacking! 🚀"

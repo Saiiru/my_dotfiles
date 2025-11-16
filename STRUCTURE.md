@@ -1,44 +1,60 @@
-# Gotham Directory Structure
+# Workstation Directory Structure
 
-## Root Level
+## Root
 ```
-gotham/
-├── config/          # All configuration files
-├── bin/             # Executable scripts
-├── themes/          # Theme and color configurations
-├── wallpapers/      # Wallpaper collection
-├── install.sh       # Main installation script
-├── symlink.sh       # Symlink management
-├── Justfile         # Command runner recipes
-└── README.md        # Main documentation
+workstation/
+├── config/          # Application + service configs
+├── docs/            # Documentation + reports
+├── fonts/           # Font payloads and installers
+├── install/         # Modular installer + helpers
+├── scripts/         # Standalone scripts (taskwarrior, helpers)
+├── themes/          # Shared colors/theme assets
+├── wallpapers/      # Artwork packs
+├── Justfile         # Task runner
+├── README.md        # Primary documentation
+├── TODO.md          # Open tasks
+└── test-complete-setup.sh
 ```
 
-## Config Directory
+## config/
 ```
 config/
-├── kitty/          # Kitty terminal config
-├── tmux/           # Tmux configuration
-├── zsh/            # Zsh shell config
-├── waybar/         # Waybar status bar
-├── wlogout/        # Logout menu
-├── niri/           # Niri compositor
-├── mise/           # Mise tool versions
-└── noctalia/       # Noctalia specific configs
+├── zsh/             # Shell bootstrap
+├── tmux/            # Multiplexer config
+├── kitty/           # Kitty terminal
+├── ghostty/         # Ghostty terminal
+├── mise/            # Runtime manager config
+├── niri/            # Wayland compositor
+├── quickshell/      # Shell widgets
+├── systemd/         # User services
+├── pipewire/        # Audio routing tweaks
+├── wlogout/         # Logout menu
+├── noctalia/        # Legacy scripts still referenced
+└── Dark-Material-shell/  # Reference widgets/assets (kept for migration)
 ```
 
-## Bin Directory
+## install/
 ```
-bin/
-├── battery/        # Battery management scripts
-├── system/         # System utilities
-├── theme/          # Theme management
-└── notifications/  # Notification helpers
+install/
+├── install.sh         # Main entrypoint
+├── symlinks-only.sh   # Only refresh symlinks
+└── modules/
+    ├── packages.sh    # Base package install
+    ├── mise.sh        # Mise bootstrap
+    ├── symlinks.sh    # Config links into ~/.config
+    ├── tmux.sh        # TPM installer
+    └── zsh.sh         # Shell defaults & znap
 ```
 
-## Migration Plan
-1. Consolidate config_dotfiles/* into config/
-2. Move scattered scripts into bin/
-3. Organize themes and starship configs into themes/
-4. Clean up duplicates and backup files
-5. Update symlink paths
-6. Commit all tracked files
+## scripts/
+```
+scripts/
+└── taskwarrior-seeds.sh  # Example utility (more coming)
+```
+
+## Migration Checklist
+1. Keep all configs inside `config/` with the same directory name used in `~/.config`.
+2. Scripts that belong to a component live next to that component (e.g. quickshell scripts stay under `config/quickshell`).
+3. Global helper scripts go into `scripts/` (or a future `bin/` if needed) and are added to PATH inside `config/zsh/core/00-environment.zsh`.
+4. Installer modules should remain idempotent and avoid hardcoding `/gotham` (use `WORKSTATION_DIR`).
+5. Validate everything with `just test` after restructuring.

@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 #═══════════════════════════════════════════════════════════════════════
-# GOTHAM SYSTEM — System Functions
+# WORKSTATION OPS — System Functions
 # Utilitários avançados de sistema e manutenção
 #═══════════════════════════════════════════════════════════════════════
 
