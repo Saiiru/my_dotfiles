@@ -16,7 +16,6 @@ dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT
 start wl-paste wl-paste --type text --watch cliphist store
 start wl-paste wl-paste --type image --watch cliphist store
 start cliphist cliphist daemon
-start waybar waybar
 start dunst dunst
 start swaybg swaybg -m fill -i "$HOME/wallpapers/current.png"
 start nm-applet nm-applet --indicator

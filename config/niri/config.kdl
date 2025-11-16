@@ -34,7 +34,7 @@ input {
 
 layout {
     gaps 8
-    background-color "#0d0d16e6"
+    background-color "#0d0d16f5"
     center-focused-column "on-overflow"
     default-column-width { proportion 0.55; }
     preset-column-widths { proportion 0.33; proportion 0.5; proportion 0.67; }
@@ -55,7 +55,7 @@ prefer-no-csd
 window-rule { match app-id=r#"^(?:steam|pavucontrol|gnome-control-center)$"#; open-floating true; }
 window-rule { match app-id=r#"^firefox$"# title="^(?:Picture-in-Picture)$"; open-floating true; }
 window-rule { match app-id=r#"^(?:kitty|ghostty|wezterm|code)$"#; draw-border-with-background false; }
-window-rule { match is-active=false; opacity 0.92; }
+window-rule { match is-active=false; opacity 0.97; }
 window-rule { geometry-corner-radius 10; clip-to-geometry true; }
 
 workspaces {
