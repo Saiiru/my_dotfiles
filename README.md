@@ -107,9 +107,11 @@ The [Justfile](./Justfile) exposes a few high-signal recipes:
 - Kitty + Ghostty share the same palette (`themes/`).
 - Fonts live in `fonts/`; scripts in `~/.local/share/fonts` keep them in sync (outside the repo).
 
-### Wayland Stack
-- `config/niri`, `config/quickshell`, `config/systemd` capture compositor/services.
-- `install/modules/symlinks.sh` links these into `~/.config` so user services (e.g. quickshell, pipewire tweaks) pick up the right files.
+### Niri / Wayland Stack
+- Run `scripts/bootstrap_niri.sh` to clone reference configs, install Waybar/Dunst themes, and update symlinks automatically.
+- Curated settings live in `config/niri/` (with `scripts/autostart.sh` for services) plus `config/waybar/` and `config/dunst/`.
+- `install/modules/symlinks.sh` (and `scripts/create-symlinks.sh`) push everything into `~/.config`, so running the bootstrapper is enough to deploy.
+- After making manual tweaks, re-run `scripts/bootstrap_niri.sh` to pull upstream improvements without losing local overrides.
 
 ## 🧪 Validation
 

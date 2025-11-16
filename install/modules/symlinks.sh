@@ -42,6 +42,10 @@ create_symlinks() {
         quickshell
         systemd
         pipewire
+        waybar
+        dunst
+
+
     )
 
     for name in "${configs[@]}"; do
