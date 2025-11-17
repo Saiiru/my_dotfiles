@@ -45,6 +45,7 @@ create_symlinks() {
         waybar
         dunst
         rofi
+        fuzzel
 
 
     )

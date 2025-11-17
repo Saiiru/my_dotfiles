@@ -62,3 +62,4 @@ my-fonts/
 *.md
 !README.md
 niriconf/
+niri-setup/
