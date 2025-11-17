@@ -15,8 +15,8 @@ EOF
 
 gum spin \
     --spinner minidot \
-    --spinner.foreground "#dceabf" \
-    --title.foreground "#dceabf" \
+    --spinner.foreground "" \
+    --title.foreground "" \
     --title "Setting up for your Monitor" -- \
     sleep 2
 
