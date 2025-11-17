@@ -44,6 +44,7 @@ create_symlinks() {
         pipewire
         waybar
         dunst
+        rofi
 
 
     )
