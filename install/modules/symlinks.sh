@@ -29,6 +29,7 @@ create_symlinks() {
     link_path "$repo_dir/themes/starship.toml" "$HOME/.config/starship.toml"
 
     link_path "$config_dir/tmux/tmux.conf" "$HOME/.tmux.conf"
+    link_path "$config_dir/alacritty" "$HOME/.config/alacritty"
 
     # Config directories to sync into ~/.config
     local -a configs=(
@@ -46,8 +47,7 @@ create_symlinks() {
         dunst
         rofi
         fuzzel
-
-
+        niriswitcher
     )
 
     for name in "${configs[@]}"; do

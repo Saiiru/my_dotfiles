@@ -1,22 +1,29 @@
 #!/bin/bash
 
-# Path to the sound files
+# Path to the sound files (disabled by default)
 SOUND_FILE_UPDATE="$HOME/.config/niri/sounds/update.wav"
 SOUND_FILE_SYSTEM="$HOME/.config/niri/sounds/system-startup.wav"
 SOUND_FILE_LOGOUT="$HOME/.config/niri/sounds/poweroff.mp3"
+ENABLE_SOUND="${NIRI_NOTIFICATION_SOUNDS:-0}"
 
-# Function to send notification and play sound
+play_sound() {
+    local file="$1"
+    [[ "$ENABLE_SOUND" == "1" && -f "$file" ]] || return 0
+    command -v paplay >/dev/null 2>&1 || return 0
+    paplay "$file"
+}
+
 notify_with_sound() {
     notify-send "$1"
-    paplay "$SOUND_FILE_UPDATE"
+    play_sound "$SOUND_FILE_UPDATE"
 }
 
 startup_with_sound() {
-    paplay "$SOUND_FILE_SYSTEM"
+    play_sound "$SOUND_FILE_SYSTEM"
 }
 
 logout_with_sound() {
-    paplay "$SOUND_FILE_LOGOUT"
+    play_sound "$SOUND_FILE_LOGOUT"
 }
 
 case $1 in
