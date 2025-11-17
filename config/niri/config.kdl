@@ -32,15 +32,15 @@ output "eDP-1" {
 
 //---------------------- decoration ----------------------\\
 layout {
-    gaps 20
+    gaps 12
     always-center-single-column
     center-focused-column "never"
 
     preset-column-widths {
-        proportion 0.33333
-        proportion 0.5
-        proportion 0.66667
-        proportion 1.0
+        proportion 0.40
+        proportion 0.55
+        proportion 0.70
+        proportion 1.00
     }
     preset-window-heights {
         proportion 0.33333
@@ -48,7 +48,7 @@ layout {
         proportion 0.66667
         proportion 1.0
     }
-    default-column-width { proportion 0.5; }
+    default-column-width { proportion 0.55; }
     focus-ring {
         width 3
         active-color "#9e9fa4"
@@ -63,7 +63,7 @@ layout {
         top 0
         bottom 0
     }
-    background-color "transparent"
+    background-color "#0d0d16f5"
 }
 
 
@@ -272,6 +272,8 @@ binds {
     Mod+Ctrl+End         { move-column-to-last; }
     Mod+Shift+h          { set-column-width "-10%"; }
     Mod+Shift+l          { set-column-width "+10%"; }
+    Mod+R                { switch-preset-column-width; }
+    Mod+Shift+R          { switch-preset-window-height; }
     Mod+Shift+k          { set-window-height "-10%"; }
     Mod+Shift+j          { set-window-height "+10%"; }
     Mod+BracketLeft      { consume-or-expel-window-left; }
