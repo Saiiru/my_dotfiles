@@ -210,6 +210,7 @@
   "topBarLeftWidgets": [
     "launcherButton",
     "workspaceSwitcher",
+    "contextIndicator",
     "focusedWindow"
   ],
   "topBarCenterWidgets": [

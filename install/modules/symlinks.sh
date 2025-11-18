@@ -48,9 +48,24 @@ create_symlinks() {
         rofi
         fuzzel
         niriswitcher
+        gamemode
+        mangohud
+        neon-niri
     )
 
     for name in "${configs[@]}"; do
         link_path "$config_dir/$name" "$HOME/.config/$name"
+    done
+
+    mkdir -p "$HOME/.local/bin"
+    declare -A bin_scripts=(
+        [context-switch]="$repo_dir/scripts/context-switch"
+        [game-launcher]="$repo_dir/scripts/game-launcher"
+        [neon-perfmon]="$repo_dir/scripts/neon-perfmon"
+        [wine-prefix-manager]="$repo_dir/scripts/wine-prefix-manager"
+    )
+
+    for name in "${!bin_scripts[@]}"; do
+        link_path "${bin_scripts[$name]}" "$HOME/.local/bin/$name"
     done
 }

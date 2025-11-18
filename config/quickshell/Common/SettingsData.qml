@@ -189,7 +189,7 @@ Singleton {
     property string weekNumbering: "ISO" // "ISO", "US", "None"
     property string systemTimezone: ""
     property int mediaSize: 1
-    property var topBarLeftWidgets: ["launcherButton", "workspaceSwitcher", "focusedWindow"]
+    property var topBarLeftWidgets: ["launcherButton", "workspaceSwitcher", "contextIndicator", "focusedWindow"]
     property var topBarCenterWidgets: ["music", "clock", "weather"]
     property var topBarRightWidgets: ["systemTray", "clipboard", "cpuUsage", "memUsage", "notificationButton", "battery", "controlCenterButton"]
     property alias topBarLeftWidgetsModel: leftWidgetsModel

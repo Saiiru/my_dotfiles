@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/neon-niri"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/neon-niri"
+DB_FILE="$CONFIG_DIR/games.db"
+LAST_GAME_FILE="$STATE_DIR/last-game"
+LOG_FILE="$STATE_DIR/game-launcher.log"
+STATE_FILE="$STATE_DIR/system-context"
+CONTEXT_BIN="${NEON_CONTEXT_SWITCH:-context-switch}"
+
+mkdir -p "$STATE_DIR"
+
+log() {
+    local level="$1"; shift
+    local message="$*"
+    printf '[%s] [%s] %s\n' "$(date '+%F %T')" "$level" "$message" >> "$LOG_FILE"
+}
+
+die() {
+    log ERROR "$*"
+    echo "[game-launcher] $*" >&2
+    exit 1
+}
+
+usage() {
+    cat <<USAGE
+Usage: game-launcher [--list|--last|GAME NAME]
+
+Without arguments a launcher menu (rofi → fzf → select) is shown.
+Use --list to print all entries.
+USAGE
+}
+
+current_context() {
+    [[ -f "$STATE_FILE" ]] && tr -d '\r' < "$STATE_FILE" | tr '[:lower:]' '[:upper:]' || echo "DEFAULT"
+}
+
+ensure_game_context() {
+    local current
+    current="$(current_context)"
+    [[ "$current" == "GAME" ]] && return
+
+    if command -v "$CONTEXT_BIN" >/dev/null 2>&1; then
+        log INFO "Context -> GAME"
+        if ! "$CONTEXT_BIN" game >/dev/null 2>&1; then
+            "$CONTEXT_BIN" game || log WARN "context-switch exited with status $?"
+        fi
+        sleep 1
+    else
+        log WARN "context-switch binary not found ($CONTEXT_BIN)"
+    fi
+}
+
+load_games() {
+    [[ -f "$DB_FILE" ]] || die "Missing games database: $DB_FILE"
+    grep -Ev '^\s*$|^#' "$DB_FILE"
+}
+
+print_games() {
+    load_games | cut -d'|' -f1
+}
+
+select_game() {
+    local entries
+    entries="$(print_games)"
+    local choice=""
+    if command -v rofi >/dev/null 2>&1; then
+        choice=$(printf '%s\n' "$entries" | rofi -dmenu -i -p "Select Game" -theme-str 'window {width: 600px;}' -theme-str 'listview {lines: 12;}') || true
+    elif command -v fzf >/dev/null 2>&1; then
+        choice=$(printf '%s\n' "$entries" | fzf --prompt="game> " --cycle --height=40% --reverse) || true
+    else
+        echo "Available games:" >&2
+        mapfile -t __game_list < <(printf '%s\n' "$entries")
+        select choice in "${__game_list[@]}"; do
+            break
+        done
+    fi
+    printf '%s\n' "$choice"
+}
+
+lookup_entry() {
+    local query="$1"
+    load_games | while IFS='|' read -r name command opts; do
+        if [[ "${name,,}" == "${query,,}" ]]; then
+            printf '%s|%s|%s\n' "$name" "$command" "$opts"
+            return 0
+        fi
+    done
+    return 1
+}
+
+run_with_wrappers() {
+    if command -v gamemoderun >/dev/null 2>&1 && command -v mangohud >/dev/null 2>&1; then
+        gamemoderun mangohud "$@" &
+    elif command -v gamemoderun >/dev/null 2>&1; then
+        gamemoderun "$@" &
+    elif command -v mangohud >/dev/null 2>&1; then
+        mangohud "$@" &
+    else
+        "$@" &
+    fi
+}
+
+launch_steam() {
+    local uri="$1" opts="$2"
+    if [[ "$uri" =~ ^steam://rungameid/([0-9]+)$ ]] && command -v steam >/dev/null 2>&1; then
+        local appid="${BASH_REMATCH[1]}"
+        if [[ -n "$opts" ]]; then
+            steam -applaunch "$appid" $opts &
+        else
+            steam -applaunch "$appid" &
+        fi
+    else
+        xdg-open "$uri" >/dev/null 2>&1 &
+    fi
+}
+
+launch_lutris() {
+    local slug="$1"
+    if command -v lutris >/dev/null 2>&1; then
+        lutris "$slug" &
+    else
+        die "lutris command not available"
+    fi
+}
+
+launch_wine_game() {
+    local game_id="$1" opts="$2"
+    case "$game_id" in
+        rocksmith)
+            local prefix="$HOME/.wine-games/rocksmith"
+            local game_dir="$HOME/Games/Rocksmith"
+            [[ -d "$game_dir" ]] || die "Rocksmith folder missing: $game_dir"
+            pushd "$game_dir" >/dev/null
+            WINEPREFIX="$prefix" run_with_wrappers wine Rocksmith2014.exe ${opts:-}
+            popd >/dev/null
+            ;;
+        *)
+            die "Unknown wine game: $game_id"
+            ;;
+    esac
+}
+
+launch_native() {
+    local exec_path="$1" opts="$2"
+    if [[ ! -x "$exec_path" ]]; then
+        die "Binary not executable: $exec_path"
+    fi
+    run_with_wrappers "$exec_path" $opts
+}
+
+launch_game() {
+    local name="$1" command="$2" opts="$3"
+    log INFO "Launching $name via $command $opts"
+    printf '%s\n' "$name" > "$LAST_GAME_FILE"
+    ensure_game_context
+
+    case "$command" in
+        steam://*) launch_steam "$command" "$opts" ;;
+        lutris:*) launch_lutris "$command" ;;
+        wine-game:*) launch_wine_game "${command#wine-game:}" "$opts" ;;
+        *) launch_native "$command" "$opts" ;;
+    esac
+}
+
+main() {
+    local selection=""
+    case "${1:-}" in
+        --help|-h) usage; exit 0 ;;
+        --list) print_games; exit 0 ;;
+        --last)
+            [[ -f "$LAST_GAME_FILE" ]] && cat "$LAST_GAME_FILE" || echo "(none yet)"
+            exit 0
+            ;;
+        "")
+            selection="$(select_game)"
+            ;;
+        *)
+            selection=$(lookup_entry "$*") || die "Game '$*' not found in $DB_FILE"
+            ;;
+    esac
+
+    [[ -n "$selection" ]] || exit 0
+    IFS='|' read -r game_name game_cmd game_opts <<<"$selection"
+    launch_game "$game_name" "$game_cmd" "$game_opts"
+}
+
+main "$@"

@@ -21,6 +21,12 @@ Item {
             "icon": "view_module",
             "enabled": true
         }, {
+            "id": "contextIndicator",
+            "text": "System Context",
+            "description": "Displays NEON-NIRI mode and lets you cycle contexts",
+            "icon": "sports_esports",
+            "enabled": true
+        }, {
             "id": "focusedWindow",
             "text": "Focused Window",
             "description": "Display currently focused application title",

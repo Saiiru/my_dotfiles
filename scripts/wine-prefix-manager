@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PREFIX_ROOT="${WINE_PREFIXES_DIR:-$HOME/.wine-games}"
+
+usage() {
+    cat <<USAGE
+Usage: wine-prefix-manager <command>
+
+Commands:
+  list                       List prefixes under $PREFIX_ROOT
+  create <name> [win64|win32]   Create a new prefix
+  delete <name>               Remove a prefix (asks for confirmation)
+  winetricks <name> <args>    Run winetricks inside a prefix
+USAGE
+}
+
+list_prefixes() {
+    if [[ ! -d "$PREFIX_ROOT" ]]; then
+        echo "No prefixes found ($PREFIX_ROOT)"
+        return
+    fi
+    printf 'Wine Prefixes in %s\n' "$PREFIX_ROOT"
+    printf '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    find "$PREFIX_ROOT" -maxdepth 1 -mindepth 1 -type d -print0 | while IFS= read -r -d '' dir; do
+        local name size
+        name="$(basename "$dir")"
+        size="$(du -sh "$dir" | awk '{print $1}')"
+        printf '  %-20s %6s\n' "$name" "$size"
+    done
+}
+
+create_prefix() {
+    local name="$1" arch="${2:-win64}"
+    [[ -n "$name" ]] || { echo "Name required"; exit 1; }
+    local path="$PREFIX_ROOT/$name"
+    if [[ -d "$path" ]]; then
+        echo "Prefix already exists: $path"
+        exit 1
+    fi
+    mkdir -p "$PREFIX_ROOT"
+    echo "Creating prefix $name ($arch)"
+    WINEPREFIX="$path" WINEARCH="$arch" wineboot -u
+    echo "Created $path"
+}
+
+delete_prefix() {
+    local name="$1"
+    local path="$PREFIX_ROOT/$name"
+    [[ -d "$path" ]] || { echo "Prefix not found: $name"; exit 1; }
+    read -r -p "Delete prefix '$name'? [y/N] " reply
+    if [[ "$reply" =~ ^[Yy]$ ]]; then
+        rm -rf "$path"
+        echo "Deleted $name"
+    else
+        echo "Aborted"
+    fi
+}
+
+run_winetricks() {
+    local name="$1"; shift
+    local path="$PREFIX_ROOT/$name"
+    [[ -d "$path" ]] || { echo "Prefix not found: $name"; exit 1; }
+    [[ $# -gt 0 ]] || { echo "winetricks arguments missing"; exit 1; }
+    WINEPREFIX="$path" winetricks "$@"
+}
+
+command="${1:-list}"
+if [[ $# -gt 0 ]]; then
+    shift
+fi
+
+case "$command" in
+    list)
+        list_prefixes
+        ;;
+    create)
+        [[ $# -ge 1 ]] || { echo "Usage: wine-prefix-manager create <name> [win32|win64]" >&2; exit 1; }
+        create_prefix "$@"
+        ;;
+    delete)
+        [[ $# -ge 1 ]] || { echo "Usage: wine-prefix-manager delete <name>" >&2; exit 1; }
+        delete_prefix "$1"
+        ;;
+    winetricks)
+        [[ $# -ge 2 ]] || { echo "Usage: wine-prefix-manager winetricks <name> <args>" >&2; exit 1; }
+        run_winetricks "$@"
+        ;;
+    -h|--help|help)
+        usage
+        ;;
+    *)
+        usage
+        exit 1
+        ;;
+esac

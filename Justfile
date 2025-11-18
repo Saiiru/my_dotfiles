@@ -4,6 +4,9 @@
 
 set shell := ["zsh", "-cu"]
 
+context_bin := if env_var_or_default("NEON_CONTEXT_SWITCH", "") != "" { env_var_or_default("NEON_CONTEXT_SWITCH", "") } else { env_var("HOME") + "/.local/bin/context-switch" }
+neon_state_dir := if env_var_or_default("XDG_STATE_HOME", "") != "" { env_var_or_default("XDG_STATE_HOME", "") } else { env_var("HOME") + "/.local/state" }
+
 default:
     @just --list --unsorted
 
@@ -71,3 +74,28 @@ info:
     @echo "Root    : ${WORKSTATION_DIR:-$HOME/workstation}"
     @echo "Config  : ${WORKSTATION_DIR:-$HOME/workstation}/config"
     @echo "Install : ${WORKSTATION_DIR:-$HOME/workstation}/install/install.sh"
+
+#───────────────────────────────────────────────────────────────────────
+# 🎮 NEON-NIRI Context & Gaming Stack
+#───────────────────────────────────────────────────────────────────────
+
+context-status:
+    @{{context_bin}} status
+
+context-default:
+    @{{context_bin}} default
+
+context-dev:
+    @{{context_bin}} dev
+
+context-game:
+    @{{context_bin}} game
+
+context-log:
+    @tail -n 40 {{neon_state_dir}}/neon-niri/context-switch.log || true
+
+neon-setup: install context-default
+    @echo "✅ NEON-NIRI base profile applied"
+
+neon-update: symlink install-dev-tools context-status
+    @echo "🔄 NEON stack refreshed"

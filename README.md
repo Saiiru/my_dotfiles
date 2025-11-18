@@ -114,6 +114,18 @@ The [Justfile](./Justfile) exposes a few high-signal recipes:
 - `install/modules/symlinks.sh` (and `scripts/create-symlinks.sh`) push everything into `~/.config`, so running the bootstrapper is enough to deploy.
 - After making manual tweaks, re-run `scripts/bootstrap_niri.sh` to pull upstream improvements without losing local overrides.
 
+### NEON-NIRI Context Engine
+- `scripts/context-switch` drives DEFAULT/DEV/GAME power profiles, regenerates `config/niri/config.kdl.active`, and writes state/logs under `~/.local/state/neon-niri/`.
+- Justfile helpers: `just context-status`, `just context-default|dev|game`, and `just context-log`. `just neon-setup` chains the installer + DEFAULT context; `just neon-update` refreshes symlinks/toolchains and prints the active mode.
+- Quickshell ships a new Top Bar widget (`ContextIndicator`) powered by `ContextService.qml` so you can read/flip contexts without leaving the UI.
+- Systemd user unit `context-default.service` still enforces DEFAULT at login; the widget/service simply monitors the same state file, so manual and automated transitions stay in sync.
+
+### Gaming Stack Bits
+- `config/gamemode/gamemode.ini` + hook scripts toggle tracker/evolution services, set NVMe schedulers, and log entries when GameMode is requested by the context engine or by games directly.
+- `config/mangohud/` carries the primary overlay plus `presets/` for minimal/competitive/full HUDs; MangoHud logs go to `~/.local/share/mangohud/logs`.
+- `scripts/game-launcher` reads `config/neon-niri/games.db`, ensures the GAME context is active, and launches Steam/Lutris/native/Wine titles (Sekiro included) with MangoHud/GameMode wrappers.
+- `scripts/neon-perfmon` offers a lightweight real-time TUI monitor and `scripts/wine-prefix-manager` centralizes Wine prefix CRUD + winetricks.
+
 ## 🧪 Validation
 
 Run:

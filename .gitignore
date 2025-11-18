@@ -61,6 +61,7 @@ my-fonts/
 # Documentation (ignore all .md except main README)
 *.md
 !README.md
+!docs/NEON-NIRI.md
 niriconf/
 niri-setup/
 config/niri/config.kdl.active

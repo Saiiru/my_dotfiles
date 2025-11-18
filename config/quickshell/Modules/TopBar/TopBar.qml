@@ -423,6 +423,7 @@ PanelWindow {
                         readonly property var componentMap: ({
                                                                  "launcherButton": launcherButtonComponent,
                                                                  "workspaceSwitcher": workspaceSwitcherComponent,
+                                                                 "contextIndicator": contextIndicatorComponent,
                                                                  "focusedWindow": focusedWindowComponent,
                                                                  "runningApps": runningAppsComponent,
                                                                  "clock": clockComponent,
@@ -804,6 +805,15 @@ PanelWindow {
                             WorkspaceSwitcher {
                                 screenName: root.screenName
                                 widgetHeight: root.widgetHeight
+                            }
+                        }
+
+                        Component {
+                            id: contextIndicatorComponent
+
+                            ContextIndicator {
+                                widgetHeight: root.widgetHeight
+                                section: topBarContent.getWidgetSection(parent)
                             }
                         }
 
