@@ -1,128 +1,73 @@
-#!/usr/bin/env zsh
-#═══════════════════════════════════════════════════════════════════════
-# WORKSTATION OPS — Aliases
-# Atalhos de comando centralizados
-#═══════════════════════════════════════════════════════════════════════
+alias shutdown='systemctl poweroff'
+alias reboot='systemctl reboot'
+alias suspend='systemctl suspend'
 
-#───────────────────────────────────────────────────────────────────────
-# MODERN TOOL REPLACEMENTS
-#───────────────────────────────────────────────────────────────────────
+alias p='sudo pacman'
+alias pi='sudo pacman -S'
+alias pr='sudo pacman -Rns'
+alias pu='sudo pacman -Syu'
+alias ps='pacman -Ss'
+alias pq='pacman -Q'
+alias pc='sudo pacman -Scc'
+
+alias y='yay'
+alias yi='yay -S'
+alias yu='yay -Syu'
 
 alias ls='eza --icons --group-directories-first'
-alias l='eza -l --icons --git --group-directories-first'
-alias la='eza -la --icons --git --group-directories-first --header'
-alias ll='eza -l --icons --git --group-directories-first --header'
+alias ll='eza -lah --icons --group-directories-first'
 alias lt='eza --tree --level=2 --icons'
-alias lta='eza --tree --level=3 --icons --all'
-alias ltr='eza --tree --icons'
 
-alias cat='bat --style=plain'
-alias catp='bat --style=full'
-alias catt='bat --style=plain --paging=never'
-
-alias vim='nvim'
-alias vi='nvim'
-alias v='nvim'
-
-alias find='fd'
-alias grep='rg'
-
-#───────────────────────────────────────────────────────────────────────
-# NAVIGATION
-#───────────────────────────────────────────────────────────────────────
+alias cp='cp -iv'
+alias mv='mv -iv'
+alias rm='rm -Iv'
+alias mkdir='mkdir -pv'
 
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
-alias .....='cd ../../../..'
-alias ~='cd ~'
-alias -- -='cd -'
-
-alias work='cd ~/workspace'
-alias proj='cd ~/projects'
-alias dots='cd ~/workstation'
-alias conf='cd ~/.config'
-
-#───────────────────────────────────────────────────────────────────────
-# GIT
-#───────────────────────────────────────────────────────────────────────
+alias dots='cd ~/dotfiles'
+alias dl='cd ~/Downloads'
+alias dev='cd ~/Dev'
+alias games='cd ~/Games'
 
 alias g='git'
 alias ga='git add'
-alias gaa='git add --all'
-alias gap='git add --patch'
-alias gb='git branch'
-alias gba='git branch --all'
-alias gbd='git branch --delete'
-alias gc='git commit -v'
-alias gcm='git commit -m'
-alias gca='git commit --amend'
-alias gcan='git commit --amend --no-edit'
-alias gco='git checkout'
-alias gcb='git checkout -b'
-alias gd='git diff'
-alias gds='git diff --staged'
-alias gf='git fetch'
-alias gfa='git fetch --all'
-alias gl='git pull'
+alias gc='git commit -m'
 alias gp='git push'
-alias gpf='git push --force-with-lease'
-alias gr='git restore'
-alias grs='git restore --staged'
-alias gs='git status --short'
-alias gst='git status'
-alias gsw='git switch'
-alias gsc='git switch -c'
-alias glog='git log --oneline --decorate --graph --all'
-alias gwip='git add -A && git commit -m "WIP"'
-alias gundo='git reset --soft HEAD~1'
+alias gl='git pull'
+alias gs='git status'
+alias gd='git diff'
+alias gco='git checkout'
+alias gb='git branch'
+alias glog='git log --oneline --graph --decorate'
 
-#───────────────────────────────────────────────────────────────────────
-# DOCKER
-#───────────────────────────────────────────────────────────────────────
-
+alias v='nvim'
+alias vim='nvim'
 alias d='docker'
-alias dc='docker compose'
-alias dcu='docker compose up -d'
-alias dcd='docker compose down'
-alias dcl='docker compose logs -f'
-alias dcr='docker compose restart'
-alias dps='docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}"'
-alias dpa='docker ps -a'
+alias dc='docker-compose'
+alias dps='docker ps'
 alias di='docker images'
-alias dclean='docker system prune -af --volumes'
+alias j='just'
 
-#───────────────────────────────────────────────────────────────────────
-# SYSTEM
-#───────────────────────────────────────────────────────────────────────
+alias niri-reload='niri msg reload-config'
+alias niri-validate='niri validate -c ~/.config/niri/config.kdl.active'
+alias niri-log='journalctl --user -u niri -f'
 
-alias sudo='sudo '
-alias update='paru -Syu'
-alias install='paru -S'
-alias remove='paru -Rns'
-alias search='paru -Ss'
-alias clean='paru -Sc'
+alias ctx='context-switch'
+alias ctx-dev='context-switch dev'
+alias ctx-game='context-switch game'
+alias ctx-default='context-switch default'
+alias ctx-status='context-switch status'
 
-alias sysinfo='fastfetch'
-alias ports='netstat -tulanp'
-alias meminfo='free -h -l -t'
+alias game='game-launcher'
+alias perf='neon-perfmon'
 
-#───────────────────────────────────────────────────────────────────────
-# MISE
-#───────────────────────────────────────────────────────────────────────
-
-alias mr='mise run'
-alias mt='mise tasks'
-alias ml='mise list'
-alias mu='mise upgrade'
-alias mc='mise run check'
-alias md='mise run doctor'
-
-#───────────────────────────────────────────────────────────────────────
-# TMUX
-#───────────────────────────────────────────────────────────────────────
-
-alias ta='tmux attach -t'
-alias tl='tmux list-sessions'
-alias tn='tmux new-session -s'
-alias tk='tmux kill-session -t'
+alias c='clear'
+alias h='history'
+alias grep='grep --color=auto'
+alias df='df -h'
+alias du='du -h'
+alias free='free -h'
+alias myip='curl -s ifconfig.me'
+alias ports='ss -tulanp'

@@ -65,3 +65,5 @@ my-fonts/
 niriconf/
 niri-setup/
 config/niri/config.kdl.active
+config/quickshell.backup*/
+config/zsh.backup*/
