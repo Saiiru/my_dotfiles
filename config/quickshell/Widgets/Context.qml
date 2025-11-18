@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import ".." as Neon
 
 Rectangle {
@@ -15,29 +16,42 @@ Rectangle {
     property bool isTransitioning: false
 
     Timer {
-        interval: 1500
-        repeat: true
-        running: true
-        onTriggered: readState()
-    }
-
-    Timer {
         id: transitionReset
         interval: 2000
         repeat: false
         onTriggered: root.isTransitioning = false
     }
 
-    Component.onCompleted: readState()
+    readonly property string stateFile: `${Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")}/neon-niri/system-context`
 
-    function readState() {
-        const stateFile = `${Quickshell.env("XDG_STATE_HOME")}/neon-niri/system-context`
-        const result = Quickshell.run("cat", [stateFile])
-        if (result.exitCode === 0) {
-            const ctx = result.stdout.trim()
-            if (ctx && ctx !== root.currentContext && !root.isTransitioning) {
-                root.currentContext = ctx
-            }
+    FileView {
+        id: stateView
+        path: root.stateFile
+        blockLoading: true
+        watchChanges: true
+        onLoaded: applyState(text())
+        onLoadFailed: stateRetry.restart()
+    }
+
+    Timer {
+        id: stateRetry
+        interval: 3000
+        repeat: false
+        onTriggered: stateView.reload()
+    }
+
+    Timer {
+        id: statePoll
+        interval: 2000
+        running: true
+        repeat: true
+        onTriggered: stateView.reload()
+    }
+
+    function applyState(raw) {
+        const ctx = raw.trim()
+        if (ctx && ctx !== root.currentContext && !root.isTransitioning) {
+            root.currentContext = ctx
         }
     }
 
@@ -85,7 +99,7 @@ Rectangle {
         const idx = order.indexOf(root.currentContext)
         const next = order[(idx + 1) % order.length]
         root.isTransitioning = true
-        Quickshell.run("context-switch", [next.toLowerCase()])
+        Quickshell.execDetached(["context-switch", next.toLowerCase()])
         transitionReset.restart()
     }
 }

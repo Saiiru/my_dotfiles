@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import ".." as Neon
 
 Rectangle {
@@ -14,18 +15,23 @@ Rectangle {
         interval: 1500
         running: true
         repeat: true
-        onTriggered: updateWorkspace()
+        onTriggered: workspaceProcess.running = true
     }
 
-    function updateWorkspace() {
-        const result = Quickshell.run("niri", ["msg", "-j", "workspaces"])
-        if (result.exitCode === 0) {
-            try {
-                const data = JSON.parse(result.stdout)
-                const focused = data.workspaces.find(ws => ws.focused)
-                if (focused) root.activeWorkspace = focused.idx + 1
-            } catch (e) {
-                // ignore
+    Process {
+        id: workspaceProcess
+        command: ["niri", "msg", "-j", "workspaces"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const data = JSON.parse(text)
+                    const focused = data.workspaces.find(ws => ws.focused)
+                    if (focused) {
+                        root.activeWorkspace = focused.idx + 1
+                    }
+                } catch (e) {
+                    // ignore
+                }
             }
         }
     }

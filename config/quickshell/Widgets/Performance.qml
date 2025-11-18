@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import ".." as Neon
 
 Rectangle {
@@ -26,33 +27,85 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        detectGpu()
+        nvidiaDetect.running = true
+        amdDetect.running = true
         updateStats()
     }
 
-    function detectGpu() {
-        const nvidia = Quickshell.run("which", ["nvidia-smi"])
-        if (nvidia.exitCode === 0) {
-            root.showGpu = true
-            return
+    Process {
+        id: cpuUsageProcess
+        command: ["sh", "-c", "top -bn1 | grep 'Cpu(s)' | sed 's/.*, *\\([0-9.]*\\)%* id.*/\\1/' | awk '{print 100 - $1\"%\"}'"]
+        stdout: StdioCollector {
+            onStreamFinished: root.cpuUsage = text.trim()
         }
-        const amd = Quickshell.run("sh", ["-c", "test -f /sys/class/drm/card0/device/gpu_busy_percent"])
-        root.showGpu = amd.exitCode === 0
+    }
+
+    Process {
+        id: cpuTempProcess
+        command: ["sh", "-c", "sensors 2>/dev/null | grep -oP 'Package id 0.*?\\+\\K[0-9.]+' | head -1"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const cleaned = text.trim()
+                if (cleaned.length > 0) {
+                    root.cpuTemp = cleaned + "°C"
+                }
+            }
+        }
+    }
+
+    Process {
+        id: ramProcess
+        command: ["sh", "-c", "free | grep Mem | awk '{printf \"%.0f%%\", ($3/$2)*100}'"]
+        stdout: StdioCollector {
+            onStreamFinished: root.ramUsage = text.trim()
+        }
+    }
+
+    Process {
+        id: gpuUsageProcess
+        command: ["nvidia-smi", "--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"]
+        stdout: StdioCollector {
+            onStreamFinished: root.gpuUsage = text.trim() + "%"
+        }
+    }
+
+    Process {
+        id: gpuTempProcess
+        command: ["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"]
+        stdout: StdioCollector {
+            onStreamFinished: root.gpuTemp = text.trim() + "°C"
+        }
+    }
+
+    Process {
+        id: nvidiaDetect
+        command: ["which", "nvidia-smi"]
+        stdout: StdioCollector {}
+        onExited: function(exitCode) {
+            if (exitCode === 0) {
+                root.showGpu = true
+            }
+        }
+    }
+
+    Process {
+        id: amdDetect
+        command: ["sh", "-c", "test -f /sys/class/drm/card0/device/gpu_busy_percent"]
+        stdout: StdioCollector {}
+        onExited: function(exitCode) {
+            if (exitCode === 0) {
+                root.showGpu = true
+            }
+        }
     }
 
     function updateStats() {
-        const cpu = Quickshell.run("sh", ["-c", "top -bn1 | grep 'Cpu(s)' | sed 's/.*, *\\([0-9.]*\\)%* id.*/\\1/' | awk '{print 100 - $1\"%\"}'"])
-        if (cpu.exitCode === 0) root.cpuUsage = cpu.stdout.trim()
-        const temp = Quickshell.run("sh", ["-c", "sensors 2>/dev/null | grep -oP 'Package id 0.*?\\+\\K[0-9.]+' | head -1"])
-        if (temp.exitCode === 0 && temp.stdout.trim() !== "") root.cpuTemp = temp.stdout.trim() + "°C"
-        const ram = Quickshell.run("sh", ["-c", "free | grep Mem | awk '{printf \"%.0f%%\", ($3/$2)*100}'"])
-        if (ram.exitCode === 0) root.ramUsage = ram.stdout.trim()
-
+        if (!cpuUsageProcess.running) cpuUsageProcess.running = true
+        if (!cpuTempProcess.running) cpuTempProcess.running = true
+        if (!ramProcess.running) ramProcess.running = true
         if (root.showGpu) {
-            const usage = Quickshell.run("nvidia-smi", ["--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"])
-            if (usage.exitCode === 0) root.gpuUsage = usage.stdout.trim() + "%"
-            const gtemp = Quickshell.run("nvidia-smi", ["--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"])
-            if (gtemp.exitCode === 0) root.gpuTemp = gtemp.stdout.trim() + "°C"
+            if (!gpuUsageProcess.running) gpuUsageProcess.running = true
+            if (!gpuTempProcess.running) gpuTempProcess.running = true
         }
     }
 
