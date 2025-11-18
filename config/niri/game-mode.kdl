@@ -1,0 +1,39 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  NEON‑NIRI v2 · Gaming Overlay
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+layout {
+    gaps 0
+    border { width 0 }
+    focus-ring { width 0 }
+    default-column-width { proportion 1.0; }
+}
+
+animations {
+    workspace-switch { off; }
+    window-movement { off; }
+    window-resize { off; }
+    window-open { off; }
+    window-close { off; }
+}
+
+window-rule {
+    match app-id="steam|lutris"
+    open-on-workspace 8
+    fullscreen true
+}
+
+window-rule {
+    match title=r#".*\.exe$"#  // Proton games
+    fullscreen true
+    open-on-workspace 8
+}
+
+idle {
+    timeout 0
+}
+
+// Disable auxiliary monitor to free GPU resources (re-enable in default/dev)
+output "HDMI-A-1" {
+    enabled false
+}
