@@ -13,24 +13,57 @@ Rectangle {
 
     readonly property var context: ContextService.currentContextInfo
     readonly property color accentColor: context && context.accent ? context.accent : Theme.primary
-    readonly property real paddingX: SettingsData.topBarNoBackground ? Theme.spacingXS : Math.max(Theme.spacingXS, SettingsData.topBarInnerPadding * 0.3)
+    readonly property real paddingX: SettingsData.topBarNoBackground ? Math.max(2, Theme.spacingXS * 0.5) : Math.max(4, SettingsData.topBarInnerPadding * 0.25)
 
     height: widgetHeight
     radius: SettingsData.topBarNoBackground ? 0 : Theme.cornerRadius
-    color: SettingsData.topBarNoBackground ? "transparent" : Qt.rgba(Theme.widgetBaseBackgroundColor.r,
-                                                                     Theme.widgetBaseBackgroundColor.g,
-                                                                     Theme.widgetBaseBackgroundColor.b,
-                                                                     Theme.widgetTransparency)
-    border.width: SettingsData.topBarNoBackground ? 0 : 1
-    border.color: SettingsData.topBarNoBackground ? "transparent" : Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.65)
+    color: "transparent"
+    border.width: 0
 
     implicitWidth: contentRow.implicitWidth + paddingX * 2
     width: implicitWidth
 
+    Rectangle {
+        id: accentBackground
+        anchors.fill: parent
+        radius: root.radius
+        color: accentColor
+        opacity: SettingsData.topBarNoBackground ? 0.22 : 0.18
+    }
+
+    Rectangle {
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: 2
+        radius: root.radius
+        color: accentColor
+        opacity: 0.6
+    }
+
+    Rectangle {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: 1
+        color: Qt.lighter(accentColor, 140)
+        opacity: 0.9
+    }
+
+    Rectangle {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: 1
+        color: Qt.darker(accentColor, 130)
+        opacity: 0.85
+    }
+
     RowLayout {
         id: contentRow
+        z: 2
         anchors.centerIn: parent
-        spacing: Theme.spacingXS
+        spacing: Math.max(2, Theme.spacingXS * 0.6)
         opacity: ContextService.busy ? 0.4 : 1
 
         DankIcon {
@@ -43,7 +76,7 @@ Rectangle {
 
         Column {
             Layout.alignment: Qt.AlignVCenter
-            spacing: -2
+            spacing: -4
 
             StyledText {
                 text: context ? `${context.id}` : "Context"
@@ -57,7 +90,7 @@ Rectangle {
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.surfaceTextSecondary
                 elide: Text.ElideRight
-                width: 120
+                width: 100
             }
         }
     }
@@ -68,6 +101,7 @@ Rectangle {
         visible: ContextService.busy
         width: Theme.iconSize - 8
         height: Theme.iconSize - 8
+        z: 3
     }
 
     Menu {

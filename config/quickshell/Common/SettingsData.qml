@@ -117,6 +117,7 @@ Singleton {
     property real topBarBorderGreen: 0.0
     property real topBarBorderBlue: 0.0
     property real topBarBorderAlpha: 1.0
+    property bool topBarAccentBorder: true
     property bool topBarBorderTop: true
     property bool topBarBorderLeft: true
     property bool topBarBorderRight: true
@@ -472,6 +473,7 @@ Singleton {
                 topBarBorderGreen = settings.topBarBorderGreen !== undefined ? settings.topBarBorderGreen : 0.0
                 topBarBorderBlue = settings.topBarBorderBlue !== undefined ? settings.topBarBorderBlue : 0.0
                 topBarBorderAlpha = settings.topBarBorderAlpha !== undefined ? settings.topBarBorderAlpha : 1.0
+                topBarAccentBorder = settings.topBarAccentBorder !== undefined ? settings.topBarAccentBorder : true
                 topBarBorderTop = settings.topBarBorderTop !== undefined ? settings.topBarBorderTop : true
                 topBarBorderLeft = settings.topBarBorderLeft !== undefined ? settings.topBarBorderLeft : true
                 topBarBorderRight = settings.topBarBorderRight !== undefined ? settings.topBarBorderRight : true
@@ -773,6 +775,7 @@ Singleton {
                                                 "topBarBorderGreen": topBarBorderGreen,
                                                 "topBarBorderBlue": topBarBorderBlue,
                                                 "topBarBorderAlpha": topBarBorderAlpha,
+                                                "topBarAccentBorder": topBarAccentBorder,
                                                 "topBarBorderTop": topBarBorderTop,
                                                 "topBarBorderLeft": topBarBorderLeft,
                                                 "topBarBorderRight": topBarBorderRight,

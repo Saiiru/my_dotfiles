@@ -42,6 +42,9 @@ PanelWindow {
         var baseColor = Theme.surfaceTint
         return Qt.rgba(baseColor.r, baseColor.g, baseColor.b, 0.04 * topBarCore.backgroundTransparency)
     }
+    readonly property color _contextAccent: typeof ContextService !== "undefined" && ContextService.currentContextInfo && ContextService.currentContextInfo.accent
+                                            ? ContextService.currentContextInfo.accent
+                                            : Theme.primary
 
     signal colorPickerRequested()
 
@@ -190,6 +193,38 @@ PanelWindow {
         property bool autoHide: SettingsData.topBarAutoHide
         property bool revealSticky: false
         property real backgroundTransparency: SettingsData.topBarTransparency
+        function borderStripColor(position) {
+            if (!SettingsData.topBarBorderEnabled) {
+                return "transparent"
+            }
+            if (SettingsData.topBarAccentBorder) {
+                if (position === "top") {
+                    return Qt.lighter(root._contextAccent, 130)
+                }
+                if (position === "bottom") {
+                    return Qt.darker(root._contextAccent, 130)
+                }
+                return root._contextAccent
+            }
+            return Qt.rgba(SettingsData.topBarBorderRed, SettingsData.topBarBorderGreen, SettingsData.topBarBorderBlue, SettingsData.topBarBorderAlpha)
+        }
+
+        function borderStripOpacity(position) {
+            if (!SettingsData.topBarBorderEnabled) {
+                return 0
+            }
+            if (SettingsData.topBarAccentBorder) {
+                switch (position) {
+                case "top":
+                    return 0.9
+                case "bottom":
+                    return 0.8
+                default:
+                    return 0.6
+                }
+            }
+            return SettingsData.topBarBorderAlpha
+        }
 
         Timer {
             id: revealHold
@@ -303,8 +338,8 @@ PanelWindow {
                 // Container that respects margins
                 Item {
                     anchors.fill: parent
-                    anchors.leftMargin: SettingsData.topBarLeftMargin
-                    anchors.rightMargin: SettingsData.topBarRightMargin
+                    anchors.leftMargin: Math.max(Theme.spacingXS * 0.5, SettingsData.topBarInnerPadding * 0.5)
+                    anchors.rightMargin: Math.max(Theme.spacingXS * 0.5, SettingsData.topBarInnerPadding * 0.5)
                     
                     // Background for blur effect
                     Rectangle {
@@ -319,34 +354,38 @@ PanelWindow {
                         color: "transparent"
                         radius: SettingsData.topBarSquareCorners ? 0 : (SettingsData.topBarRoundedCorners ? SettingsData.topBarCornerRadius : 0)
                         border.width: SettingsData.topBarBorderEnabled ? SettingsData.topBarBorderWidth : 0
-                        border.color: SettingsData.topBarBorderEnabled ? Qt.rgba(SettingsData.topBarBorderRed, SettingsData.topBarBorderGreen, SettingsData.topBarBorderBlue, SettingsData.topBarBorderAlpha) : "transparent"
+                        border.color: SettingsData.topBarBorderEnabled ? (SettingsData.topBarAccentBorder ? root._contextAccent : Qt.rgba(SettingsData.topBarBorderRed, SettingsData.topBarBorderGreen, SettingsData.topBarBorderBlue, SettingsData.topBarBorderAlpha)) : "transparent"
+                        opacity: SettingsData.topBarAccentBorder ? 0.35 : 1
                     }
-                    
+
                     // Individual border sides for selective visibility
                     Rectangle {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.top: parent.top
                         height: SettingsData.topBarBorderEnabled && SettingsData.topBarBorderTop ? SettingsData.topBarBorderWidth : 0
-                        color: SettingsData.topBarBorderEnabled && SettingsData.topBarBorderTop ? Qt.rgba(SettingsData.topBarBorderRed, SettingsData.topBarBorderGreen, SettingsData.topBarBorderBlue, SettingsData.topBarBorderAlpha) : "transparent"
+                        color: topBarCore.borderStripColor("top")
+                        opacity: topBarCore.borderStripOpacity("top")
                     }
-                    
+
                     Rectangle {
                         anchors.left: parent.left
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         width: SettingsData.topBarBorderEnabled && SettingsData.topBarBorderLeft ? SettingsData.topBarBorderWidth : 0
-                        color: SettingsData.topBarBorderEnabled && SettingsData.topBarBorderLeft ? Qt.rgba(SettingsData.topBarBorderRed, SettingsData.topBarBorderGreen, SettingsData.topBarBorderBlue, SettingsData.topBarBorderAlpha) : "transparent"
+                        color: topBarCore.borderStripColor("side")
+                        opacity: topBarCore.borderStripOpacity("side")
                     }
-                    
+
                     Rectangle {
                         anchors.right: parent.right
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         width: SettingsData.topBarBorderEnabled && SettingsData.topBarBorderRight ? SettingsData.topBarBorderWidth : 0
-                        color: SettingsData.topBarBorderEnabled && SettingsData.topBarBorderRight ? Qt.rgba(SettingsData.topBarBorderRed, SettingsData.topBarBorderGreen, SettingsData.topBarBorderBlue, SettingsData.topBarBorderAlpha) : "transparent"
+                        color: topBarCore.borderStripColor("side")
+                        opacity: topBarCore.borderStripOpacity("side")
                     }
-                    
+
                     Rectangle {
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -354,19 +393,21 @@ PanelWindow {
                         anchors.leftMargin: SettingsData.topBarBorderBottomLeftInset
                         anchors.rightMargin: SettingsData.topBarBorderBottomRightInset
                         height: SettingsData.topBarBorderEnabled && SettingsData.topBarBorderBottom ? SettingsData.topBarBorderWidth : (SettingsData.topBarBorderEnabled ? 0 : 1)
-                        color: SettingsData.topBarBorderEnabled && SettingsData.topBarBorderBottom ? Qt.rgba(SettingsData.topBarBorderRed, SettingsData.topBarBorderGreen, SettingsData.topBarBorderBlue, SettingsData.topBarBorderAlpha) : Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.3 * root._bgColor.a)
+                        color: SettingsData.topBarBorderEnabled && SettingsData.topBarBorderBottom ? topBarCore.borderStripColor("bottom") : Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.3 * root._bgColor.a)
+                        opacity: SettingsData.topBarBorderEnabled && SettingsData.topBarBorderBottom ? topBarCore.borderStripOpacity("bottom") : 1
                     }
                     
                     Item {
                         id: topBarContent
                         anchors.fill: parent
-                        anchors.leftMargin: Math.max(Theme.spacingXS, SettingsData.topBarInnerPadding * 0.8)
-                        anchors.rightMargin: Math.max(Theme.spacingXS, SettingsData.topBarInnerPadding * 0.8)
-                        anchors.topMargin: SettingsData.topBarInnerPadding / 2
-                        anchors.bottomMargin: SettingsData.topBarInnerPadding / 2
+                        anchors.leftMargin: Math.max(Theme.spacingXS * 0.5, SettingsData.topBarInnerPadding * 0.5)
+                        anchors.rightMargin: Math.max(Theme.spacingXS * 0.5, SettingsData.topBarInnerPadding * 0.5)
+                        anchors.topMargin: Math.max(Theme.spacingXS * 0.35, SettingsData.topBarInnerPadding / 3)
+                        anchors.bottomMargin: Math.max(Theme.spacingXS * 0.35, SettingsData.topBarInnerPadding / 3)
                         clip: true
 
-                    readonly property int availableWidth: width
+                        property real denseSpacing: Math.max(1, Math.round(SettingsData.topBarNoBackground ? 1 : SettingsData.topBarInnerPadding * 0.35))
+                        readonly property int availableWidth: width
                         readonly property int launcherButtonWidth: 40
                         readonly property int workspaceSwitcherWidth: 120
                         readonly property int focusedAppMaxWidth: 456
@@ -458,7 +499,7 @@ PanelWindow {
                             id: leftSection
 
                             height: parent.height
-                            spacing: SettingsData.topBarNoBackground ? 2 : Theme.spacingXS
+                            spacing: topBarContent.denseSpacing
                             anchors.left: parent.left
                             anchors.verticalCenter: parent.verticalCenter
 
@@ -485,7 +526,7 @@ PanelWindow {
                             property var centerWidgets: []
                             property int totalWidgets: 0
                             property real totalWidth: 0
-                            property real spacing: SettingsData.topBarNoBackground ? 2 : Theme.spacingXS
+                            property real spacing: topBarContent.denseSpacing
                             
                             width: childrenRect.width
                             height: parent.height
@@ -723,7 +764,7 @@ PanelWindow {
                             id: rightSection
 
                             height: parent.height
-                            spacing: SettingsData.topBarNoBackground ? 2 : Theme.spacingXS
+                            spacing: topBarContent.denseSpacing
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
 
