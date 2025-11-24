@@ -1,0 +1,32 @@
+[env]
+JAVA_HOME = "{{env.HOME}}/.local/share/mise/installs/java/11"
+MAVEN_OPTS = "-Xmx512m -XX:+UseG1GC"
+BAT_STACK = "BATMAN-JAVA"
+
+[tools]
+java = "11"
+maven = "latest"
+
+[tasks.build]
+description = "Build Maven project"
+run = "mvn -q clean package"
+
+[tasks.test]
+description = "Run tests"
+run = "mvn -q test"
+
+[tasks.run]
+description = "Run Spring Boot app"
+run = "mvn -q spring-boot:run"
+
+[tasks.dev]
+description = "Run app skipping tests"
+run = "mvn -q -DskipTests spring-boot:run"
+
+[tasks.check]
+description = "Verify (tests + checks)"
+run = "mvn -q verify"
+
+[tasks.init]
+description = "Resolve dependencies"
+run = "mvn -q dependency:resolve"
