@@ -14,10 +14,15 @@ _zsh_clone_plugin() {
 _zsh_clone_plugin "zsh-autosuggestions" "https://github.com/zsh-users/zsh-autosuggestions.git"
 _zsh_clone_plugin "zsh-syntax-highlighting" "https://github.com/zsh-users/zsh-syntax-highlighting.git"
 _zsh_clone_plugin "zsh-completions" "https://github.com/zsh-users/zsh-completions.git"
+_zsh_clone_plugin "zsh-history-substring-search" "https://github.com/zsh-users/zsh-history-substring-search.git"
 
 if [[ -f "$_zsh_plugins_dir/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
   source "$_zsh_plugins_dir/zsh-autosuggestions/zsh-autosuggestions.zsh"
   ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#555555'
+fi
+
+if [[ -f "$_zsh_plugins_dir/zsh-history-substring-search/zsh-history-substring-search.zsh" ]]; then
+  source "$_zsh_plugins_dir/zsh-history-substring-search/zsh-history-substring-search.zsh"
 fi
 
 if [[ -f "$_zsh_plugins_dir/zsh-completions/zsh-completions.plugin.zsh" ]]; then

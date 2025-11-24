@@ -27,6 +27,9 @@ alias k='kubectl'
 alias kctx='kubectl config use-context'
 alias kns='kubectl config set-context --current --namespace'
 
+# Dev helpers
+alias bdev='bat_dev'
+
 alias mvncf='mvn clean package -DskipTests=false'
 alias mvncp='mvn clean package -DskipTests'
 alias mvnt='mvn test'

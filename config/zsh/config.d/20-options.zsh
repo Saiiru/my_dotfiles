@@ -4,6 +4,8 @@ setopt auto_cd
 setopt extended_glob
 setopt correct
 setopt interactive_comments
+setopt no_beep
+setopt notify
 
 setopt share_history
 setopt hist_ignore_dups
@@ -17,3 +19,6 @@ bindkey -e
 
 # Não considerar / como parte da palavra (melhora navegação por palavra)
 WORDCHARS=${WORDCHARS//\/}
+
+# Evita erros de glob sem match
+setopt nonomatch

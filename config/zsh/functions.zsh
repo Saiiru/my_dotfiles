@@ -25,6 +25,36 @@ dragon_dev() {
   fi
 }
 
+bat_project_root() {
+  if command git rev-parse --show-toplevel >/dev/null 2>&1; then
+    git rev-parse --show-toplevel
+  else
+    printf "%s" "$PWD"
+  fi
+}
+
+bat_dev() {
+  local root
+  root="$(bat_project_root)"
+  cd "$root" || return 1
+
+  if [[ -f "mise.toml" || -f ".mise.toml" ]]; then
+    echo "[BATMAN] mise config detectado em $root"
+  fi
+
+  if command -v tmux >/dev/null 2>&1; then
+    tmux new -A -s dev "cd '$root'; zsh"
+  else
+    zsh
+  fi
+}
+
+bat_java_check()   { mise run java-env   2>/dev/null || true; }
+bat_node_check()   { mise run node-env   2>/dev/null || true; }
+bat_go_check()     { mise run go-env     2>/dev/null || true; }
+bat_python_check() { mise run python-env 2>/dev/null || true; }
+bat_rust_check()   { mise run rust-env   2>/dev/null || true; }
+
 qa_http_json() {
   if (( $# < 2 )); then
     echo "usage: qa_http_json METHOD URL [JSON_BODY]"

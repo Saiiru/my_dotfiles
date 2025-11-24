@@ -1,110 +1,127 @@
-# DRAGON-OPS · Toolchain global
+# BATMAN CORE STACK – global dev tools
 
 [env]
 EDITOR = "nvim"
 VISUAL = "nvim"
-BATCAVE_MODE = "DEV"
+
+# Locale previsível pro tooling
+LANG   = "en_US.UTF-8"
+LC_ALL = "en_US.UTF-8"
+
+# Qualidade de vida Python
 PIP_DISABLE_PIP_VERSION_CHECK = "1"
-PYTHONWARNINGS = "ignore"
+PYTHONWARNINGS                = "ignore"
 
+# Git: diffs mais bonitos (se delta instalado)
+GIT_PAGER = "delta"
+
+#──────────────────────────────── TOOLS GLOBAIS ────────────────────────────────
 [tools]
-java = "11"
-maven = "latest"
-gradle = "latest"
-node = "lts"
-npm = "bundled"
-go = "latest"
-python = "3.12"
-rust = "stable"
-cmake = "latest"
-postgres = "latest"
+# Node / JS / TS
+node    = "lts"
+pnpm    = "latest"
+yarn    = "latest"
 
+# Python
+python  = "3.12"
+
+# Go
+go      = "latest"
+
+# Java & Build
+java    = "11"
+maven   = "latest"
+gradle  = "latest"
+
+# Rust
+rust    = "stable"
+
+# SQL / DB tooling (ajuste se plugin disponível)
+# sqlfluff = "latest"
+
+# Utilidades gerais (dependem de plugins do mise)
+# eza     = "latest"
+# bat     = "latest"
+# ripgrep = "latest"
+# fd      = "latest"
+
+#──────────────────────────────── TASKS GLOBAIS ────────────────────────────────
 [tasks.bootstrap]
-description = "Instala toda a toolchain DRAGON-OPS (langs + utils)"
+description = "Instala/atualiza toda a toolchain BATMAN (global)"
 run = """
 mise install
 """
 
-[tasks.dev-shell]
-description = "Abre sessão tmux DEV com Zsh/mise ativados"
-run = """
-tmux new -A -s dev 'zsh'
-"""
-
-[tasks.context-default]
-description = "Contexto DEFAULT via Elephant (se script existir)"
-run = """
-$HOME/workstation/scripts/elephant-sync default || true
-"""
-
-[tasks.context-dev]
-description = "Contexto DEV via Elephant"
-run = """
-$HOME/workstation/scripts/elephant-sync dev || true
-"""
-
-[tasks.context-game]
-description = "Contexto GAME via Elephant"
-run = """
-$HOME/workstation/scripts/elephant-sync game || true
-"""
-
 [tasks.update-tools]
-description = "Atualiza ferramentas para versões mais novas compatíveis"
+description = "Atualiza linguagens/ferramentas para versões mais novas compatíveis"
 run = """
 mise upgrade
 """
 
-[tasks.java-backend]
-description = "Ciclo padrão de backend Java (build + testes Maven)"
+[tasks.dev-shell]
+description = "Abre sessão tmux 'dev' com Zsh + mise ativados"
 run = """
-mvn -q clean verify
+tmux new -A -s dev 'zsh'
 """
 
-[tasks.spring-boot-dev]
-description = "Sobe aplicação Spring Boot em modo dev"
+[tasks.qa-check]
+description = "Checks básicos de QA no repo atual"
 run = """
-mvn -q spring-boot:run
-"""
+echo "[QA] Git status:"
+git status -sb || true
 
-[tasks.node-api]
-description = "API Node.js em modo desenvolvimento"
-run = """
-npm install
-npm run dev
-"""
+echo
+echo "[QA] Docker:"
+docker info >/dev/null 2>&1 && echo "Docker OK" || echo "Docker não disponível"
 
-[tasks.go-service]
-description = "Build + run serviço Go main.go"
-run = """
-go mod tidy
-go run ./...
-"""
-
-[tasks.rust-build]
-description = "Build otimizado de binário Rust"
-run = """
-cargo build --release
-"""
-
-[tasks.py-qa]
-description = "Roda suíte de testes Python (pytest)"
-run = """
-pytest -q
-"""
-
-[tasks.qa-http]
-description = "Smoke test de uma API com httpie"
-run = """
-http --check-status GET http://localhost:8080/actuator/health
-"""
-
-[tasks.qa-load]
-description = "Load test simples usando k6 (se instalado)"
-run = """
-if command -v k6 >/dev/null 2>&1; then
-  k6 run k6-script.js
+echo
+echo "[QA] Pre-commit:"
+if command -v pre-commit >/dev/null 2>&1; then
+  pre-commit run --all-files || true
 else
-  echo "[DRAGON-OPS] k6 não instalado (configure via mise ou pacman)"
+  echo "pre-commit não instalado (opcional)"
 fi
+"""
+
+[tasks.java-env]
+description = "Mostra informações do ambiente Java/JVM"
+run = """
+echo "JAVA:"
+java -version || true
+echo
+echo "MAVEN:"
+mvn -version || true
+echo
+echo "GRADLE:"
+gradle -version || true
+"""
+
+[tasks.node-env]
+description = "Mostra informações do ambiente Node/JS"
+run = """
+node -v || true
+npm -v || true
+pnpm -v || true
+yarn -v || true
+"""
+
+[tasks.go-env]
+description = "Mostra informações do ambiente Go"
+run = """
+go version || true
+go env GOPATH GOMODCACHE || true
+"""
+
+[tasks.python-env]
+description = "Mostra informações do ambiente Python"
+run = """
+python --version || true
+pip --version || true
+"""
+
+[tasks.rust-env]
+description = "Mostra informações do ambiente Rust"
+run = """
+rustc --version || true
+cargo --version || true
 """
