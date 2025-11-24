@@ -1,1 +1,320 @@
-config.kdl.active
+// NEON-NIRI merged config · DEV/GAME
+
+layout {
+  gaps 6
+  center-focused-column "never"
+  always-center-single-column
+  default-column-display "tabbed"
+
+  preset-column-widths {
+    proportion 0.3333
+    proportion 0.5
+    proportion 0.6667
+  }
+  default-column-width {
+    proportion 0.5
+  }
+
+  preset-window-heights {
+    proportion 0.3333
+    proportion 0.5
+    proportion 0.6667
+  }
+
+  focus-ring {
+    width 1.5
+    active-color "#3fb5ff"
+    inactive-color "#505b73"
+  }
+
+  border {
+    width 1
+    active-color "#1a2133"
+    inactive-color "#101528"
+  }
+
+  shadow {
+    on
+    softness 30
+    spread 5
+    offset x=0 y=5
+    color "#000000cc"
+  }
+
+  tab-indicator {
+    hide-when-single-tab
+    place-within-column
+    gap 5
+    width 4
+    length total-proportion=1.0
+    position "right"
+    gaps-between-tabs 2
+    corner-radius 8
+    active-color "#3fb5ff"
+    inactive-color "#262d3c"
+  }
+}
+
+overview {
+  zoom 0.35
+  backdrop-color "rgba(5, 8, 20, 0.98)"
+  workspace-shadow {
+    softness 30
+    spread 18
+    offset x=0 y=0
+    color "rgba(0, 0, 0, 0.85)"
+  }
+}
+
+animations {
+  workspace-switch {
+    spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+  }
+  window-open {
+    duration-ms 160
+    curve "ease-out-quad"
+  }
+  window-close {
+    duration-ms 160
+    curve "ease-out-cubic"
+  }
+  window-movement {
+    spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+  }
+  overview-open-close {
+    spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+  }
+}
+
+window-rule {
+  match app-id="steam" title="^notificationtoasts_[0-9]+_desktop$"
+  open-floating true
+  default-floating-position x=10 y=10 relative-to="bottom-right"
+}
+window-rule {
+  match app-id="steam"
+  open-on-workspace "GAME"
+  open-fullscreen false
+}
+window-rule {
+  match app-id="steam" title="Friends List"
+  open-on-workspace "GAME"
+  open-fullscreen false
+}
+window-rule {
+  match app-id="steam_app_.*"
+  open-on-workspace "GAME"
+  open-fullscreen true
+  variable-refresh-rate true
+}
+
+debug {
+  keep-laptop-panel-on-when-lid-is-closed
+}
+
+input {
+  keyboard {
+    xkb {
+      layout "br"
+      options "compose:ralt,ctrl:nocaps"
+    }
+    repeat-delay 240
+    repeat-rate 55
+    numlock
+  }
+  touchpad {
+    tap
+    natural-scroll
+    scroll-method "two-finger"
+  }
+  warp-mouse-to-focus
+  focus-follows-mouse max-scroll-amount="0%"
+}
+
+output "HDMI-A-1" {
+  mode "1280x720@60.000"
+  scale 1
+  transform "normal"
+  position x=-1280 y=0
+}
+
+output "DP-2" {
+  mode "2560x1080@74.991"
+  scale 1
+  transform "normal"
+  position x=0 y=0
+}
+
+prefer-no-csd
+screenshot-path "~/Pictures/Screenshots/screenshot-%Y-%m-%d-%H-%M-%S.png"
+
+workspace "DEV" {
+  open-on-output "DP-2"
+}
+workspace "WEB" {
+  open-on-output "DP-2"
+}
+workspace "CHAT" {
+  open-on-output "DP-2"
+}
+workspace "GAME" {
+  open-on-output "DP-2"
+}
+
+spawn-at-startup "nm-applet"
+spawn-at-startup "swww-daemon"
+spawn-at-startup "syshud"
+spawn-at-startup "qs"
+spawn-at-startup "~/.config/niri/scripts/suspend.sh"
+spawn-at-startup "~/.config/niri/scripts/lock.sh"
+spawn-at-startup "swww" "img" "/home/sairu/workstation/wallpapers/wallhaven-o5rjq9.png" "--transition-type" "grow" "--resize" "fit"
+
+binds {
+  Mod+Return {
+    spawn "kitty"
+  }
+  Mod+D {
+    spawn-sh "command -v walker-launch >/dev/null 2>&1 && walker-launch || walker"
+  }
+  Mod+Alt+L {
+    spawn "~/.config/niri/scripts/lock.sh"
+  }
+  Mod+O {
+    toggle-overview
+  }
+  Mod+Q {
+    close-window
+  }
+
+  Mod+Left {
+    focus-column-left
+  }
+  Mod+Right {
+    focus-column-right
+  }
+  Mod+Up {
+    focus-window-up
+  }
+  Mod+Down {
+    focus-window-down
+  }
+
+  Mod+H {
+    focus-column-left
+  }
+  Mod+L {
+    focus-column-right
+  }
+  Mod+K {
+    focus-window-up
+  }
+  Mod+J {
+    focus-window-down
+  }
+
+  Mod+Ctrl+H {
+    move-column-left
+  }
+  Mod+Ctrl+L {
+    move-column-right
+  }
+  Mod+Ctrl+K {
+    move-window-up
+  }
+  Mod+Ctrl+J {
+    move-window-down
+  }
+
+  Mod+1 {
+    focus-workspace 1
+  }
+  Mod+2 {
+    focus-workspace 2
+  }
+  Mod+3 {
+    focus-workspace 3
+  }
+  Mod+4 {
+    focus-workspace 4
+  }
+  Mod+5 {
+    focus-workspace 5
+  }
+  Mod+6 {
+    focus-workspace 6
+  }
+  Mod+7 {
+    focus-workspace 7
+  }
+  Mod+8 {
+    focus-workspace 8
+  }
+  Mod+9 {
+    focus-workspace 9
+  }
+
+  Mod+Ctrl+1 {
+    move-column-to-workspace 1
+  }
+  Mod+Ctrl+2 {
+    move-column-to-workspace 2
+  }
+  Mod+Ctrl+3 {
+    move-column-to-workspace 3
+  }
+  Mod+Ctrl+4 {
+    move-column-to-workspace 4
+  }
+  Mod+Ctrl+5 {
+    move-column-to-workspace 5
+  }
+  Mod+Ctrl+6 {
+    move-column-to-workspace 6
+  }
+  Mod+Ctrl+7 {
+    move-column-to-workspace 7
+  }
+  Mod+Ctrl+8 {
+    move-column-to-workspace 8
+  }
+  Mod+Ctrl+9 {
+    move-column-to-workspace 9
+  }
+
+  Mod+Shift+H {
+    focus-monitor-left
+  }
+  Mod+Shift+L {
+    focus-monitor-right
+  }
+  Mod+Shift+Ctrl+H {
+    move-column-to-monitor-left
+  }
+  Mod+Shift+Ctrl+L {
+    move-column-to-monitor-right
+  }
+
+  Mod+F {
+    maximize-column
+  }
+  Mod+Shift+F {
+    fullscreen-window
+  }
+  Mod+V {
+    toggle-window-floating
+  }
+
+  Print {
+    screenshot
+  }
+  Ctrl+Print {
+    screenshot-screen
+  }
+  Alt+Print {
+    screenshot-window
+  }
+
+  Mod+Shift+E {
+    quit
+  }
+}

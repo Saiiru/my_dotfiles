@@ -1,73 +1,56 @@
-alias shutdown='systemctl poweroff'
-alias reboot='systemctl reboot'
-alias suspend='systemctl suspend'
+# Aliases DRAGON-OPS
 
-alias p='sudo pacman'
-alias pi='sudo pacman -S'
-alias pr='sudo pacman -Rns'
-alias pu='sudo pacman -Syu'
-alias ps='pacman -Ss'
-alias pq='pacman -Q'
-alias pc='sudo pacman -Scc'
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza --icons'
+  alias ll='eza -lah --icons'
+  alias la='eza -a --icons'
+else
+  alias ls='ls --color=auto'
+  alias ll='ls -alF'
+  alias la='ls -A'
+fi
 
-alias y='yay'
-alias yi='yay -S'
-alias yu='yay -Syu'
+if command -v bat >/dev/null 2>&1; then
+  alias cat='bat'
+fi
 
-alias ls='eza --icons --group-directories-first'
-alias ll='eza -lah --icons --group-directories-first'
-alias lt='eza --tree --level=2 --icons'
+alias gs='git status -sb'
+alias ga='git add'
+alias gc='git commit'
+alias gco='git checkout'
+alias gl='git log --oneline --graph --decorate'
+alias gfp='git fetch --prune'
 
-alias cp='cp -iv'
-alias mv='mv -iv'
-alias rm='rm -Iv'
-alias mkdir='mkdir -pv'
+alias d='docker'
+alias dc='docker compose'
+alias k='kubectl'
+alias kctx='kubectl config use-context'
+alias kns='kubectl config set-context --current --namespace'
+
+alias mvncf='mvn clean package -DskipTests=false'
+alias mvncp='mvn clean package -DskipTests'
+alias mvnt='mvn test'
+alias sb-run='mvn spring-boot:run'
+
+alias nr='npm run'
+alias ni='npm install'
+alias nx='npx'
+alias nrdev='npm run dev'
+alias nrb='npm run build'
+
+alias gob='go build ./...'
+alias got='go test ./...'
+
+alias cbuild='cargo build'
+alias ctest='cargo test'
+
+alias py='python'
+alias pytest='pytest -q'
+
+alias htget='http --verbose'
+alias curlj='curl -H "Content-Type: application/json"'
 
 alias ..='cd ..'
 alias ...='cd ../..'
-alias ....='cd ../../..'
-alias dots='cd ~/dotfiles'
-alias dl='cd ~/Downloads'
-alias dev='cd ~/Dev'
-alias games='cd ~/Games'
-
-alias g='git'
-alias ga='git add'
-alias gc='git commit -m'
-alias gp='git push'
-alias gl='git pull'
-alias gs='git status'
-alias gd='git diff'
-alias gco='git checkout'
-alias gb='git branch'
-alias glog='git log --oneline --graph --decorate'
-
-alias v='nvim'
-alias vim='nvim'
-alias d='docker'
-alias dc='docker-compose'
-alias dps='docker ps'
-alias di='docker images'
-alias j='just'
-
-alias niri-reload='niri msg reload-config'
-alias niri-validate='niri validate -c ~/.config/niri/config.kdl.active'
-alias niri-log='journalctl --user -u niri -f'
-
-alias ctx='context-switch'
-alias ctx-dev='context-switch dev'
-alias ctx-game='context-switch game'
-alias ctx-default='context-switch default'
-alias ctx-status='context-switch status'
-
-alias game='game-launcher'
-alias perf='neon-perfmon'
-
-alias c='clear'
-alias h='history'
-alias grep='grep --color=auto'
-alias df='df -h'
-alias du='du -h'
-alias free='free -h'
-alias myip='curl -s ifconfig.me'
-alias ports='ss -tulanp'
+alias cproj='cd "$WORKSTATION_DIR"'
+alias cls='clear'

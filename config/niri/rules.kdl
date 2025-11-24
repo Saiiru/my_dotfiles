@@ -1,0 +1,140 @@
+// ───────────────── Window & Layer Rules ─────────────────
+// Mantém regras agrupadas para evitar poluição do config principal.
+
+// Steam / Games
+window-rule {
+  match app-id="steam" title=r#"^notificationtoasts_\d+_desktop$"#
+  open-floating true
+  default-floating-position x=10 y=10 relative-to="bottom-right"
+}
+window-rule {
+  match app-id="steam" title="Steam"
+  open-fullscreen false
+}
+window-rule {
+  match app-id="steam" title="Lista de amigos"
+  open-on-workspace "CHAT"
+  open-fullscreen false
+}
+// Jogos Steam (steam_app_xxx) em workspace "Game", fullscreen, VRR
+window-rule {
+  match app-id=r#"^steam_app_.*"# title=".*"
+  open-on-workspace "Game"
+  open-fullscreen true
+  variable-refresh-rate true
+}
+// Diálogos do Steam
+window-rule {
+  match app-id=r#"steam"# title=r#".*(Friends|Settings|Properties).*"#
+  open-floating true
+}
+
+// Firefox PIP sempre flutuante.
+window-rule {
+  match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+  open-floating true
+}
+
+// Navegadores maximizados.
+window-rule {
+  match app-id=r#"firefox$"#
+  open-maximized true
+}
+window-rule {
+  match app-id=r#"firefox-developer-edition$"#
+  open-maximized true
+}
+window-rule {
+  match app-id=r#"chrome$"#
+  open-maximized true
+}
+window-rule {
+  match app-id=r#"google-chrome-stable$"#
+  open-maximized true
+}
+
+// IDEs / Editor principal
+window-rule {
+  match app-id=r#"code$"#
+  open-maximized true
+}
+window-rule {
+  match app-id=r#"obsidian$"#
+  open-maximized true
+}
+
+// ProtonVPN em floating
+window-rule {
+  match app-id=r#"protonvpn-app"#
+  open-floating true
+  min-width 400
+  min-height 600
+}
+
+// Diálogos de arquivo
+window-rule {
+  match title=r#".*(Open|Save|Select).*"#
+  open-floating true
+  max-width 800
+  max-height 1000
+  default-column-width { proportion 0.0; }
+}
+window-rule {
+  match app-id=r#"org\.gtk\.FileChooserDialog"#
+  open-floating true
+  max-width 800
+  max-height 1000
+  default-column-width { proportion 0.0; }
+}
+
+// Diálogos genéricos
+window-rule {
+  match title=r#".*(Dialog|Properties|Preferences|Settings|Rename).*"#
+  open-floating true
+}
+
+// Auth
+window-rule {
+  match app-id=r#"org\.kde\.polkit-kde-authentication-agent-1"#
+  open-floating true
+}
+window-rule {
+  match title=r#".*Authentication.*"#
+  open-floating true
+}
+
+// Ferramentas de sistema
+window-rule {
+  match app-id=r#"nm-connection-editor"#
+  open-floating true
+}
+window-rule {
+  match app-id=r#"blueman-manager"#
+  open-floating true
+}
+window-rule {
+  match app-id=r#"pavucontrol"#
+  open-floating true
+}
+
+// Password managers
+window-rule {
+  match app-id=r#"org\.keepassxc\.KeePassXC"# title=r#".*Auto-Type.*"#
+  open-floating true
+}
+window-rule {
+  match app-id=r#"Bitwarden"# title=r#".*unlock.*"#
+  open-floating true
+}
+
+// Aparência global
+window-rule {
+  geometry-corner-radius 0
+  clip-to-geometry true
+}
+
+// Transparência inativos
+window-rule {
+  match is-active=false
+  opacity 0.95
+}

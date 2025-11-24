@@ -1,38 +1,80 @@
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  NEON-NIRI v2 - QUICKSHELL ENTRY POINT
-//  Autor: @Saiiru
-//  Data: 2025-11-18
-//  Descrição: Entry point do Quickshell, carrega todos os componentes
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-import QtQuick
 import Quickshell
 import Quickshell.Io
-import Quickshell.Wayland
-import "." as Neon
+import Quickshell.Services.Pipewire
+import Quickshell.Services.Notifications
+import QtQuick
+import QtCore
+import qs.Bar
+import qs.Bar.Modules
+import qs.Widgets
+import qs.Widgets.Notification
+import "Widgets/Notification" as Notif
+import qs.Settings
+import qs.Helpers
 
-ShellRoot {
+Scope {
     id: root
 
-    PanelWindow {
-        id: topBar
+    property alias appLauncherPanel: appLauncherPanel
+    property var notificationHistoryWin: notificationHistoryWin
 
-        WlrLayershell.namespace: "quickshell"
-        WlrLayershell.layer: WlrLayershell.Top
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-
-        anchors.top: true
-        anchors.left: true
-        anchors.right: true
-        exclusiveZone: Neon.Theme.barHeight
-        implicitWidth: Screen.width
-        implicitHeight: Neon.Theme.barHeight
-        color: "transparent"
-
-        Bar {
-            anchors.fill: parent
+    function updateVolume(vol) {
+        volume = vol;
+        if (defaultAudioSink && defaultAudioSink.audio) {
+            defaultAudioSink.audio.volume = vol / 100;
         }
     }
 
-    property string currentContext: "DEFAULT"
+    Component.onCompleted: {
+        Quickshell.shell = root;
+    }
+
+    Bar {
+        id: bar
+        shell: root
+        property var notificationHistoryWin: notificationHistoryWin
+    }
+
+    Applauncher {
+        id: appLauncherPanel
+        visible: false
+    }
+
+    LockScreen {
+        id: lockScreen
+    }
+
+    // Toasts no canto superior direito (NotificationServer embutido)
+    Notif.NotificationManager {
+        id: notificationManager
+    }
+
+    // Notification History Window (mantido)
+    NotificationHistory {
+        id: notificationHistoryWin
+    }
+
+    property var defaultAudioSink: Pipewire.defaultAudioSink
+    property int volume: defaultAudioSink && defaultAudioSink.audio && defaultAudioSink.audio.volume ? Math.round(defaultAudioSink.audio.volume * 100) : 0
+
+    PwObjectTracker {
+        objects: [Pipewire.defaultAudioSink]
+    }
+
+    IPCHandlers {
+        appLauncherPanel: appLauncherPanel
+        lockScreen: lockScreen
+    }
+
+    Connections {
+        function onReloadCompleted() {
+            Quickshell.inhibitReloadPopup();
+        }
+
+        function onReloadFailed() {
+            Quickshell.inhibitReloadPopup();
+        }
+
+        target: Quickshell
+    }
 }

@@ -1,0 +1,110 @@
+# DRAGON-OPS · Toolchain global
+
+[env]
+EDITOR = "nvim"
+VISUAL = "nvim"
+BATCAVE_MODE = "DEV"
+PIP_DISABLE_PIP_VERSION_CHECK = "1"
+PYTHONWARNINGS = "ignore"
+
+[tools]
+java = "11"
+maven = "latest"
+gradle = "latest"
+node = "lts"
+npm = "bundled"
+go = "latest"
+python = "3.12"
+rust = "stable"
+cmake = "latest"
+postgres = "latest"
+
+[tasks.bootstrap]
+description = "Instala toda a toolchain DRAGON-OPS (langs + utils)"
+run = """
+mise install
+"""
+
+[tasks.dev-shell]
+description = "Abre sessão tmux DEV com Zsh/mise ativados"
+run = """
+tmux new -A -s dev 'zsh'
+"""
+
+[tasks.context-default]
+description = "Contexto DEFAULT via Elephant (se script existir)"
+run = """
+$HOME/workstation/scripts/elephant-sync default || true
+"""
+
+[tasks.context-dev]
+description = "Contexto DEV via Elephant"
+run = """
+$HOME/workstation/scripts/elephant-sync dev || true
+"""
+
+[tasks.context-game]
+description = "Contexto GAME via Elephant"
+run = """
+$HOME/workstation/scripts/elephant-sync game || true
+"""
+
+[tasks.update-tools]
+description = "Atualiza ferramentas para versões mais novas compatíveis"
+run = """
+mise upgrade
+"""
+
+[tasks.java-backend]
+description = "Ciclo padrão de backend Java (build + testes Maven)"
+run = """
+mvn -q clean verify
+"""
+
+[tasks.spring-boot-dev]
+description = "Sobe aplicação Spring Boot em modo dev"
+run = """
+mvn -q spring-boot:run
+"""
+
+[tasks.node-api]
+description = "API Node.js em modo desenvolvimento"
+run = """
+npm install
+npm run dev
+"""
+
+[tasks.go-service]
+description = "Build + run serviço Go main.go"
+run = """
+go mod tidy
+go run ./...
+"""
+
+[tasks.rust-build]
+description = "Build otimizado de binário Rust"
+run = """
+cargo build --release
+"""
+
+[tasks.py-qa]
+description = "Roda suíte de testes Python (pytest)"
+run = """
+pytest -q
+"""
+
+[tasks.qa-http]
+description = "Smoke test de uma API com httpie"
+run = """
+http --check-status GET http://localhost:8080/actuator/health
+"""
+
+[tasks.qa-load]
+description = "Load test simples usando k6 (se instalado)"
+run = """
+if command -v k6 >/dev/null 2>&1; then
+  k6 run k6-script.js
+else
+  echo "[DRAGON-OPS] k6 não instalado (configure via mise ou pacman)"
+fi
+"""

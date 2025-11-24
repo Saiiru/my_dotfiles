@@ -44,6 +44,9 @@ venv/
 /bin/
 /pkg/
 
+# NixOS config (não versionar aqui)
+nixos/
+
 # Rust
 /target/
 Cargo.lock

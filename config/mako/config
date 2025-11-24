@@ -1,0 +1,36 @@
+# Batcave · Mako Notification Theme
+# Fundo quase preto, texto claro, acento ciano.
+
+font=Audiowide 11
+anchor=top-right
+width=360
+max-history=20
+max-visible=5
+margin=10,20,20
+padding=10
+border-radius=8
+border-size=2
+
+background-color=#050910ee
+text-color=#e6f5ffff
+border-color=#00ffd5dd
+progress-color=#00ffd5dd
+
+icons=1
+
+default-timeout=7000
+ignore-timeout=1
+history=1
+group-by=app-name
+
+[urgency=low]
+background-color=#0b1018ee
+text-color=#c7d2eaff
+border-color=#38bdf8dd
+default-timeout=5000
+
+[urgency=high]
+background-color=#1f0a0aee
+text-color=#fee2e2ff
+border-color=#f97373dd
+default-timeout=12000
