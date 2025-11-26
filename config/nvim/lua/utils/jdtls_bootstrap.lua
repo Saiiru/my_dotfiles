@@ -20,11 +20,13 @@ function M.build_cmd()
 
   local java_home = vim.env.JAVA_HOME
   local runtime = java_home and { name = "Java", path = java_home } or nil
+  local java_exec = vim.fn.exepath("java")
+  if java_exec == "" then return nil, "java executable not found in PATH; set JAVA_HOME or install JDK 17/21" end
 
   local workspace = vim.fn.stdpath("data") .. "/jdtls-workspaces/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 
   local cmd = {
-    "java",
+    java_exec,
     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
     "-Dosgi.bundles.defaultStartLevel=4",
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
