@@ -14,6 +14,11 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 path=(
   $HOME/.local/bin
   $HOME/workstation/bin
+  $HOME/workstation/bin/core
+  $HOME/workstation/bin/qa
+  $HOME/workstation/bin/dev
+  $HOME/workstation/bin/sys
+  $HOME/workstation/bin/hud
   $HOME/.cargo/bin
   $HOME/go/bin
   $path
@@ -27,3 +32,16 @@ HISTFILE="$XDG_DATA_HOME/zsh/history"
 export WORKSTATION_DIR="${WORKSTATION_DIR:-$HOME/workstation}"
 export BATCAVE_STATE_DIR="${XDG_STATE_HOME}/batcave"
 mkdir -p "$BATCAVE_STATE_DIR"
+
+# Java default (prefira o JDK mais recente instalado)
+if [[ -z "${JAVA_HOME:-}" ]]; then
+  if [[ -d /usr/lib/jvm/java-25-openjdk ]]; then
+    export JAVA_HOME=/usr/lib/jvm/java-25-openjdk
+  elif [[ -d /usr/lib/jvm/java-17-openjdk ]]; then
+    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+  fi
+fi
+
+if [[ -n "${JAVA_HOME:-}" ]]; then
+  path=($JAVA_HOME/bin $path)
+fi
