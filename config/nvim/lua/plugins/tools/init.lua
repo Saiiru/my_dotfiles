@@ -8,4 +8,5 @@ return {
   require("plugins.tools.debugging"),
   require("plugins.tools.testing"),
   require("plugins.tools.quicker"),
+  require("plugins.tools.mise"),
 }
