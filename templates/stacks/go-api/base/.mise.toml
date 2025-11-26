@@ -1,0 +1,21 @@
+[tools]
+go = "1.22"
+
+[tasks.dev]
+description = "Roda servidor Go"
+run = "go run ./cmd/server"
+
+[tasks.test]
+description = "Testes Go"
+run = "go test ./..."
+
+[tasks.lint]
+description = "go vet (lint básico)"
+run = "go vet ./..."
+
+[tasks.qa]
+description = "vet + test"
+run = """
+go vet ./...
+go test ./...
+"""

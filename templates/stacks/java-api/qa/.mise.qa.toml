@@ -1,0 +1,11 @@
+[tasks.test]
+description = "Roda testes com Maven"
+run = "mvn -B test"
+
+[tasks.qa]
+description = "Pipeline QA: clean + test + verify"
+run = """
+mvn -B clean
+mvn -B test
+mvn -B verify
+"""

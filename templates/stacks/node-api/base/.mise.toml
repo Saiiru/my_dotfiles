@@ -1,0 +1,21 @@
+[tools]
+node = "lts"
+
+[tasks.dev]
+description = "Dev server (nodemon)"
+run = "pnpm dev || npm run dev"
+
+[tasks.test]
+description = "Testes (Jest)"
+run = "pnpm test || npm test"
+
+[tasks.lint]
+description = "ESLint"
+run = "pnpm lint || npm run lint"
+
+[tasks.qa]
+description = "lint + test"
+run = """
+pnpm lint || npm run lint
+pnpm test || npm test
+"""

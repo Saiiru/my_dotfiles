@@ -1,0 +1,31 @@
+[tools]
+java = "__JAVA_VERSION__"
+maven = "latest"
+
+[tasks.dev]
+description = "Spring Boot em dev"
+run = "./mvnw spring-boot:run"
+
+[tasks.test]
+description = "Testes unitários"
+run = "./mvnw test"
+
+[tasks.lint]
+description = "Verify (lint/static) sem testes"
+run = "./mvnw verify -DskipTests"
+
+[tasks.qa]
+description = "clean + test + verify"
+run = """
+./mvnw clean
+./mvnw test
+./mvnw verify
+"""
+
+[tasks.docker-up]
+description = "Sobe app via docker compose (builda imagem)"
+run = "docker compose up --build"
+
+[tasks.docker-down]
+description = "Derruba docker compose"
+run = "docker compose down -v"

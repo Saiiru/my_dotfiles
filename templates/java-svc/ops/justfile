@@ -1,0 +1,51 @@
+# Justfile padrão para serviço Spring Boot (Batman)
+
+default:
+  @just help
+
+help:
+  @echo "Comandos disponíveis:"
+  @just --list
+
+env-copy:
+  @cp -n env/.env.example env/.env || true
+  @echo "Env preparado em env/.env"
+
+dev:
+  ./mvnw spring-boot:run
+
+test:
+  ./mvnw test
+
+build:
+  ./mvnw -DskipTests package
+
+fmt:
+  ./mvnw spotless:apply || true
+
+lint:
+  ./mvnw -B verify -DskipTests
+
+qa:
+  ./mvnw -B clean
+  ./mvnw -B test
+  ./mvnw -B verify
+
+db-up:
+  docker compose -f docker/docker-compose.yml up -d db
+
+db-down:
+  docker compose -f docker/docker-compose.yml down db
+
+dev-up:
+  docker compose -f docker/docker-compose.yml up -d
+
+dev-down:
+  docker compose -f docker/docker-compose.yml down
+
+logs:
+  docker compose -f docker/docker-compose.yml logs -f app
+
+ci:
+  ./mvnw -B test
+  ./mvnw -B verify

@@ -1,0 +1,44 @@
+pipeline {
+  agent any
+
+  tools {
+    nodejs 'node-20'
+  }
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Install') {
+      steps {
+        sh 'pnpm install || npm install'
+      }
+    }
+
+    stage('Lint') {
+      steps {
+        sh 'pnpm lint || npm run lint'
+      }
+    }
+
+    stage('Test') {
+      steps {
+        sh 'pnpm test || npm test'
+      }
+    }
+
+    stage('Build') {
+      steps {
+        sh 'pnpm build || npm run build'
+      }
+    }
+  }
+}
