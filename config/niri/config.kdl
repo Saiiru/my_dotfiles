@@ -53,6 +53,7 @@ layout {
     active-color "#3fb5ff"
     inactive-color "#262d3c"
   }
+
 }
 
 overview {
@@ -71,15 +72,15 @@ animations {
     spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
   }
   window-open {
-    duration-ms 160
+    duration-ms 120
     curve "ease-out-quad"
   }
   window-close {
-    duration-ms 160
+    duration-ms 120
     curve "ease-out-cubic"
   }
   window-movement {
-    spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+    spring damping-ratio=1.05 stiffness=950 epsilon=0.0001
   }
   overview-open-close {
     spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
@@ -106,6 +107,13 @@ window-rule {
   open-on-workspace "GAME"
   open-fullscreen true
   variable-refresh-rate true
+}
+
+// Suavizar cantos em todas as janelas
+window-rule {
+  match app-id=r#".*"#  // aplica a qualquer app
+  geometry-corner-radius 8
+  clip-to-geometry true
 }
 
 debug {
@@ -165,8 +173,9 @@ spawn-at-startup "nm-applet"
 spawn-at-startup "swww-daemon"
 spawn-at-startup "syshud"
 spawn-at-startup "qs"
-spawn-at-startup "~/.config/niri/scripts/suspend.sh"
-spawn-at-startup "~/.config/niri/scripts/lock.sh"
+spawn-at-startup "sh" "-c" "command -v elephant >/dev/null 2>&1 && elephant"
+spawn-at-startup "sh" "-c" "command -v walker >/dev/null 2>&1 && walker --gapplication-service"
+spawn-at-startup "sh" "-c" "command -v /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 >/dev/null 2>&1 && /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
 spawn-at-startup "swww" "img" "/home/sairu/workstation/wallpapers/wallhaven-o5rjq9.png" "--transition-type" "grow" "--resize" "fit"
 
 binds {
@@ -175,6 +184,15 @@ binds {
   }
   Mod+D {
     spawn-sh "command -v walker-launch >/dev/null 2>&1 && walker-launch || walker"
+  }
+  Mod+F1 {
+    spawn-sh "$HOME/workstation/scripts/elephant-sync default"
+  }
+  Mod+F2 {
+    spawn-sh "$HOME/workstation/scripts/elephant-sync dev"
+  }
+  Mod+F3 {
+    spawn-sh "$HOME/workstation/scripts/elephant-sync game"
   }
   Mod+Alt+L {
     spawn "~/.config/niri/scripts/lock.sh"
@@ -316,5 +334,29 @@ binds {
 
   Mod+Shift+E {
     quit
+  }
+}
+
+window-rule {
+  match app-id="kitty"
+  opacity 0.90
+  geometry-corner-radius 8
+  clip-to-geometry true
+  focus-ring {
+    width 1.5
+    active-color "#00e5ff"
+    inactive-color "#505b73"
+  }
+  border {
+    width 1
+    active-color "#111827"
+    inactive-color "#0b101f"
+  }
+  shadow {
+    on
+    softness 25
+    spread 5
+    offset x=0 y=5
+    color "#00000080"
   }
 }
