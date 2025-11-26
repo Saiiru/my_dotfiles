@@ -4,6 +4,11 @@ local function mason_path(pkg)
   local ok, registry = pcall(require, "mason-registry")
   if not ok or not registry.has_package(pkg) then return nil end
   local p = registry.get_package(pkg)
+  if not p then
+    registry.refresh()
+    p = registry.get_package(pkg)
+  end
+  if not p then return nil end
   if not p:is_installed() then p:install() end
   return p:get_install_path()
 end

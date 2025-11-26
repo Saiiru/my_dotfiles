@@ -1,5 +1,9 @@
 ---@type LazySpec
--- NOTE: For .NET Development
+-- NOTE: For .NET Development (only if dotnet is available)
+if vim.fn.executable("dotnet") == 0 then
+  return {}
+end
+
 return {
   "GustavEikaas/easy-dotnet.nvim",
   event = "VeryLazy",
