@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Syncs the current "Elephant" context to a state file used by the Bat HUD.
+# Usage: elephant-sync <context> (default|dev|game|anything)
+set -euo pipefail
+
+ctx="${1:-default}"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/neon-niri"
+state_file="$state_dir/context"
+
+mkdir -p "$state_dir"
+printf "%s\n" "$ctx" > "$state_file"
+
+# Opcional: notificação leve se notify-send existir (não falha se ausente)
+if command -v notify-send >/dev/null 2>&1; then
+  notify-send -a "Elephant" "Contexto atualizado" "$ctx" || true
+fi
