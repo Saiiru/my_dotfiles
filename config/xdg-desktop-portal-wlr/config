@@ -1,0 +1,6 @@
+screencast_output=*
+screencast_cursor=embedded
+max_fps=60
+chooser_type=simple
+with_gpu=true
+with_pipewire=true
