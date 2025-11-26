@@ -70,3 +70,9 @@ niri-setup/
 config/niri/config.kdl.active
 config/quickshell.backup*/
 config/zsh.backup*/
+# Local development / scratch
+Main.java
+README.md
+config/tmux/plugins/
+config/tmux/tmbak/
+dotfiles/
