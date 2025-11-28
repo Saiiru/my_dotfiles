@@ -81,9 +81,12 @@ main() {
       [[ "$choice" == "Dev + Tests" ]] && layout_go_dev
       ;;
     *)
-      echo "Stack desconhecida (procura pom.xml / pyproject.toml / go.mod). Saindo."
+      echo "Stack desconhecida (procura pom.xml / pyproject.toml / go.mod)."
       ;;
   esac
+
+  echo
+  read -r -p "Pressione ENTER para fechar o popup..." _
 }
 
 main "$@"
