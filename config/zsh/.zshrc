@@ -4,16 +4,6 @@
 # load env vars from .zprofile into the shells
 [[ -f ~/.zprofile ]] && source ~/.zprofile
 
-# Homebrew (somente se existir; útil em macOS)
-if command -v brew >/dev/null 2>&1; then
-  eval "$(brew shellenv)"
-fi
-
-# gdircolors (GNU coreutils via brew); se não existir, ignore
-if command -v gdircolors >/dev/null 2>&1; then
-  eval "$(gdircolors)"
-fi
-
 # oh-my-zsh (só se estiver instalado)
 if [[ -n "${ZSH:-}" && -r "$ZSH/oh-my-zsh.sh" ]]; then
   source "$ZSH/oh-my-zsh.sh"
@@ -47,6 +37,12 @@ fi
 # Atuin Configs
 export ATUIN_NOBIND="true"
 if command -v atuin >/dev/null 2>&1; then
+  # garante que ~/.config/atuin é diretório
+  if [[ -f "$HOME/.config/atuin" ]]; then
+    echo "⚠ ~/.config/atuin é um arquivo; renomeie ou remova para usar atuin."
+  else
+    mkdir -p "$HOME/.config/atuin"
+  fi
   eval "$(atuin init zsh)"
   bindkey '^r' atuin-up-search-viins
 fi
@@ -131,9 +127,7 @@ alias sethvault="cd ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/set
 
 # brew installations activation (new mac systems brew path: opt/homebrew , not usr/local )
 # source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-if command -v brew >/dev/null 2>&1 && [[ -r "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-  source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-elif [[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+if [[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
   source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
