@@ -1,0 +1,348 @@
+# ~/workstation/config/starship/starship.toml
+# DRAGON-OPS Starship Configuration
+# Batman/Red Hood Industrial HUD Theme
+
+#═══════════════════════════════════════════════════════════════════════════
+# CORE CONFIGURATION
+#═══════════════════════════════════════════════════════════════════════════
+
+format = """
+[╭─](bold cyan) $custom.userhost $directory$git_branch$git_status$git_state$java$golang$python$nodejs$rust$docker_context$kubernetes$jobs$cmd_duration$line_break[╰─](bold cyan)$character"""
+
+# Right prompt (time)
+right_format = """$time"""
+
+# Continuation prompt
+continuation_prompt = "[∙](bold cyan) "
+
+# Scan timeout
+scan_timeout = 30
+command_timeout = 500
+add_newline = true
+
+#═══════════════════════════════════════════════════════════════════════════
+# COLOR PALETTE (Batman Industrial)
+#═══════════════════════════════════════════════════════════════════════════
+
+[palettes.bat_hud]
+# Core colors (Batman industrial)
+bg = "#08090d"
+fg = "#e6edf3"
+dark = "#11141b"
+gray = "#7f8694"
+gray_soft = "#5b6370"
+
+# Accent colors (Red Hood / WayneTech)
+red = "#e01b44"
+cyan = "#45c7d9"
+yellow = "#f3cf4f"
+green = "#48f29c"
+magenta = "#ff4d91"
+orange = "#ff8b48"
+blue = "#4a78c8"
+
+# Status colors
+active = "#e01b44"
+inactive = "#5b6370"
+warning = "#f3cf4f"
+success = "#48f29c"
+
+palette = "bat_hud"
+
+#═══════════════════════════════════════════════════════════════════════════
+# PROMPT COMPONENTS
+#═══════════════════════════════════════════════════════════════════════════
+
+[character]
+success_symbol = "[λ](bold green)"
+error_symbol = "[λ](bold red)"
+vimcmd_symbol = "[λ](bold cyan)"
+
+[username]
+disabled = true
+
+[hostname]
+disabled = true
+
+[custom.userhost]
+description = "User@Host no mesmo bloco, sem espaços extras"
+command = "printf '[%s 󰭟 %s]' \"$USER\" \"$(hostname -s)\""
+when = "true"
+format = "[$output](cyan bold)"
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+format = "[$path]($style)"
+style = "red bold"
+read_only = "󰌾"
+read_only_style = "red"
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"~/workstation" = " workstation"
+"~/workspace" = "󱧼 workspace"
+"~" = "󰋜 home"
+
+#═══════════════════════════════════════════════════════════════════════════
+# GIT INTEGRATION
+#═══════════════════════════════════════════════════════════════════════════
+
+[git_branch]
+symbol = ""
+format = " [$branch]($style)"
+style = "cyan bold"
+truncation_length = 20
+truncation_symbol = "…"
+
+[git_status]
+format = " [$all_status$ahead_behind]($style)"
+style = "yellow bold"
+conflicted = "[ ${count}](red bold)"
+ahead = "[ ${count}](cyan bold)"
+behind = "[ ${count}](orange bold)"
+diverged = "[ ${ahead_count} ${behind_count}](yellow bold)"
+untracked = "[? ${count}](magenta bold)"
+stashed = "[󰆓 ${count}](gray bold)"
+modified = "[! ${count}](yellow bold)"
+staged = "[+ ${count}](green bold)"
+renamed = "[» ${count}](cyan bold)"
+deleted = "[ ${count}](red bold)"
+
+[git_state]
+format = ' [\($state $progress_current/$progress_total\)]($style)'
+style = "orange bold"
+cherry_pick = "[ PICK](yellow bold)"
+rebase = "[ REBASE](orange bold)"
+merge = "[ MERGE](red bold)"
+revert = "[ REVERT](magenta bold)"
+bisect = "[ BISECT](cyan bold)"
+
+#═══════════════════════════════════════════════════════════════════════════
+# LANGUAGE MODULES
+#═══════════════════════════════════════════════════════════════════════════
+
+[java]
+symbol = " "
+format = " [$symbol($version)]($style)"
+style = "yellow bold"
+disabled = false
+detect_extensions = ["java", "class", "jar", "gradle", "kt", "kts"]
+detect_files = ["pom.xml", "build.gradle.kts", "build.gradle", ".java-version"]
+detect_folders = ["src/main/java"]
+
+[golang]
+symbol = "󰟓 "
+format = " [$symbol($version)]($style)"
+style = "cyan bold"
+disabled = false
+detect_extensions = ["go"]
+detect_files = ["go.mod", "go.sum", "go.work"]
+detect_folders = []
+
+[python]
+symbol = " "
+format = " [${symbol}${pyenv_prefix}(${version})(\\($virtualenv\\))]($style)"
+style = "yellow bold"
+disabled = false
+pyenv_version_name = false
+pyenv_prefix = ""
+detect_extensions = ["py"]
+detect_files = [".python-version", "Pipfile", "pyproject.toml", "requirements.txt", "setup.py", "tox.ini"]
+detect_folders = []
+
+[nodejs]
+symbol = "󰎙 "
+format = " [$symbol($version)]($style)"
+style = "green bold"
+disabled = false
+detect_extensions = ["js", "mjs", "cjs", "ts", "mts", "cts"]
+detect_files = ["package.json", ".node-version", ".nvmrc"]
+detect_folders = ["node_modules"]
+
+[rust]
+symbol = " "
+format = " [$symbol($version)]($style)"
+style = "red bold"
+disabled = false
+detect_extensions = ["rs"]
+detect_files = ["Cargo.toml", "Cargo.lock"]
+detect_folders = []
+
+#═══════════════════════════════════════════════════════════════════════════
+# INFRASTRUCTURE MODULES
+#═══════════════════════════════════════════════════════════════════════════
+
+[docker_context]
+symbol = " "
+format = " [$symbol$context]($style)"
+style = "blue bold"
+only_with_files = true
+disabled = false
+detect_files = ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"]
+
+[kubernetes]
+symbol = "󱃾 "
+format = " [$symbol$context(/$namespace)]($style)"
+style = "cyan bold"
+disabled = false
+detect_files = ["k8s"]
+detect_extensions = ["yaml", "yml"]
+detect_folders = ["k8s", "kubernetes"]
+
+[kubernetes.context_aliases]
+"docker-desktop" = "docker"
+"minikube" = "mini"
+
+#═══════════════════════════════════════════════════════════════════════════
+# SYSTEM STATUS
+#═══════════════════════════════════════════════════════════════════════════
+
+[cmd_duration]
+min_time = 2000
+format = " [⏱ $duration]($style)"
+style = "yellow bold"
+show_milliseconds = false
+disabled = false
+
+[jobs]
+symbol = " "
+format = " [$symbol$number]($style)"
+style = "red bold"
+number_threshold = 1
+symbol_threshold = 1
+disabled = false
+
+[time]
+disabled = false
+format = "[\\[$time\\]](gray_soft)"
+time_format = "%H:%M:%S"
+use_12hr = false
+
+#═══════════════════════════════════════════════════════════════════════════
+# ADDITIONAL LANGUAGE SUPPORT
+#═══════════════════════════════════════════════════════════════════════════
+
+[c]
+symbol = " "
+format = " [-\\[](magenta)[$symbol($version)]($style)[\\]](magenta)"
+style = "blue bold"
+disabled = false
+
+[lua]
+symbol = "󰢱 "
+format = " [-\\[](magenta)[$symbol($version)]($style)[\\]](magenta)"
+style = "blue bold"
+disabled = false
+
+[ruby]
+symbol = " "
+format = " [-\\[](magenta)[$symbol($version)]($style)[\\]](magenta)"
+style = "red bold"
+disabled = false
+
+[php]
+symbol = "󰌟 "
+format = " [-\\[](magenta)[$symbol($version)]($style)[\\]](magenta)"
+style = "magenta bold"
+disabled = false
+
+#═══════════════════════════════════════════════════════════════════════════
+# CLOUD PROVIDERS
+#═══════════════════════════════════════════════════════════════════════════
+
+[aws]
+symbol = " "
+format = " [-\\[](magenta)[$symbol($profile)(\\($region\\))]($style)[\\]](magenta)"
+style = "orange bold"
+disabled = false
+
+[gcloud]
+symbol = "󱇶 "
+format = " [-\\[](magenta)[$symbol$account(@$domain)(\\($region\\))]($style)[\\]](magenta)"
+style = "blue bold"
+disabled = false
+
+[azure]
+symbol = "󰠅 "
+format = " [-\\[](magenta)[$symbol($subscription)]($style)[\\]](magenta)"
+style = "cyan bold"
+disabled = false
+
+#═══════════════════════════════════════════════════════════════════════════
+# PACKAGE MANAGERS
+#═══════════════════════════════════════════════════════════════════════════
+
+[package]
+symbol = "󰏗 "
+format = " [-\\[](magenta)[$symbol$version]($style)[\\]](magenta)"
+style = "cyan bold"
+disabled = false
+display_private = false
+
+#═══════════════════════════════════════════════════════════════════════════
+# BATTERY (for laptops)
+#═══════════════════════════════════════════════════════════════════════════
+
+[battery]
+full_symbol = "󰁹 "
+charging_symbol = "󰂄 "
+discharging_symbol = "󰂃 "
+unknown_symbol = "󰂑 "
+empty_symbol = "󰂎 "
+disabled = false
+
+[[battery.display]]
+threshold = 15
+style = "red bold"
+discharging_symbol = "󰂎 "
+
+[[battery.display]]
+threshold = 30
+style = "yellow bold"
+discharging_symbol = "󰁾 "
+
+[[battery.display]]
+threshold = 100
+style = "green bold"
+
+#═══════════════════════════════════════════════════════════════════════════
+# MEMORY USAGE
+#═══════════════════════════════════════════════════════════════════════════
+
+[memory_usage]
+disabled = false
+threshold = 75
+symbol = "󰍛 "
+format = " [-\\[](magenta)[$symbol${ram}]($style)[\\]](magenta)"
+style = "red bold"
+
+#═══════════════════════════════════════════════════════════════════════════
+# SHELL
+#═══════════════════════════════════════════════════════════════════════════
+
+[shell]
+bash_indicator = "bsh"
+fish_indicator = "fsh"
+zsh_indicator = "zsh"
+powershell_indicator = "psh"
+disabled = true
+
+#═══════════════════════════════════════════════════════════════════════════
+# CUSTOM MODULES (Examples)
+#═══════════════════════════════════════════════════════════════════════════
+
+[custom.mise]
+command = "mise current"
+when = "[[ -f .mise.toml || -f mise.toml ]]"
+symbol = " "
+format = " [-\\[](magenta)[$symbol$output]($style)[\\]](magenta)"
+style = "cyan bold"
+disabled = true
+
+[env_var.BATCAVE_MODE]
+variable = "BATCAVE_MODE"
+symbol = "󰯉 "
+format = " [-\\[](magenta)[$symbol$env_value]($style)[\\]](magenta)"
+style = "red bold"
+disabled = true

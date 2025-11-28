@@ -43,10 +43,43 @@ main() {
     fzf gum zoxide eza yazi fd ripgrep bat direnv tldr
 
   install_pacman "Git/Docker/Processos" \
-    lazygit lazydocker k9s btop mprocs
+    lazygit lazydocker k9s btop
+
+  # mprocs não está no repo oficial em algumas installs; tenta via paru/yay se disponível
+  if ! pacman -Qi mprocs >/dev/null 2>&1; then
+    if command -v paru >/dev/null 2>&1; then
+      info "Tentando instalar mprocs via paru"
+      paru -S --needed --noconfirm mprocs || warn "mprocs não instalado (paru falhou)"
+    elif command -v yay >/dev/null 2>&1; then
+      info "Tentando instalar mprocs via yay"
+      yay -S --needed --noconfirm mprocs || warn "mprocs não instalado (yay falhou)"
+    else
+      warn "mprocs não encontrado no pacman; instale via AUR (paru/yay) se precisar."
+    fi
+  else
+    info "mprocs já instalado"
+  fi
 
   install_pacman "Utilitários" \
-    dua-cli dust hyperfine timg glow jq gojq jless sd procs curlie
+    dua-cli dust hyperfine glow jq jless sd procs curlie
+
+  # Pacotes opcionais/AUR (tenta paru/yay se existir; não falha se não achar)
+  opt_aur=(mprocs timg gojq)
+  for pkg in "${opt_aur[@]}"; do
+    if pacman -Qi "$pkg" >/dev/null 2>&1; then
+      info "$pkg já instalado"
+      continue
+    fi
+    if command -v paru >/dev/null 2>&1; then
+      info "Tentando instalar $pkg via paru"
+      paru -S --needed --noconfirm "$pkg" || warn "$pkg não instalado (paru falhou)"
+    elif command -v yay >/dev/null 2>&1; then
+      info "Tentando instalar $pkg via yay"
+      yay -S --needed --noconfirm "$pkg" || warn "$pkg não instalado (yay falhou)"
+    else
+      warn "$pkg não encontrado no pacman; instale via AUR (paru/yay) se precisar."
+    fi
+  done
 
   # oh-my-zsh (clone direto, já que no Arch não vem no pacman oficial)
   if [[ ! -d "$HOME/.oh-my-zsh" ]]; then

@@ -37,7 +37,7 @@ gradle  = "latest"
 rust    = "stable"
 
 # SQL / DB tooling (ajuste se plugin disponível)
-# sqlfluff = "latest"
+sqlfluff = "latest"
 
 # Utilidades gerais (dependem de plugins do mise)
 # eza     = "latest"

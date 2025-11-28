@@ -1,0 +1,170 @@
+# ────────────────────────────────────────────────────────────────
+# tmux.conf · DRAGON-BAT CONTROL NODE
+# Prefix C-a, status topo enxuto, paleta neon igual ao Kitty.
+# Menus em prefix+letra, panes centralizados para QA/dev.
+# ────────────────────────────────────────────────────────────────
+
+unbind C-b
+set -g prefix C-a
+bind C-a send-prefix
+
+set -g base-index 1
+setw -g pane-base-index 1
+set -g renumber-windows on
+
+set -g history-limit 50000
+set -g mouse on
+set -g escape-time 0
+set -g focus-events on
+set -g set-clipboard on
+set -g set-titles on
+set -g set-titles-string "󰯉 #S · #W"
+
+set -g default-terminal "tmux-256color"
+set -as terminal-overrides ",xterm-256color:RGB"
+
+# Paleta retangular (contraste alto)
+%hidden BG="#0b0c10"
+%hidden FG="#e6edf3"
+%hidden ACTIVE_BG="#ff4d6d"
+%hidden ACTIVE_FG="#0b0c10"
+%hidden INACTIVE_BG="#161a1f"
+%hidden INACTIVE_FG="#8a93a5"
+%hidden ACC="#4dd0e1"
+%hidden TRI_LEFT="#(printf '\uE0B2')"   # 
+%hidden TRI_RIGHT="#(printf '\uE0B0')"  # 
+
+# Status topo quadradão (sem hora/branch)
+set -g status on
+set -g status-position top
+set -g status-interval 2
+set -g status-justify centre
+set -g status-style "bg=#0b0c10,fg=#e6edf3,bold"
+set -g status-left-length 80
+set -g status-right-length 80
+
+# Blocos retangulares, sem powerline
+set -g status-left "\
+#[bg=#dc143c,fg=#0a0b0d,bold] 󰯉 #h \
+#[bg=#1f232a,fg=#e6edf3,bold]#{pane_user}@#S \
+#[default]"
+set -g status-right "\
+#[bg=#12161c,fg=#4dd0e1,bold]#h \
+#[default]"
+
+# Janelas (quadradas, separadas por espaços)
+set -g window-status-style "bg=#161a1f,fg=#8a93a5,bold"
+set -g window-status-format "\
+#[bg=#161a1f,fg=#8a93a5] #I | #W #[default]"
+set -g window-status-current-format "\
+#[bg=#ff4d6d,fg=#0b0c10,bold] #I | #W #[default]"
+set -g window-status-separator " "
+
+# Bordas / mensagens
+set -g pane-border-style "fg=${INACTIVE_BG}"
+set -g pane-active-border-style "fg=${ACTIVE_BG}"
+set -g message-style "bg=${ACTIVE_BG},fg=${BG},bold"
+set -g message-command-style "bg=${ACC},fg=${BG},bold"
+
+# Splits / navegação / resize
+bind c new-window  -c "#{pane_current_path}"
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+bind -n M-h resize-pane -L 3
+bind -n M-j resize-pane -D 3
+bind -n M-k resize-pane -U 3
+bind -n M-l resize-pane -R 3
+bind = select-layout even-horizontal
+bind + select-layout even-vertical
+bind Space next-layout
+bind q confirm-before -p "Kill pane #P? (y/n)" kill-pane
+bind Q confirm-before -p "Kill window #W? (y/n)" kill-window
+bind r source-file ~/.config/tmux/tmux.conf \; display "󰯉 tmux reloaded"
+
+# Copy-mode vi + clipboard
+setw -g mode-keys vi
+bind Escape copy-mode
+bind -T copy-mode-vi v     send-keys -X begin-selection
+bind -T copy-mode-vi V     send-keys -X select-line
+bind -T copy-mode-vi C-v   send-keys -X rectangle-toggle
+bind -T copy-mode-vi y     send-keys -X copy-pipe-and-cancel "wl-copy 2>/dev/null || xclip -sel clip"
+bind -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "wl-copy 2>/dev/null || xclip -sel clip"
+bind -T copy-mode-vi Escape send-keys -X cancel
+bind p run "wl-paste 2>/dev/null | tmux load-buffer - && tmux paste-buffer"
+
+# Vim-tmux navigator
+is_vim="ps -o state= -o comm= -t '#{pane_tty}' | grep -iqE '^[^TXZ ]+ +(\\S+/)?g?(n?vim?x?)(diff)?$'"
+bind -n C-h if-shell "$is_vim" "send-keys C-h" "select-pane -L"
+bind -n C-j if-shell "$is_vim" "send-keys C-j" "select-pane -D"
+bind -n C-k if-shell "$is_vim" "send-keys C-k" "select-pane -U"
+bind -n C-l if-shell "$is_vim" "send-keys C-l" "select-pane -R"
+
+# Plugins TPM + extras
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'tmux-plugins/tmux-yank'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+set -g @plugin 'omerxx/tmux-sessionx'
+set -g @plugin 'omerxx/tmux-floax'
+set -g @plugin 'wfxr/tmux-fzf-url'
+set -g @resurrect-strategy-nvim 'session'
+set -g @resurrect-capture-pane-contents 'on'
+set -g @continuum-restore 'on'
+set -g @continuum-save-interval '5'
+set -g @sessionx-bind 'o'
+set -g @sessionx-preview-location 'right'
+set -g @sessionx-preview-ratio '55%'
+set -g @floax-bind 'p'
+set -g @floax-bind-menu 'P'
+set -g @floax-width  '80%'
+set -g @floax-height '80%'
+
+# Menus (prefix + letra)
+bind-key q display-menu -T "#[align=centre] QA / Tests" \
+  "Tests (bat-qa-test)"   t "split-window -v -c '#{pane_current_path}' 'bat-qa-test; read'" \
+  "Lint  (bat-qa-lint)"   l "split-window -v -c '#{pane_current_path}' 'bat-qa-lint; read'" \
+  "" "" "" \
+  "mise qa-check"         c "split-window -v -c '#{pane_current_path}' 'mise run qa-check; read'" \
+  "mise dev-shell"        d "split-window -h -c '#{pane_current_path}' 'TMUX= mise run dev-shell 2>/dev/null || TMUX= zsh'"
+
+bind-key n display-menu -T "#[align=centre] Projects / Stack" \
+  "bat-mk (novo proj)"    m "display-popup -w 80% -h 60% -E 'cd #{pane_current_path} && bat-mk'" \
+  "bat_init_stack"        i "display-popup -w 80% -h 60% -E 'cd #{pane_current_path} && bat_init_stack'" \
+  "New Java API"          j "display-popup -w 80% -h 60% -E 'cd #{pane_current_path} && bat-new-project java-api'"
+
+bind-key e display-menu -T "#[align=centre]󰙅 Files / Code" \
+  "zoxide+fd+fzf -> nvim"  z "display-popup -w 80% -h 80% -E 'cd #{pane_current_path} && ~/workstation/bin/zoxide_openfiles_nvim.sh'" \
+  "Old files (fzf_listold)" o "display-popup -w 80% -h 60% -E 'cd #{pane_current_path} && ~/workstation/bin/fzf_listoldfiles.sh'"
+
+bind-key g display-menu -T "#[align=centre] Git" \
+  "fzf-git"                f "display-popup -w 80% -h 80% -E 'cd #{pane_current_path} && ~/workstation/bin/fzf-git.sh'" \
+  "git status"             s "split-window -v -c '#{pane_current_path}' 'git status -sb; read'" \
+  "git log -20"            l "split-window -v -c '#{pane_current_path}' 'git log --oneline -20; read'"
+
+bind-key L display-menu -T "#[align=centre] Layouts Dev/QA" \
+  "QEA Java (bat_tmux_qea_java)" j "run-shell 'bat_tmux_qea_java \"#{pane_current_path}\"'" \
+  "Generic Dev/QA (bat_tmux_devqa)" d "run-shell 'bat_tmux_devqa \"#{pane_current_path}\"'"
+
+bind-key b run-shell "tmux-floax 'btop'"
+# FZF HUB desativado (plugin tmux-fzf removido). Reative se instalar plugin.
+unbind f
+
+# BAT-HUD: popup global (usa ~/workstation/bin/bat_hud.sh)
+bind-key H display-popup -E -w 80% -h 80% "cd #{pane_current_path} && ~/workstation/bin/bat_hud.sh"
+
+# Stack layouts (popup com menu via gum/fallback)
+bind-key S display-popup -E -w 80% -h 70% "cd #{pane_current_path} && ~/workstation/bin/bat_tmux_stack.sh"
+
+# F-keys úteis
+bind-key -n F8 display-popup -E -w 40% -h 60% "cal -3 && read"
+bind-key -n F9 run-shell 'bat_tmux_qea_java --no-attach "#{pane_current_path}"'
+bind-key -n F11 new-window -c "#{pane_current_path}" "bat_init_stack"
+bind-key -n F12 new-window -c "#{pane_current_path}" "TMUX= mise run dev-shell 2>/dev/null || TMUX= zsh"
+
+# TPM init
+run '~/.tmux/plugins/tpm/tpm'
