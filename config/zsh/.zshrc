@@ -35,6 +35,11 @@ fi
 [[ -r "$ZSH_CONFIG_ROOT/user/aliases.zsh" ]]  && source "$ZSH_CONFIG_ROOT/user/aliases.zsh"
 [[ -r "$ZSH_CONFIG_ROOT/lib/functions.zsh" ]] && source "$ZSH_CONFIG_ROOT/lib/functions.zsh"
 
+# mise (gerencia shims de node/npm, go, java, python, etc.)
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
+
 # Tema / prompt Bat-HUD (duas linhas, colchetes sem espaços internos)
 autoload -Uz promptinit; promptinit
 [[ -r "$ZSH_CONFIG_ROOT/themes/bat-hud.zsh" ]] && source "$ZSH_CONFIG_ROOT/themes/bat-hud.zsh"
