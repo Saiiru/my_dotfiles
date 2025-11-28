@@ -4,13 +4,20 @@
 # load env vars from .zprofile into the shells
 [[ -f ~/.zprofile ]] && source ~/.zprofile
 
-eval "$(brew shellenv)"
-# source .zprofile in all zsh shells (just in case)
-# [[ -f "$HOME/.zprofile" ]] && source "$HOME/.zprofile"
+# Homebrew (somente se existir; útil em macOS)
+if command -v brew >/dev/null 2>&1; then
+  eval "$(brew shellenv)"
+fi
 
-eval "$(gdircolors)"
+# gdircolors (GNU coreutils via brew); se não existir, ignore
+if command -v gdircolors >/dev/null 2>&1; then
+  eval "$(gdircolors)"
+fi
 
-source $ZSH/oh-my-zsh.sh
+# oh-my-zsh (só se estiver instalado)
+if [[ -n "${ZSH:-}" && -r "$ZSH/oh-my-zsh.sh" ]]; then
+  source "$ZSH/oh-my-zsh.sh"
+fi
 
 # unbind ctrl g in terminal
 bindkey -r "^G"
@@ -21,23 +28,28 @@ if [[ "${widgets[zle-keymap-select]#user:}" == "starship_zle-keymap-select" || \
       "${widgets[zle-keymap-select]#user:}" == "starship_zle-keymap-select-wrapped" ]]; then
     zle -N zle-keymap-select "";
 fi
-eval "$(starship init zsh)"
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 
 # Zoxide
-eval "$(zoxide init zsh)"
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
 
 # FZF
-eval "$(fzf --zsh)"
+command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh)"
 
 # FZF with Git right in the shell by Junegunn : check out his github below
 # Keymaps for this is available at https://github.com/junegunn/fzf-git.sh
-source ~/scripts/fzf-git.sh
+if [[ -r "$HOME/workstation/config/scripts/scripts/fzf-git.sh" ]]; then
+  source "$HOME/workstation/config/scripts/scripts/fzf-git.sh"
+elif [[ -r "$HOME/scripts/fzf-git.sh" ]]; then
+  source "$HOME/scripts/fzf-git.sh"
+fi
 
 # Atuin Configs
 export ATUIN_NOBIND="true"
-eval "$(atuin init zsh)"
-# bindkey '^r' _atuin_search_widget
-bindkey '^r' atuin-up-search-viins
+if command -v atuin >/dev/null 2>&1; then
+  eval "$(atuin init zsh)"
+  bindkey '^r' atuin-up-search-viins
+fi
 #User configuration
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -75,16 +87,16 @@ alias vim="nvim"
 alias tmux="tmux -f $TMUX_CONF"
 alias a="attach"
 # calls the tmux new session script
-alias tns="~/scripts/tmux-sessionizer"
+alias tns="$HOME/workstation/config/scripts/scripts/tmux-sessionizer"
 
 # fzf 
 # called from ~/scripts/
-alias nlof="~/scripts/fzf_listoldfiles.sh"
+alias nlof="$HOME/workstation/config/scripts/scripts/fzf_listoldfiles.sh"
 # opens documentation through fzf (eg: git,zsh etc.)
 alias fman="compgen -c | fzf | xargs man"
 
 # zoxide (called from ~/scripts/)
-alias nzo="~/scripts/zoxide_openfiles_nvim.sh"
+alias nzo="$HOME/workstation/config/scripts/scripts/zoxide_openfiles_nvim.sh"
 
 # Next level of an ls 
 # options :  --no-filesize --no-time --no-permissions 
@@ -119,6 +131,11 @@ alias sethvault="cd ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/set
 
 # brew installations activation (new mac systems brew path: opt/homebrew , not usr/local )
 # source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+if command -v brew >/dev/null 2>&1 && [[ -r "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+  source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+elif [[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+  source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
 
-. "/Users/personal/.deno/env"
+# Deno (desabilitado; ative se usar)
+# . \"$HOME/.deno/env\"

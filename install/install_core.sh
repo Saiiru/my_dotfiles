@@ -37,7 +37,7 @@ main() {
     base-devel git curl wget
 
   install_pacman "Shell/Terminal" \
-    tmux zsh neovim
+    tmux zsh neovim starship atuin zsh-syntax-highlighting
 
   install_pacman "Navegação/Produtividade" \
     fzf gum zoxide eza yazi fd ripgrep bat direnv tldr
@@ -48,9 +48,18 @@ main() {
   install_pacman "Utilitários" \
     dua-cli dust hyperfine timg glow jq gojq jless sd procs curlie
 
+  # oh-my-zsh (clone direto, já que no Arch não vem no pacman oficial)
+  if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+    info "Instalando oh-my-zsh (clone)..."
+    git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
+  else
+    info "oh-my-zsh já presente em $HOME/.oh-my-zsh"
+  fi
+
   info "Done. Ative no zsh (se ainda não):"
   echo '  eval "$(zoxide init zsh)"'
   echo '  eval "$(direnv hook zsh)"'
+  echo '  command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"'
 }
 
 main "$@"
