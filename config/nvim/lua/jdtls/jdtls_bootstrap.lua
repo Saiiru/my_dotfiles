@@ -23,12 +23,16 @@ function M.get_java_home()
   local java_home = vim.env.JAVA_HOME
   if java_home and vim.fn.isdirectory(java_home) == 1 then return java_home end
   if vim.fn.executable("mise") == 1 then
-    local handle = io.popen("mise where java 2>/dev/null")
-    if handle then
-      local mise_java = handle:read("*a"):gsub("%s+$", "")
-      handle:close()
-      if mise_java ~= "" and vim.fn.isdirectory(mise_java) == 1 then
-        return mise_java
+    -- prefer modern JDKs first
+    local candidates = { "java@21", "java@17", "java" }
+    for _, ver in ipairs(candidates) do
+      local handle = io.popen(string.format("mise where %s 2>/dev/null", ver))
+      if handle then
+        local mise_java = handle:read("*a"):gsub("%s+$", "")
+        handle:close()
+        if mise_java ~= "" and vim.fn.isdirectory(mise_java) == 1 then
+          return mise_java
+        end
       end
     end
   end
@@ -172,7 +176,15 @@ function M.setup_jdtls(bufnr)
       vim.keymap.set("v", "<leader>cjm", function() require('jdtls').extract_method(true) end, opts)
       vim.notify("[JDTLS] Attached to buffer " .. buf, vim.log.levels.INFO)
     end,
-    capabilities = require("cmp_nvim_lsp").default_capabilities(),
+    -- Capabilities: prefer cmp_nvim_lsp when available, otherwise fallback
+    capabilities = (function()
+      local base = vim.lsp.protocol.make_client_capabilities()
+      local ok, cmp = pcall(require, "cmp_nvim_lsp")
+      if ok and cmp.default_capabilities then
+        return cmp.default_capabilities(base)
+      end
+      return base
+    end)(),
   }
 
   require("jdtls").start_or_attach(config)

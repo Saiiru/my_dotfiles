@@ -1,32 +1,124 @@
-# DRAGON-VEGA · Batcave Shell · NEON-NIRI (modular v4)
+# export PATH=$HOME/bin:/usr/local/bin:$PATH
+# echo source ~/.bash_profile
 
-export WORKSTATION_DIR="${WORKSTATION_DIR:-$HOME/workstation}"
-export ZDOTDIR="$WORKSTATION_DIR/config/zsh"
+# load env vars from .zprofile into the shells
+[[ -f ~/.zprofile ]] && source ~/.zprofile
 
-export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
-export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+eval "$(brew shellenv)"
+# source .zprofile in all zsh shells (just in case)
+# [[ -f "$HOME/.zprofile" ]] && source "$HOME/.zprofile"
 
-# Core modules
-for cfg in "$ZDOTDIR"/core/*.zsh; do
-  [ -r "$cfg" ] && source "$cfg"
-done
+eval "$(gdircolors)"
 
-# Theme
-[ -r "$ZDOTDIR/themes/penumbra-cyberpunk.zsh" ] && source "$ZDOTDIR/themes/penumbra-cyberpunk.zsh"
+source $ZSH/oh-my-zsh.sh
 
-# Plugins
-[ -r "$ZDOTDIR/plugins/plugins.zsh" ] && source "$ZDOTDIR/plugins/plugins.zsh"
+# unbind ctrl g in terminal
+bindkey -r "^G"
 
-# User aliases / functions
-[ -r "$ZDOTDIR/user/aliases.zsh" ] && source "$ZDOTDIR/user/aliases.zsh"
-[ -r "$ZDOTDIR/lib/functions.zsh" ] && source "$ZDOTDIR/lib/functions.zsh"
-
-# Prompt / HUD
-autoload -Uz promptinit; promptinit
-[ -r "$ZDOTDIR/themes/bat-hud.zsh" ] && source "$ZDOTDIR/themes/bat-hud.zsh"
-
-# mise activation
-if command -v mise >/dev/null 2>&1; then
-  eval "$(mise activate zsh)"
+# Starship 
+bindkey -v
+if [[ "${widgets[zle-keymap-select]#user:}" == "starship_zle-keymap-select" || \
+      "${widgets[zle-keymap-select]#user:}" == "starship_zle-keymap-select-wrapped" ]]; then
+    zle -N zle-keymap-select "";
 fi
+eval "$(starship init zsh)"
+
+# Zoxide
+eval "$(zoxide init zsh)"
+
+# FZF
+eval "$(fzf --zsh)"
+
+# FZF with Git right in the shell by Junegunn : check out his github below
+# Keymaps for this is available at https://github.com/junegunn/fzf-git.sh
+source ~/scripts/fzf-git.sh
+
+# Atuin Configs
+export ATUIN_NOBIND="true"
+eval "$(atuin init zsh)"
+# bindkey '^r' _atuin_search_widget
+bindkey '^r' atuin-up-search-viins
+#User configuration
+# export MANPATH="/usr/local/man:$MANPATH"
+
+#----- Vim Editing modes & keymaps ------ 
+set -o vi
+
+export EDITOR=nvim
+export VISUAL=nvim
+
+bindkey -M viins '^E' autosuggest-accept
+bindkey -M viins '^P' up-line-or-history
+bindkey -M viins '^N' down-line-or-history
+#----------------------------------------
+
+# zsh plugins
+plugins=(
+    git 
+    ## with oh-my-zsh and not homebrew
+    # zsh-autosuggestions ( git clone <find link in the repo> and uncomment  )
+    # zsh-syntax-highlighting ( git clone <find link in the repo> and uncomment )
+    web-search
+)
+
+# -------------------ALIAS----------------------
+# These alias need to have the same exact space as written here
+# HACK: For Running Go Server using Air
+alias air='$(go env GOPATH)/bin/air'
+
+# other Aliases shortcuts
+alias c="clear"
+alias e="exit"
+alias vim="nvim"
+
+# Tmux 
+alias tmux="tmux -f $TMUX_CONF"
+alias a="attach"
+# calls the tmux new session script
+alias tns="~/scripts/tmux-sessionizer"
+
+# fzf 
+# called from ~/scripts/
+alias nlof="~/scripts/fzf_listoldfiles.sh"
+# opens documentation through fzf (eg: git,zsh etc.)
+alias fman="compgen -c | fzf | xargs man"
+
+# zoxide (called from ~/scripts/)
+alias nzo="~/scripts/zoxide_openfiles_nvim.sh"
+
+# Next level of an ls 
+# options :  --no-filesize --no-time --no-permissions 
+alias ls="eza --no-filesize --long --color=always --icons=always --no-user" 
+
+# tree
+alias tree="tree -L 3 -a -I '.git' --charset X "
+alias dtree="tree -L 3 -a -d -I '.git' --charset X "
+
+# lstr
+alias lstr="lstr --icons"
+
+# git aliases
+alias gt="git"
+alias ga="git add ."
+alias gs="git status -s"
+alias gc='git commit -m'
+alias glog='git log --oneline --graph --all'
+alias gh-create='gh repo create --private --source=. --remote=origin && git push -u --all && gh browse'
+
+alias nvim-scratch="NVIM_APPNAME=nvim-scratch nvim"
+
+# lazygit
+alias lg="lazygit"
+
+# mpd start alias
+alias mpds="mpd ~/.config/mpd/mpd.conf"
+
+# obsidian icloud path
+alias sethvault="cd ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/sethVault/"
+# ---------------------------------------
+
+# brew installations activation (new mac systems brew path: opt/homebrew , not usr/local )
+# source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+. "/Users/personal/.deno/env"

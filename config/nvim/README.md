@@ -2,8 +2,8 @@
 
 - Base: LazyVim with full extras (see `lazyvim.json`).
 - Theme: cyberdream (transparent).
-- Java: `mfussenegger/nvim-jdtls` via `lua/jdtls/jdtls_setup.lua` (auto on FileType java). Needs `jdtls`, `java-debug-adapter`, `java-test` via :Mason.
-- Inlay hints: `inlay-hints.nvim` included; attach automatically on LSP.
+- Java: `mfussenegger/nvim-jdtls` bootstrapped by `lua/jdtls/jdtls_bootstrap.lua` (auto on FileType java via `after/ftplugin/java.lua`). Needs `jdtls`, `java-debug-adapter`, `java-test` via :Mason.
+- Inlay hints: native LSP inlay hints auto-enabled on attach (`lua/plugins/lsp/inlay-hints.lua`).
 - Mise: tasks picker `<leader>tm` and prompt `<leader>tr` (ToggleTerm if available), parsing `[tasks]` from `.mise.toml`.
 
 Quick start:
