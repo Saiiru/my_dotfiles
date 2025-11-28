@@ -26,18 +26,15 @@ yarn    = "latest"
 python  = "3.12"
 
 # Go
-go      = "latest"
+go      = "1.22"
 
 # Java & Build
-java    = "11"
+java    = "21"
 maven   = "latest"
 gradle  = "latest"
 
 # Rust
 rust    = "stable"
-
-# SQL / DB tooling (ajuste se plugin disponível)
-sqlfluff = "latest"
 
 # Utilidades gerais (dependem de plugins do mise)
 # eza     = "latest"
@@ -125,3 +122,17 @@ run = """
 rustc --version || true
 cargo --version || true
 """
+
+# ───────────────────────────── HUD / TMUX / STARTERS ──────────────────────────
+
+[tasks.hud]
+description = "🦇 Abrir BAT-HUD (stack-aware) no diretório atual"
+run = "bash $HOME/workstation/bin/bat_hud.sh"
+
+[tasks.new-project]
+description = "🆕 Criar projeto a partir dos starters (java|python|go)"
+run = "bash $HOME/workstation/bin/bat_new_project.sh"
+
+[tasks.tmux-stack]
+description = "📐 Abrir sessão tmux com layout dev/test/logs (stack-aware)"
+run = "bash $HOME/workstation/bin/bat_tmux_stack.sh"
