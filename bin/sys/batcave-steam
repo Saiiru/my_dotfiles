@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Launcher simples para Steam em contexto Batcave
+set -euo pipefail
+export STEAM_FORCE_DESKTOPUI_SCALING=1.0
+exec steam "$@"

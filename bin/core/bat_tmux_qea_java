@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# bat_tmux_qea_java - Layout tmux para projetos Java (QEA)
+# Uso: bat_tmux_qea_java [CAMINHO_DO_PROJETO]
+set -euo pipefail
+
+SESSION=""
+PROJECT_ROOT="$PWD"
+NO_DOCKER=0
+NO_DB=0
+ATTACH=1
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --no-docker) NO_DOCKER=1; shift ;;
+    --no-db)     NO_DB=1; shift ;;
+    --no-attach) ATTACH=0; shift ;;
+    *) PROJECT_ROOT="$1"; shift ;;
+  esac
+done
+
+PROJECT_NAME="$(basename "$PROJECT_ROOT")"
+
+# Se já estiver dentro do tmux, só cria uma nova janela na sessão atual
+if [[ -n "${TMUX:-}" ]]; then
+  SESSION="$(tmux display-message -p '#S')"
+  ATTACH=0
+  base_w="qea-${PROJECT_NAME}"
+  WIN_NAME="$base_w"
+  idx=2
+  while tmux list-windows -t "$SESSION" -F '#W' | grep -qx "$WIN_NAME"; do
+    WIN_NAME="${base_w}-${idx}"
+    idx=$((idx+1))
+  done
+  tmux new-window -t "$SESSION" -n "$WIN_NAME" -c "$PROJECT_ROOT"
+else
+  SESSION="${BAT_QEA_SESSION:-qea-${PROJECT_NAME}}"
+  if tmux has-session -t "$SESSION" 2>/dev/null; then
+    tmux attach -t "$SESSION"
+    exit 0
+  fi
+  WIN_NAME="code"
+  tmux new-session -d -s "$SESSION" -c "$PROJECT_ROOT" -n "$WIN_NAME"
+fi
+
+# Referência do alvo principal (primeira janela)
+TARGET="${SESSION}:${WIN_NAME}"
+
+# Pane 1: editor
+tmux send-keys -t "${TARGET}.1" "nvim" C-m
+
+# Pane 2: tests (embaixo)
+# Pane 2/3: grade 2x2 centralizada
+tmux split-window -v -t "$TARGET" -c "$PROJECT_ROOT"
+tmux split-window -h -t "$TARGET" -c "$PROJECT_ROOT"
+tmux split-window -h -t "${TARGET}.2" -c "$PROJECT_ROOT"
+
+# Agora temos:
+# .1 editor (top-left)
+# .2 (top-right)
+# .3 (bottom-left)
+# .4 (bottom-right)
+
+tmux select-pane -t "${TARGET}.2"
+tmux send-keys "mvn -B test" C-m
+
+tmux select-pane -t "${TARGET}.3"
+tmux send-keys "docker compose logs -f app" C-m
+
+tmux select-pane -t "${TARGET}.4"
+tmux send-keys "bash" C-m
+
+# Window 2: ops (compose up / db logs)
+if (( ! NO_DOCKER )); then
+  tmux new-window -t "$SESSION" -n "ops" -c "$PROJECT_ROOT"
+  tmux send-keys -t "$SESSION:ops.1" "docker compose up --build" C-m
+  tmux split-window -v -t "$SESSION:ops" -c "$PROJECT_ROOT"
+  tmux send-keys -t "$SESSION:ops.2" "docker compose logs -f db" C-m
+fi
+
+# Window 3: db (psql)
+if (( ! NO_DB )) && [[ -n "${DATABASE_URL:-}" ]]; then
+  tmux new-window -t "$SESSION" -n "db" -c "$PROJECT_ROOT"
+  tmux send-keys -t "$SESSION:db.1" 'psql "$DATABASE_URL"' C-m
+fi
+
+# Foco em code
+tmux select-window -t "$TARGET"
+tmux select-pane -t "${TARGET}.1"
+
+if (( ATTACH )); then
+  tmux attach -t "$SESSION"
+fi

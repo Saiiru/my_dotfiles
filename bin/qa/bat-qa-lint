@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# bat-qa-lint - roda lint/verificações priorizando mise run lint
+set -euo pipefail
+
+if command -v mise >/dev/null 2>&1 && [ -f ".mise.toml" ]; then
+  if mise run lint; then
+    exit 0
+  fi
+  echo "[bat-qa-lint] mise run lint falhou, tentando fallback..." >&2
+fi
+
+if [ -f "pom.xml" ]; then
+  echo "[QA] Maven verify (lint)"
+  mvn -B verify -DskipTests
+elif [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+  echo "[QA] Gradle check (lint)"
+  ./gradlew check || gradle check
+elif [ -f "package.json" ]; then
+  echo "[QA] Node lint"
+  if jq -e '.scripts.lint' package.json >/dev/null 2>&1; then
+    pnpm lint || npm run lint
+  else
+    echo "[QA] Nenhum script lint definido."
+  fi
+elif [ -f "go.mod" ]; then
+  echo "[QA] Go vet"
+  go vet ./...
+elif [ -f "Cargo.toml" ]; then
+  echo "[QA] Rust clippy"
+  cargo clippy -- -D warnings
+else
+  echo "[bat-qa-lint] Nenhuma stack suportada detectada." >&2
+  exit 1
+fi

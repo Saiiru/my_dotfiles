@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# RED HOOD CYBERPUNK - FONT INSTALLER
+# Instala nerd fonts recomendadas para terminal/IDE
+set -euo pipefail
+
+FONT_DIR="$HOME/.local/share/fonts"
+TEMP_DIR="$(mktemp -d /tmp/red-hood-fonts.XXXXXX)"
+
+mkdir -p "$FONT_DIR" "$TEMP_DIR"
+cd "$TEMP_DIR"
+
+echo "🔥 RED HOOD FONT INSTALLER"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+install_font() {
+  local name="${1:-}"
+  local url="${2:-}"
+  if [[ -z "$name" || -z "$url" ]]; then
+    echo "SKIP: install_font missing args" >&2
+    return 1
+  fi
+  local dir="$FONT_DIR/$name"
+  echo "📦 Installing ${name} Nerd Font..."
+  wget -q --show-progress "$url"
+  unzip -q "${name}.zip" -d "$dir"
+  rm -f "${name}.zip"
+  echo "✓ ${name} installed"
+}
+
+install_font "CascadiaCode" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/CascadiaCode.zip"
+install_font "FiraCode"     "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip"
+install_font "JetBrainsMono" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip"
+install_font "VictorMono"    "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/VictorMono.zip"
+install_font "Iosevka"       "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Iosevka.zip"
+install_font "Mononoki"      "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Mononoki.zip"
+install_font "Hack"          "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Hack.zip"
+
+echo "🔄 Rebuilding font cache..."
+fc-cache -fv >/dev/null 2>&1
+
+rm -rf "$TEMP_DIR"
+
+cat <<'MSG'
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ ALL FONTS INSTALLED!
+
+Recomendado:
+  Kitty/Ghostty: CascadiaCode Nerd Font
+  Alternativas: FiraCode, JetBrainsMono, Iosevka, VictorMono, Mononoki, Hack
+
+Reinicie o terminal para aplicar.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MSG

@@ -54,3 +54,7 @@ fi
 
 # command-not-found (se existir)
 [[ -f /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
+
+
+# BAT-HUD alias
+hud(){ mise run -c ~/github/workstation/.mise.toml hud "$@"; }

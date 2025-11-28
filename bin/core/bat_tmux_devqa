@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# bat_tmux_devqa - Layout tmux genérico para Dev/QA
+# Uso: bat_tmux_devqa [CAMINHO_DO_PROJETO]
+set -euo pipefail
+
+PROJECT_ROOT="${1:-$PWD}"
+PROJECT_NAME="$(basename "$PROJECT_ROOT")"
+SESSION="devqa-${PROJECT_NAME}"
+
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+  tmux attach -t "$SESSION"
+  exit 0
+fi
+
+# Janela code
+tmux new-session -d -s "$SESSION" -c "$PROJECT_ROOT" -n "code"
+tmux send-keys -t "$SESSION:code.1" "cd \"$PROJECT_ROOT\" && nvim ." C-m
+# Grade 2x2 central na janela code
+tmux split-window -v -t "$SESSION:code" -c "$PROJECT_ROOT"
+tmux split-window -h -t "$SESSION:code" -c "$PROJECT_ROOT"
+tmux split-window -h -t "$SESSION:code.2" -c "$PROJECT_ROOT"
+# Panes: .1 editor; .2 tests; .3 lint; .4 livre/logs
+tmux select-pane -t "$SESSION:code.2"
+tmux send-keys "bat-qa-test" C-m
+tmux select-pane -t "$SESSION:code.3"
+tmux send-keys "bat-qa-lint" C-m
+tmux select-pane -t "$SESSION:code.4"
+tmux send-keys "bash" C-m
+
+# Janela QA
+tmux new-window -t "$SESSION" -n "qa" -c "$PROJECT_ROOT"
+# Janela QA (logs e comandos livres)
+tmux new-window -t "$SESSION" -n "qa" -c "$PROJECT_ROOT"
+tmux send-keys -t "$SESSION:qa.1" "cd \"$PROJECT_ROOT\" && bat-qa-test" C-m
+tmux split-window -v -t "$SESSION:qa" -c "$PROJECT_ROOT"
+tmux send-keys -t "$SESSION:qa.2" "cd \"$PROJECT_ROOT\" && bat-qa-lint" C-m
+
+# Janela ops (docker)
+tmux new-window -t "$SESSION" -n "ops" -c "$PROJECT_ROOT"
+tmux send-keys -t "$SESSION:ops.1" "cd \"$PROJECT_ROOT\" && docker compose up --build" C-m
+tmux split-window -v -t "$SESSION:ops" -c "$PROJECT_ROOT"
+tmux send-keys -t "$SESSION:ops.2" "cd \"$PROJECT_ROOT\" && docker compose logs -f" C-m
+
+# Janela db
+tmux new-window -t "$SESSION" -n "db" -c "$PROJECT_ROOT"
+if [[ -n "${DATABASE_URL:-}" ]]; then
+  tmux send-keys -t "$SESSION:db.1" 'psql "$DATABASE_URL"' C-m
+else
+  tmux send-keys -t "$SESSION:db.1" "echo 'Defina DATABASE_URL para conectar via psql'; bash" C-m
+fi
+
+tmux select-window -t "$SESSION:code"
+tmux select-pane -t "$SESSION:code.1"
+tmux attach -t "$SESSION"

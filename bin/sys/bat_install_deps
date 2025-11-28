@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# bat_install_deps - instala dependências básicas (Arch) para tmux + scripts
+# Inclui: tmux, fzf, ripgrep, fd, bat, tree, wl-clipboard, xclip, git, btop, zoxide, python
+# NÃO instala plugins TPM; apenas pacotes do sistema.
+set -euo pipefail
+
+PKGS=(
+  tmux fzf ripgrep fd bat tree
+  wl-clipboard xclip
+  git btop
+  zoxide
+  python
+)
+
+echo "[bat_install_deps] Installing packages (pacman)..."
+sudo pacman -S --needed --noconfirm "${PKGS[@]}"
+echo "[bat_install_deps] Done."

@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# bat_portal_install - linka configs do xdg-desktop-portal (wlr) do repo
+# Uso: bat_portal_install
+set -euo pipefail
+
+ROOT="${WORKSTATION_DIR:-$HOME/workstation}"
+
+link() {
+  local src="$1" dest="$2"
+  mkdir -p "$(dirname "$dest")"
+  if [[ -e "$dest" || -L "$dest" ]]; then
+    echo "[bat_portal_install] destino existe, mantendo: $dest"
+  else
+    ln -s "$src" "$dest"
+    echo "[bat_portal_install] linkado: $src -> $dest"
+  fi
+}
+
+link "$ROOT/config/xdg-desktop-portal/xdg-desktop-portal.conf" \
+     "$HOME/.config/xdg-desktop-portal/xdg-desktop-portal.conf"
+
+link "$ROOT/config/xdg-desktop-portal-wlr/config" \
+     "$HOME/.config/xdg-desktop-portal-wlr/config"
+
+echo "[bat_portal_install] done. Reinicie o xdg-desktop-portal (ou relogue) se necessário."

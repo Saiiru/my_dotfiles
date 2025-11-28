@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# tmux-calendar: mostra agenda/Calendário no popup.
+# Se gcalcli estiver configurado (Gmail/Google Calendar), usa agenda.
+# Caso contrário, mostra um cal -3 simples.
+set -euo pipefail
+
+# Garante que ~/.local/bin está no PATH para gcalcli --user
+export PATH="$HOME/.local/bin:$PATH"
+
+if command -v gcalcli >/dev/null 2>&1; then
+  # Se não houver token, avisa como autorizar
+  if [[ ! -f "$HOME/.config/gcalcli/oauth" && ! -f "$HOME/.cache/gcalcli/oauth.json" ]]; then
+    echo "gcalcli instalado, mas falta autorizar."
+    echo "Rode em um terminal:"
+    echo "  gcalcli list   # abrirá o navegador para OAuth"
+    echo "Depois use F8 de novo."
+    exit 0
+  fi
+
+  # Mostra agenda; se falhar, não fecha na hora
+  gcalcli --nocache agenda --details calendar,title,start,end,location \
+    --nodeclined --monday --lineart=ascii --width 90 \
+  || {
+    echo
+    echo "Falha ao ler agenda. Tente:"
+    echo "  gcalcli list --refresh"
+    sleep 3
+  }
+else
+  cal -3
+fi

@@ -1,0 +1,306 @@
+#!/usr/bin/env bash
+# bat_init_stack - Initializr de terminal para stacks Batman
+# Suporta: Java Spring Boot API + Postgres | Node.js Express API + Postgres
+
+set -euo pipefail
+
+WORKSPACE_DEFAULT="${WORKSPACE_DIR:-$HOME/workspace}"
+HAS_GUM=0
+if command -v gum >/dev/null 2>&1; then
+  HAS_GUM=1
+fi
+
+die() { echo "[bat_init_stack] $*" >&2; exit 1; }
+
+require() {
+  command -v "$1" >/dev/null 2>&1 || die "Dependência não encontrada: $1"
+}
+
+prompt_default() {
+  local __var="$1"; shift
+  local __prompt="$1"; shift
+  local __default="$1"; shift
+  local __val
+  read -r -p "${__prompt} [${__default}]: " __val || true
+  if [[ -z "${__val}" ]]; then __val="${__default}"; fi
+  printf -v "${__var}" '%s' "${__val}"
+}
+
+choose_stack() {
+  local choice
+  echo "=== BAT INIT STACK ==="
+  if (( HAS_GUM )); then
+    choice=$(gum choose "Java Spring Boot API" "Node.js Express API" "Quit") || exit 1
+    case "$choice" in
+      "Java Spring Boot API") STACK="java-spring" ;;
+      "Node.js Express API")  STACK="node-express" ;;
+      "Quit") exit 0 ;;
+    esac
+  else
+    echo "1) Java Spring Boot API"
+    echo "2) Node.js Express API"
+    echo "q) Quit"
+    read -r -p "Escolha: " choice || true
+    case "$choice" in
+      1) STACK="java-spring" ;;
+      2) STACK="node-express" ;;
+      q|Q) exit 0 ;;
+      *) die "Opção inválida" ;;
+    esac
+  fi
+}
+
+java_spring() {
+  local project="$1" target="$2"
+  require curl; require unzip
+
+  local groupId packageName javaVersion buildTool bootVersion deps dep_choice
+
+  prompt_default groupId     "GroupId"                    "com.batcave"
+  prompt_default packageName "Package base"               "${groupId}.${project}"
+  prompt_default javaVersion "Java version"               "17"
+  prompt_default buildTool   "Build tool (maven-project/gradle-project)" "maven-project"
+  prompt_default bootVersion "Spring Boot version (vazio = latest)"     ""
+
+  echo "Selecione dependências Spring (multi-escolha):"
+  local opts=("web" "data-jpa" "validation" "lombok" "devtools" "actuator" "testcontainers" "security")
+  if (( HAS_GUM )); then
+    deps=$(gum choose --no-limit "${opts[@]}" | paste -sd, -) || deps=""
+  else
+    echo " 1) web   2) data-jpa   3) validation   4) lombok"
+    echo " 5) devtools   6) actuator   7) testcontainers   8) security"
+    read -r -p "Escolha (ex: 1 2 4): " dep_choice || true
+    deps=""
+    for n in $dep_choice; do
+      case "$n" in
+        1) deps+=",web" ;;
+        2) deps+=",data-jpa" ;;
+        3) deps+=",validation" ;;
+        4) deps+=",lombok" ;;
+        5) deps+=",devtools" ;;
+        6) deps+=",actuator" ;;
+        7) deps+=",testcontainers" ;;
+        8) deps+=",security" ;;
+      esac
+    done
+    deps="${deps#,}"
+  fi
+
+  mkdir -p "$target"
+  pushd "$target" >/dev/null
+
+  local zip="${project}.zip"
+  local base_url="https://start.spring.io/starter.zip"
+  curl -s "$base_url" \
+    -d "type=${buildTool}" \
+    -d "language=java" \
+    -d "groupId=${groupId}" \
+    -d "artifactId=${project}" \
+    -d "name=${project}" \
+    -d "packageName=${packageName}" \
+    -d "javaVersion=${javaVersion}" \
+    ${bootVersion:+-d "bootVersion=${bootVersion}"} \
+    ${deps:+-d "dependencies=${deps}"} \
+    -o "$zip"
+
+  unzip -q "$zip"
+  rm "$zip"
+
+  # Detecta diretório extraído (start.spring.io pode embutir pasta)
+  local extracted
+  extracted="$(find . -maxdepth 1 -type d \( -name "$project" -o -name "${project}-"* \) | head -n1)"
+  [[ -z "$extracted" ]] && extracted="$(find . -maxdepth 1 -type d ! -name '.' | head -n1)"
+  [[ -z "$extracted" ]] && die "Não foi possível localizar diretório extraído."
+  cd "$extracted"
+
+  mkdir -p db
+  cat > db/init.sql <<'EOF'
+CREATE TABLE IF NOT EXISTS users (
+  id          BIGSERIAL PRIMARY KEY,
+  username    VARCHAR(64)  NOT NULL UNIQUE,
+  email       VARCHAR(128) NOT NULL UNIQUE,
+  created_at  TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+EOF
+
+  cat > docker-compose.yml <<EOF
+version: "3.8"
+services:
+  db:
+    image: postgres:16
+    container_name: ${project}_db
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - app-net
+networks:
+  app-net:
+    driver: bridge
+EOF
+
+  if [[ ! -f src/main/resources/application.yml && ! -f src/main/resources/application.properties ]]; then
+    mkdir -p src/main/resources
+    cat > src/main/resources/application.yml <<'EOF'
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/appdb
+    username: app
+    password: app
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+EOF
+  fi
+
+  popd >/dev/null
+  echo "[OK] Projeto Java criado em: ${target}/${project}"
+  echo "Próximos passos:"
+  echo "  cd ${target}/${project}"
+  echo "  docker compose up -d db"
+  echo "  ./mvnw spring-boot:run   # ou ./gradlew bootRun"
+}
+
+node_express() {
+  local project="$1" target="$2"
+  require npm; require jq
+
+  mkdir -p "$target/$project"
+  pushd "$target/$project" >/dev/null
+
+  npm init -y >/dev/null 2>&1
+  npm install express cors dotenv pg >/dev/null 2>&1
+  npm install --save-dev nodemon jest supertest eslint >/dev/null 2>&1
+
+  mkdir -p src db
+  cat > src/index.js <<'EOF'
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import pkg from "pg";
+
+dotenv.config();
+const { Pool } = pkg;
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || "postgres://app:app@localhost:5432/appdb",
+});
+
+app.get("/health", async (_req, res) => {
+  try {
+    await pool.query("SELECT 1");
+    res.json({ status: "ok" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: "error" });
+  }
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`API on port ${port}`));
+EOF
+
+  cat > db/init.sql <<'EOF'
+CREATE TABLE IF NOT EXISTS events (
+  id          BIGSERIAL PRIMARY KEY,
+  type        VARCHAR(64)  NOT NULL,
+  payload     JSONB        NOT NULL,
+  created_at  TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+EOF
+
+  cat > docker-compose.yml <<'EOF'
+version: "3.8"
+services:
+  db:
+    image: postgres:16
+    container_name: node_api_db
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - app-net
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: node_api
+    environment:
+      DATABASE_URL: postgres://app:app@db:5432/appdb
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
+EOF
+
+  cat > Dockerfile <<'EOF'
+FROM node:22-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+ENV PORT=3000
+CMD ["npm", "run", "start"]
+EOF
+
+  jq '.scripts += { "start":"node src/index.js", "dev":"nodemon src/index.js", "test":"jest" }' \
+    package.json > package.json.tmp && mv package.json.tmp package.json
+
+  popd >/dev/null
+  echo "[OK] Projeto Node criado em: ${target}/${project}"
+  echo "Próximos passos:"
+  echo "  cd ${target}/${project}"
+  echo "  docker compose up --build"
+  echo "  curl http://localhost:3000/health"
+}
+
+main() {
+  local project stack target_dir
+  project="${1-}"
+  stack="${STACK-}"
+
+  if [[ -z "$project" ]]; then
+    read -r -p "Nome do projeto (artifactId): " project
+  fi
+  [[ -z "$project" ]] && die "Informe um nome de projeto."
+
+  if [[ -z "$stack" ]]; then
+    choose_stack
+    stack="$STACK"
+  fi
+
+  prompt_default target_dir "Diretório destino" "$WORKSPACE_DEFAULT"
+
+  case "$stack" in
+    java-spring)   java_spring "$project" "$target_dir" ;;
+    node-express)  node_express "$project" "$target_dir" ;;
+    *) die "Stack desconhecida: $stack" ;;
+  esac
+}
+
+main "$@"

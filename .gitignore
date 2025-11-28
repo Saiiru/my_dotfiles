@@ -40,8 +40,7 @@ __pycache__/
 venv/
 *.egg-info/
 
-# Go
-/bin/
+# Go (somente build caches, NÃO scripts gerais)
 /pkg/
 
 # NixOS config (não versionar aqui)
@@ -61,18 +60,21 @@ local.toml
 text.txt
 my-fonts/
 
-# Documentation (ignore all .md except main README)
+# Documentation (ignore all .md except principais)
 *.md
 !README.md
 !docs/NEON-NIRI.md
+!docs/**
 niriconf/
 niri-setup/
 config/niri/config.kdl.active
 config/quickshell.backup*/
 config/zsh.backup*/
-# Local development / scratch
-Main.java
-README.md
 config/tmux/plugins/
 config/tmux/tmbak/
-dotfiles/
+
+# Local development / scratch
+Main.java
+# context e scratch são locais
+context.md
+scratch/

@@ -1,0 +1,345 @@
+#!/usr/bin/env bash
+# bat-mk – Gerador de projetos (Batman Stack)
+# Suporta: java-api (node/go prontos quando houver starter)
+# Flags: --name, --dir, --with-sample, --with-tests, --with-qa, --non-interactive
+set -euo pipefail
+
+ROOT="${WORKSTATION_ROOT:-$HOME/workstation}"
+TEMPLATES_ROOT="${ROOT}/templates"
+README_TEMPLATE="${TEMPLATES_ROOT}/readme/README.base.md"
+
+STACK=""
+NAME=""
+TARGET_DIR=""
+WITH_SAMPLE=0
+WITH_TESTS=0
+WITH_QA=0
+NON_INTERACTIVE=0
+# TLS do Maven às vezes falha; deixa install opcional.
+RUN_INSTALL=0
+
+slugify() {
+  # Converte nome para slug em-kebab: minusculo, separador -, sem duplicatas
+  local input="${1:-}"
+  local slug
+  slug="$(echo "$input" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//; s/-+/-/g')"
+  [[ -n "$slug" ]] || slug="app"
+  echo "$slug"
+}
+
+pascal_case() {
+  # Transforma slug/strings variadas em PascalCase
+  local input="${1:-}"
+  local out="" word
+  # troca separadores não alfanum por espaço e faz capitalização
+  input="$(echo "$input" | sed 's/[^a-zA-Z0-9]/ /g')"
+  for word in $input; do
+    local lower="${word,,}"
+    out+="${lower^}"
+  done
+  echo "$out"
+}
+
+usage() {
+  cat <<EOF
+bat-mk – Batman Stack Project Generator
+
+Uso:
+  bat-mk <stack> --name NOME [opções]
+
+Stacks:
+  java-api   Spring Boot REST (Maven)
+  (node-api / go-api: habilite quando tiver starters publicados)
+
+Opções:
+  --name NOME         Nome do projeto (obrigatório)
+  --dir CAMINHO       Diretório alvo (default: ./NOME)
+  --with-sample       Adiciona rota /health de exemplo
+  --with-tests        Adiciona testes básicos
+  --with-qa           Adiciona Jenkinsfile + .mise.qa
+  --install           Roda install/tidy após gerar (padrão é não rodar)
+  --non-interactive   Falha se faltar --name
+  -h, --help          Ajuda
+EOF
+}
+
+die() { printf "[bat-mk] ERRO: %s\n" "$*" >&2; exit 1; }
+log() { printf "[bat-mk] %s\n" "$*"; }
+
+parse_args() {
+  [[ $# -ge 1 ]] || { usage; exit 1; }
+  STACK="$1"; shift
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --name) NAME="${2:-}"; shift 2 ;;
+      --dir)  TARGET_DIR="${2:-}"; shift 2 ;;
+      --with-sample) WITH_SAMPLE=1; shift ;;
+      --with-tests)  WITH_TESTS=1; shift ;;
+      --with-qa)     WITH_QA=1; shift ;;
+      --install)     RUN_INSTALL=1; shift ;;
+      --non-interactive) NON_INTERACTIVE=1; shift ;;
+      -h|--help) usage; exit 0 ;;
+      *) die "Opção desconhecida: $1" ;;
+    esac
+  done
+}
+
+ensure_stack_supported() {
+  case "$STACK" in
+    java-api) ;;
+    # Adicione node-api/go-api quando publicar os starters correspondentes
+    *) die "Stack desconhecida: $STACK" ;;
+  esac
+}
+
+ask_if_needed() {
+  if [[ -z "$NAME" ]]; then
+    if (( NON_INTERACTIVE )); then
+      die "--name é obrigatório em modo não-interativo."
+    fi
+    read -rp "Nome do projeto: " NAME
+    [[ -z "$NAME" ]] && die "Nome não pode ser vazio."
+  fi
+}
+
+stack_base_dir() {
+  local base="${DRAGON_WORKSPACE:-$HOME/workspace}"
+  case "$STACK" in
+    java-api) echo "$base/java" ;;
+    node-api) echo "$base/node" ;;
+    go-api)   echo "$base/go" ;;
+    *)        echo "$base/projects" ;;
+  esac
+}
+
+copy_tree() {
+  local src="$1" dst="$2"
+  [[ -d "$src" ]] || return 0
+  rsync -a "$src"/ "$dst"/
+}
+
+ensure_mvnw() {
+  local dir="$1"
+  # Só para stacks Java
+  [[ "$STACK" != "java-api" ]] && return 0
+  # Baixa o jar da wrapper se não existir
+  if [[ -x "$dir/mvnw" && ! -f "$dir/.mvn/wrapper/maven-wrapper.jar" ]]; then
+    mkdir -p "$dir/.mvn/wrapper"
+    curl -k -fsSL "https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.2.0/maven-wrapper-3.2.0.jar" \
+      -o "$dir/.mvn/wrapper/maven-wrapper.jar" \
+      || wget --no-check-certificate -O "$dir/.mvn/wrapper/maven-wrapper.jar" \
+        "https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.2.0/maven-wrapper-3.2.0.jar" || true
+  fi
+}
+
+substitute_placeholders() {
+  local dir="$1"
+  local project_name="$NAME"
+  local project_slug
+  project_slug="$(slugify "$NAME")"
+
+  local project_slug_us="${project_slug//-/_}"
+  local module_path="github.com/your-org/${project_slug}"
+  local base_pkg="com.${project_slug//-/.}"
+  local base_pkg_path="${base_pkg//./\/}"
+  local app_class
+  app_class="$(pascal_case "$project_slug")Application"
+  local api_title="${project_name} API"
+  local hello_msg="Hello from ${project_name}!"
+
+  find "$dir" -type f -print0 | while IFS= read -r -d '' f; do
+    perl -pi -e "
+      s/__PROJECT_NAME__/$project_name/g;
+      s/__PROJECT_SLUG__/$project_slug/g;
+      s/__STACK__/$STACK/g;
+      s#__MODULE_PATH__#$module_path#g;
+      s#com\\.neonforge\\.starter#$base_pkg#g;
+      s/__JAVA_VERSION__/17/g;
+      s/java-api-starter/$project_slug/g;
+      s/NeonForge Java API Starter/$api_title/g;
+      s/NeonforgeStarterApplication/$app_class/g;
+      s/Hello from NeonForge starter!/$hello_msg/g;
+      s/NeonForge/$project_name/g;
+      s/starterdb/${project_slug_us}db/g;
+      s#postgres://starter:starter@localhost:5432/starter#postgres://${project_slug_us}:${project_slug_us}@localhost:5432/${project_slug_us}#g;
+    " "$f"
+  done
+
+  if [[ "$STACK" == "java-api" ]]; then
+    local from_main="$dir/src/main/java/com/neonforge/starter"
+    local from_test="$dir/src/test/java/com/neonforge/starter"
+    local to_main="$dir/src/main/java/${base_pkg_path}"
+    local to_test="$dir/src/test/java/${base_pkg_path}"
+    if [[ -d "$from_main" ]]; then
+      mkdir -p "$to_main"
+      mv "$from_main"/* "$to_main"/
+      rmdir --ignore-fail-on-non-empty "$from_main"
+    fi
+    if [[ -d "$from_test" ]]; then
+      mkdir -p "$to_test"
+      mv "$from_test"/* "$to_test"/
+      rmdir --ignore-fail-on-non-empty "$from_test"
+    fi
+
+    # Renomeia classe principal para fugir de NeonforgeStarterApplication
+    local app_dir
+    if [[ -d "$to_main/api" ]]; then
+      app_dir="$to_main/api"
+    else
+      app_dir="$to_main"
+    fi
+    local old_app="$app_dir/NeonforgeStarterApplication.java"
+    local new_app="$app_dir/${app_class}.java"
+    if [[ -f "$old_app" ]]; then
+      mv "$old_app" "$new_app"
+    fi
+
+    # Limpa diretórios vazios remanescentes de com/neonforge
+    rmdir --ignore-fail-on-non-empty "$dir/src/main/java/com/neonforge" "$dir/src/test/java/com/neonforge" 2>/dev/null || true
+  fi
+}
+
+post_process_java_api() {
+  # Ajustes adicionais específicos do starter Java para remover resquícios de "starter/neonforge".
+  local dir="$1"
+  local project_slug
+  project_slug="$(slugify "$NAME")"
+  local project_slug_us="${project_slug//-/_}"
+  local app_class
+  app_class="$(pascal_case "$project_slug")Application"
+  local base_pkg="com.${project_slug//-/.}"
+
+  local dc="$dir/docker-compose.yml"
+  if [[ -f "$dc" ]]; then
+    perl -pi -e '
+      s/java-api-starter-app/'"${project_slug}"'-app/g;
+      s/java-api-starter-db/'"${project_slug}"'-db/g;
+      s/java-api-starter-adminer/'"${project_slug}"'-adminer/g;
+      s/starter-net/'"${project_slug}"'-net/g;
+      s#jdbc:postgresql://db:5432/[^\s]+#jdbc:postgresql://db:5432/'"${project_slug_us}"'#g;
+      s/(SPRING_DATASOURCE_USERNAME:\s*).*/$1'"${project_slug_us}"'/;
+      s/(SPRING_DATASOURCE_PASSWORD:\s*).*/$1'"${project_slug_us}"'/;
+      s/(POSTGRES_DB:\s*).*/$1'"${project_slug_us}"'/;
+      s/(POSTGRES_USER:\s*).*/$1'"${project_slug_us}"'/;
+      s/(POSTGRES_PASSWORD:\s*).*/$1'"${project_slug_us}"'/;
+    ' "$dc"
+  fi
+
+  local readme="$dir/README.md"
+  if [[ -f "$readme" ]]; then
+    python - <<PY
+from pathlib import Path
+path = Path("$readme")
+data = path.read_text()
+updated = data.replace(
+    "postgres://starter:starter@localhost:5432/starter",
+    "postgres://${project_slug_us}:${project_slug_us}@localhost:5432/${project_slug_us}",
+)
+if updated != data:
+    path.write_text(updated)
+PY
+  fi
+
+  # Refina mainClass no pom caso alguma substituição falhe
+  local pom="$dir/pom.xml"
+  if [[ -f "$pom" ]]; then
+    perl -pi -e "s#<mainClass>.*</mainClass>#<mainClass>${base_pkg}.api.${app_class}</mainClass>#g" "$pom"
+  fi
+}
+
+generate_readme() {
+  [[ -f "$README_TEMPLATE" ]] || return 0
+  local readme="$1/README.md"
+  sed \
+    -e "s/__PROJECT_NAME__/$NAME/g" \
+    -e "s/__PROJECT_SLUG__/$NAME/g" \
+    -e "s/__STACK__/$STACK/g" \
+    -e "s/__WITH_SAMPLE__/$WITH_SAMPLE/g" \
+    -e "s/__WITH_TESTS__/$WITH_TESTS/g" \
+    -e "s/__WITH_QA__/$WITH_QA/g" \
+    "$README_TEMPLATE" > "$readme"
+}
+
+main() {
+  parse_args "$@"
+  ensure_stack_supported
+  ask_if_needed
+
+  if [[ -z "$TARGET_DIR" ]]; then
+    TARGET_DIR="$(stack_base_dir)/${NAME}"
+  fi
+
+  local stack_root
+  stack_root="$(starter_path "$STACK")"
+
+  [[ -d "$stack_root" ]] || die "Starter para stack '$STACK' não encontrado em $stack_root"
+  [[ -e "$TARGET_DIR" ]] && die "Diretório alvo já existe: $TARGET_DIR"
+
+  mkdir -p "$TARGET_DIR"
+
+  # Copia tudo, exceto o .git do starter
+  rsync -a --exclude '.git' "$stack_root"/ "$TARGET_DIR"/
+
+  substitute_placeholders "$TARGET_DIR"
+  [[ "$STACK" == "java-api" ]] && post_process_java_api "$TARGET_DIR"
+  ensure_mvnw "$TARGET_DIR"
+  # Só gera README base se o starter não trouxe um README próprio.
+  [[ -f "$TARGET_DIR/README.md" ]] || generate_readme "$TARGET_DIR"
+  run_install "$TARGET_DIR"
+
+  log "Projeto criado em: $TARGET_DIR"
+}
+
+run_install() {
+  local dir="$1"
+  (( RUN_INSTALL )) || return 0
+
+  case "$STACK" in
+    java-api)
+      if [[ -x "$dir/mvnw" ]]; then
+        (cd "$dir" && ./mvnw -B dependency:resolve || true)
+      fi
+      ;;
+    node-api)
+      if command -v pnpm >/dev/null 2>&1; then
+        (cd "$dir" && pnpm install || npm install || true)
+      elif command -v npm >/dev/null 2>&1; then
+        (cd "$dir" && npm install || true)
+      fi
+      ;;
+    go-api)
+      if [[ -f "$dir/go.mod" ]]; then
+        (cd "$dir" && go mod tidy || true)
+      fi
+      ;;
+  esac
+}
+
+starter_path() {
+  local stack="$1"
+
+  # 1) Starter local em ~/github/<stack>-starter
+  if [[ "$stack" == "java-api" ]]; then
+    local local_dir="$HOME/github/java-api-starter"
+    [[ -d "$local_dir" ]] && { echo "$local_dir"; return; }
+  fi
+
+  # 2) Clone remoto (HTTPS para evitar problema de SSH)
+  declare -A STARTER_URLS=(
+    [java-api]="https://github.com/Saiiru/java-api-starter.git"
+  )
+
+  if command -v git >/dev/null 2>&1 && [[ -n "${STARTER_URLS[$stack]:-}" ]]; then
+    local gh_dir="$HOME/github/${stack}-starter"
+    if [[ ! -d "$gh_dir" ]]; then
+      log "Clonando starter remoto: ${STARTER_URLS[$stack]}"
+      git clone --depth 1 "${STARTER_URLS[$stack]}" "$gh_dir" >/dev/null 2>&1 || die "Falha ao clonar starter remoto"
+    fi
+    [[ -d "$gh_dir" ]] && { echo "$gh_dir"; return; }
+  fi
+
+  die "Starter para stack '$stack' não encontrado. Clone manualmente em ~/github/${stack}-starter."
+}
+
+main "$@"

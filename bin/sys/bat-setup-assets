@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Download Batcave fonts and prepare cyberpunk notification sound
+set -euo pipefail
+
+FONT_ZIP_URL="https://github.com/saifulapm/my-fonts/archive/refs/heads/main.zip"
+TMP_ZIP="/tmp/bat-fonts.zip"
+FONT_DEST="$HOME/.local/share/fonts/batcave"
+SOUND_SRC="$HOME/workstation/config/sounds/cyberpunk_notification.mp3"
+SOUND_DEST_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/sounds/cyberpunk"
+SOUND_DEST="$SOUND_DEST_DIR/cyberpunk_notification.ogg"
+
+log() { printf "[bat-setup] %s\n" "$*"; }
+
+fetch_fonts() {
+  mkdir -p "$(dirname "$TMP_ZIP")"
+  log "Baixando fontes de $FONT_ZIP_URL"
+  curl -L "$FONT_ZIP_URL" -o "$TMP_ZIP"
+  mkdir -p "$FONT_DEST"
+  log "Extraindo para $FONT_DEST"
+  bsdtar -xf "$TMP_ZIP" -C "$FONT_DEST" --strip-components=1 || unzip -o "$TMP_ZIP" -d "$FONT_DEST"
+  find "$FONT_DEST" -type f ! -name '*.ttf' ! -name '*.otf' -delete || true
+  if command -v fc-cache >/dev/null 2>&1; then
+    log "Atualizando cache de fontes"
+    fc-cache -fv "$FONT_DEST" >/dev/null
+  fi
+  log "Fontes instaladas em $FONT_DEST"
+}
+
+convert_sound() {
+  mkdir -p "$SOUND_DEST_DIR"
+  if [[ ! -f "$SOUND_SRC" ]]; then
+    log "Som fonte não encontrado: $SOUND_SRC"
+    return 0
+  fi
+  if command -v ffmpeg >/dev/null 2>&1; then
+    log "Convertendo som para OGG via ffmpeg"
+    ffmpeg -y -i "$SOUND_SRC" -c:a libvorbis -q:a 5 "$SOUND_DEST" >/dev/null 2>&1
+  elif command -v sox >/dev/null 2>&1; then
+    log "Convertendo som para OGG via sox"
+    sox "$SOUND_SRC" "$SOUND_DEST"
+  else
+    log "ffmpeg/sox não encontrados; copiando MP3 como fallback"
+    cp "$SOUND_SRC" "$SOUND_DEST_DIR/cyberpunk_notification.mp3"
+    return 0
+  fi
+  log "Som pronto em $SOUND_DEST"
+}
+
+fetch_fonts
+convert_sound
+log "Done"

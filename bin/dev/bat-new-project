@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+# bat-new-project – Batman stack project generator
+
+set -euo pipefail
+
+WORKSPACE_DIR="${DRAGON_WORKSPACE:-${WORKSPACE_DIR:-$HOME/workspace}}"
+TEMPLATE_ROOT="${WORKSTATION_DIR:-$HOME/workstation}/templates/stacks"
+
+usage() {
+  cat <<EOF
+bat-new-project – cria projetos a partir de templates Batman stack.
+
+Uso:
+  bat-new-project <stack> <nome-projeto> [--group com.exemplo.app]
+
+Stacks suportadas:
+  java-api    – Java 11 + Maven + Spring Boot (Batman backend)
+
+Exemplos:
+  bat-new-project java-api gotham-api
+  bat-new-project java-api bat-signal --group com.sairu.batsignal
+EOF
+  exit 1
+}
+
+if [[ $# -lt 2 ]]; then
+  usage
+fi
+
+STACK="$1"
+PROJECT_NAME="$2"
+shift 2
+
+GROUP_ID="com.batman"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --group)
+      GROUP_ID="${2:-$GROUP_ID}"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      ;;
+    *)
+      echo "[bat-new-project] argumento desconhecido: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+case "$STACK" in
+  java-api) TEMPLATE_DIR="${TEMPLATE_ROOT}/java-api" ;;
+  *)
+    echo "[bat-new-project] stack não suportada: ${STACK}" >&2
+    echo "Stacks suportadas: java-api" >&2
+    exit 1
+    ;;
+esac
+
+if [[ ! -d "$TEMPLATE_DIR" ]]; then
+  echo "[bat-new-project] template não encontrado: $TEMPLATE_DIR" >&2
+  exit 1
+fi
+
+# Destino padrão: ~/workspace/java/<projeto>
+DEFAULT_BASE="${WORKSPACE_DIR}/java"
+TARGET_DIR="${PWD}/${PROJECT_NAME}"
+if [[ "$PWD" == "$WORKSPACE_DIR" || "$PWD" == "$DEFAULT_BASE" ]]; then
+  mkdir -p "$DEFAULT_BASE"
+  TARGET_DIR="${DEFAULT_BASE}/${PROJECT_NAME}"
+fi
+
+if [[ -e "$TARGET_DIR" ]]; then
+  echo "[bat-new-project] destino já existe: $TARGET_DIR" >&2
+  exit 1
+fi
+
+echo "[bat-new-project] criando projeto '${PROJECT_NAME}' (stack=${STACK}) em:"
+echo "  $TARGET_DIR"
+mkdir -p "$TARGET_DIR"
+cp -R "${TEMPLATE_DIR}/." "$TARGET_DIR"
+
+# Substituições: groupId e artifactId
+perl -pi -e "s/com\\.batman/${GROUP_ID}/g" "${TARGET_DIR}/pom.xml"
+perl -pi -e "s/batman-api/${PROJECT_NAME}/g" "${TARGET_DIR}/pom.xml"
+perl -pi -e "s/Batman API/${PROJECT_NAME^}/g" "${TARGET_DIR}/README.md"
+
+# Ajusta pacote se groupId mudou
+GROUP_PATH="${GROUP_ID//./\/}"
+SRC_MAIN="${TARGET_DIR}/src/main/java"
+SRC_TEST="${TARGET_DIR}/src/test/java"
+
+if [[ "$GROUP_PATH" != "com/batman" ]]; then
+  mkdir -p "${SRC_MAIN}/${GROUP_PATH}/app"
+  mkdir -p "${SRC_TEST}/${GROUP_PATH}/app"
+
+  if [[ -d "${SRC_MAIN}/com/batman/app" ]]; then
+    mv "${SRC_MAIN}/com/batman/app/"* "${SRC_MAIN}/${GROUP_PATH}/app/" || true
+    rm -rf "${SRC_MAIN}/com"
+  fi
+  if [[ -d "${SRC_TEST}/com/batman/app" ]]; then
+    mv "${SRC_TEST}/com/batman/app/"* "${SRC_TEST}/${GROUP_PATH}/app/" || true
+    rm -rf "${SRC_TEST}/com"
+  fi
+
+  find "${TARGET_DIR}/src" -type f -name "*.java" -print0 \
+    | xargs -0 perl -pi -e "s/package com\\.batman\\.app;/package ${GROUP_ID}.app;/g"
+fi
+
+echo "[bat-new-project] projeto criado."
+
+cat <<EOF
+
+Próximos passos:
+
+  cd ${PROJECT_NAME}
+  mise install        # garante Java 11 + Maven
+  mise run init       # baixa dependências Maven
+  mise run dev        # sobe o backend em http://localhost:8080/api/v1/health
+
+EOF

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# bat_tmux_install - linka tmux.conf do repo para ~/.config/tmux
+# Uso: bat_tmux_install
+set -euo pipefail
+
+ROOT="${WORKSTATION_DIR:-$HOME/workstation}"
+SRC="$ROOT/config/tmux/tmux.conf"
+DEST="$HOME/.config/tmux/tmux.conf"
+
+mkdir -p "$(dirname "$DEST")"
+
+if [[ -e "$DEST" || -L "$DEST" ]]; then
+  echo "[bat_tmux_install] destino já existe: $DEST (mantendo)"
+else
+  ln -s "$SRC" "$DEST"
+  echo "[bat_tmux_install] linkado: $SRC -> $DEST"
+fi
+
+if [[ -n "${TMUX:-}" ]]; then
+  echo "[bat_tmux_install] dentro de tmux: recarregando config na sessão atual."
+  tmux source-file "$DEST" \; display-message "tmux reloaded"
+else
+  echo "[bat_tmux_install] recarregando tmux (kill-server para aplicar globalmente)..."
+  tmux kill-server 2>/dev/null || true
+fi
+
+echo "[bat_tmux_install] done."

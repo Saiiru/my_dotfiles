@@ -1,0 +1,225 @@
+#!/usr/bin/env bash
+# bat_init_java - Spring Boot Initializr com overlay Batman (Docker, DB, mise, README, Justfile)
+# Requisitos: curl, unzip, rsync, git (opcional), docker/compose (para DB)
+
+set -euo pipefail
+
+ROOT="${WORKSTATION_DIR:-$HOME/workstation}"
+# Prefer DRAGON_WORKSPACE/java if definido; senão caímos no workspace do repo.
+BASE_PROJECTS="${DRAGON_WORKSPACE:-$HOME/workspace}/java"
+# Fallback final se o usuário quiser forçar dentro do repo
+if [[ -n "${WORKSTATION_FORCE_PROJECTS:-}" ]]; then
+  BASE_PROJECTS="${ROOT}/projects/java"
+fi
+TEMPLATE_DIR="${ROOT}/templates/java-svc"
+
+ask() {
+  local prompt="$1" default="${2:-}" val
+  read -r -p "$prompt${default:+ [$default]}: " val || true
+  echo "${val:-$default}"
+}
+
+pick() {
+  # pick <prompt> <opt1> <opt2> ... ; each opt may use "value|label"
+  local prompt="$1"; shift
+  local opts=("$@")
+
+  if command -v gum >/dev/null 2>&1; then
+    gum choose --cursor-prefix "➤ " --header "$prompt" "${opts[@]}"
+    return
+  fi
+
+  if command -v fzf >/dev/null 2>&1; then
+    printf "%s\n" "${opts[@]}" | fzf --prompt "$prompt > " --height 40% --border
+    return
+  fi
+
+  echo "$prompt"
+  local i=1
+  for o in "${opts[@]}"; do
+    echo "  $i) $o"
+    ((i++))
+  done
+  local choice
+  while :; do
+    read -r -p "Escolha [1-${#opts[@]}]: " choice || true
+    if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice>=1 && choice<=${#opts[@]} )); then
+      echo "${opts[choice-1]}"
+      return 0
+    fi
+    echo "Opção inválida."
+  done
+}
+
+require() {
+  command -v "$1" >/dev/null 2>&1 || { echo "[bat_init_java] falta: $1" >&2; exit 1; }
+}
+
+render_placeholders() {
+  local file="$1"
+  perl -pi -e "
+    s/__APP_NAME__/$APP_NAME/g;
+    s/__ARTIFACT_ID__/$ARTIFACT_ID/g;
+    s/__GROUP_ID__/$GROUP_ID/g;
+    s/__PACKAGE_NAME__/$PACKAGE_NAME/g;
+    s/__JAVA_VERSION__/$JAVA_VERSION/g;
+    s/__BOOT_VERSION__/$BOOT_VERSION/g;
+    s/__DB_NAME__/$DB_NAME/g;
+    s/__DB_USER__/$DB_USER/g;
+    s/__DB_PASS__/$DB_PASS/g;
+    s/__APP_PORT__/$APP_PORT/g;
+  " "$file"
+}
+
+main() {
+  require curl
+  require unzip
+  require rsync
+
+  mkdir -p "$BASE_PROJECTS"
+
+  PROJECT_NAME="$(ask 'Nome do projeto (diretório/artifact)' 'batman-api')"
+  GROUP_ID="$(ask 'GroupId' 'com.batcave')"
+  ARTIFACT_ID="$(ask 'ArtifactId' "$PROJECT_NAME")"
+  PACKAGE_NAME="$(ask 'Pacote base' "$GROUP_ID.$ARTIFACT_ID" | tr '-' '_')"
+
+  BUILD_TOOL_RAW="$(pick 'Build tool' \
+    "maven|Maven (mvnw wrapper)" \
+    "gradle|Gradle (gradlew wrapper)")"
+  BUILD_TOOL="${BUILD_TOOL_RAW%%|*}"
+  if [[ -z "$BUILD_TOOL" ]]; then
+    BUILD_TOOL="maven"
+    echo "[bat_init_java] nenhum build tool escolhido; usando default: maven"
+  fi
+
+  JAVA_RAW="$(pick 'Java version' \
+    "21|Java 21 (LTS, recomendado)" \
+    "17|Java 17 (LTS)" \
+    "11|Java 11")"
+  JAVA_VERSION="${JAVA_RAW%%|*}"
+  if [[ -z "$JAVA_VERSION" ]]; then
+    JAVA_VERSION="21"
+    echo "[bat_init_java] nenhuma versão Java escolhida; usando default: 21"
+  fi
+
+  BOOT_VERSION="$(ask 'Spring Boot version (vazio = latest)' '3.3.5')"
+
+  DB_RAW="$(pick 'Banco de dados' \
+    "postgres|PostgreSQL + JPA + Testcontainers" \
+    "mysql|MySQL + JPA + Testcontainers" \
+    "none|Sem DB (use H2/mem ou configure depois)")"
+  DB_CHOICE="${DB_RAW%%|*}"
+  if [[ -z "$DB_CHOICE" ]]; then
+    DB_CHOICE="postgres"
+    echo "[bat_init_java] nenhum DB escolhido; usando default: postgres"
+  fi
+
+  DEPS_BASE=("web" "actuator" "validation")
+  case "$DB_CHOICE" in
+    postgres) DEPS_BASE+=("data-jpa" "postgresql" "testcontainers"); DB_NAME="${ARTIFACT_ID//-/_}_db";;
+    mysql)    DEPS_BASE+=("data-jpa" "mysql" "testcontainers"); DB_NAME="${ARTIFACT_ID//-/_}_db";;
+    none)     DB_NAME="appdb";;
+  esac
+
+  DB_USER="app"
+  DB_PASS="app"
+  APP_NAME="$PROJECT_NAME"
+  APP_PORT=8080
+
+  DEPS_CSV=$(IFS=,; echo "${DEPS_BASE[*]}")
+  TYPE="maven-project"; [[ "$BUILD_TOOL" == "gradle" ]] && TYPE="gradle-project"
+
+  TARGET_DIR="$BASE_PROJECTS/$PROJECT_NAME"
+  if [[ -e "$TARGET_DIR" ]]; then
+    echo "[bat_init_java] ERRO: destino já existe: $TARGET_DIR" >&2
+    exit 1
+  fi
+  mkdir -p "$TARGET_DIR"
+
+  echo "[bat_init_java] Gerando via Spring Initializr..."
+  TMP_ZIP="$(mktemp /tmp/bat-init-java-XXXXXX.zip)"
+  CURL_OPTS=(
+    -fsSL
+    -G
+    -w "%{http_code}"
+    -o "$TMP_ZIP"
+    "https://start.spring.io/starter.zip"
+    --data-urlencode "type=$TYPE"
+    --data-urlencode "language=java"
+    --data-urlencode "groupId=$GROUP_ID"
+    --data-urlencode "artifactId=$ARTIFACT_ID"
+    --data-urlencode "name=$PROJECT_NAME"
+    --data-urlencode "packageName=$PACKAGE_NAME"
+    --data-urlencode "javaVersion=$JAVA_VERSION"
+    --data-urlencode "packaging=jar"
+    --data-urlencode "dependencies=$DEPS_CSV"
+  )
+  if [[ -n "$BOOT_VERSION" ]]; then
+    CURL_OPTS+=(--data-urlencode "bootVersion=$BOOT_VERSION")
+  fi
+
+  HTTP_CODE="$(curl "${CURL_OPTS[@]}" 2>/tmp/bat_init_java.curl.log || true)"
+
+  if [[ "$HTTP_CODE" != "200" ]]; then
+    echo "[bat_init_java] Aviso: Spring Initializr retornou HTTP $HTTP_CODE. Log: /tmp/bat_init_java.curl.log" >&2
+    echo "[bat_init_java] Usando fallback local (templates/java-batman-api) -- build tool maven."
+    if [[ "$BUILD_TOOL" == "gradle" ]]; then
+      echo "[bat_init_java] (OBS: gradle escolhido, mas fallback é maven; rode ./mvnw)" >&2
+    fi
+    if [[ -d "${ROOT}/templates/java-batman-api" ]]; then
+      rsync -a "${ROOT}/templates/java-batman-api"/ "$TARGET_DIR"/
+    else
+      echo "[bat_init_java] ERRO: fallback local não encontrado em templates/java-batman-api" >&2
+      exit 1
+    fi
+  else
+    unzip -q "$TMP_ZIP" -d "$TARGET_DIR"
+  fi
+  rm -f "$TMP_ZIP"
+
+  # Em zips do Spring Initializr o conteúdo já vem na raiz do target
+  EXTRACTED="$TARGET_DIR"
+
+  # Ajusta java.version em qualquer pom.xml gerado (inclui fallback)
+  find "$EXTRACTED" -name pom.xml -print0 | while IFS= read -r -d '' pom; do
+    perl -pi -e "s/(<java\\.version>)(.*?)(<\\/java\\.version>)/\$1$JAVA_VERSION\$3/" "$pom"
+  done
+
+  echo "[bat_init_java] Aplicando overlay Batman..."
+  if [[ -d "$TEMPLATE_DIR" ]]; then
+    rsync -a "$TEMPLATE_DIR"/ "$EXTRACTED"/
+  fi
+
+  # Render placeholders nos arquivos overlay
+  while IFS= read -r -d '' file; do
+    render_placeholders "$file"
+  done < <(find "$EXTRACTED" \( -path "$EXTRACTED/docker/*" -o -path "$EXTRACTED/env/*" -o -path "$EXTRACTED/ops/*" -o -path "$EXTRACTED/misc/*" \) -type f -print0 2>/dev/null || true)
+
+  # Se mise overlay existir, promove para raíz
+  if [[ -f "$EXTRACTED/env/mise.toml.overlay" ]]; then
+    mv "$EXTRACTED/env/mise.toml.overlay" "$EXTRACTED/mise.toml"
+  fi
+
+  # Se README template existir, renomeia
+  if [[ -f "$EXTRACTED/misc/README_TEMPLATE.md" ]]; then
+    mv "$EXTRACTED/misc/README_TEMPLATE.md" "$EXTRACTED/README.md"
+  fi
+
+  echo "[bat_init_java] Projeto criado em: $EXTRACTED"
+  echo "Resumo:"
+  echo "  Build tool : $BUILD_TOOL"
+  echo "  Java       : $JAVA_VERSION"
+  echo "  Boot       : ${BOOT_VERSION:-latest}"
+  echo "  DB         : $DB_CHOICE (DB_NAME=$DB_NAME, user=$DB_USER)"
+  echo "Próximos passos:"
+  echo "  cd \"$EXTRACTED\""
+  echo "  docker compose up -d db    # sobe banco"
+  if [[ "$BUILD_TOOL" == "maven" ]]; then
+    echo "  ./mvnw spring-boot:run"
+  else
+    echo "  ./gradlew bootRun"
+  fi
+  echo "  mise install               # opcional para travar toolchain"
+}
+
+main "$@"

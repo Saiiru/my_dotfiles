@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# bat-qa-test - roda testes priorizando tarefas do mise, com fallback por stack
+set -euo pipefail
+
+# Se existir .mise.toml e mise, tenta "mise run test"
+if command -v mise >/dev/null 2>&1 && [ -f ".mise.toml" ]; then
+  if mise run test; then
+    exit 0
+  fi
+  echo "[bat-qa-test] mise run test falhou, tentando fallback..." >&2
+fi
+
+if [ -f "pom.xml" ]; then
+  echo "[QA] Maven test"
+  mvn -B test
+elif [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+  echo "[QA] Gradle test"
+  ./gradlew test || gradle test
+elif [ -f "package.json" ]; then
+  echo "[QA] Node test"
+  if jq -e '.scripts.test' package.json >/dev/null 2>&1; then
+    pnpm test || npm test
+  else
+    echo "[QA] Nenhum script test definido."
+  fi
+elif [ -f "go.mod" ]; then
+  echo "[QA] Go test"
+  go test ./...
+elif [ -f "Cargo.toml" ]; then
+  echo "[QA] Rust test"
+  cargo test
+else
+  echo "[bat-qa-test] Nenhuma stack suportada detectada." >&2
+  exit 1
+fi
