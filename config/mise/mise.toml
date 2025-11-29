@@ -127,12 +127,12 @@ cargo --version || true
 
 [tasks.hud]
 description = "🦇 Abrir BAT-HUD (stack-aware) no diretório atual"
-run = "bash $HOME/workstation/bin/bat_hud.sh"
+run = "bat-hud"
 
 [tasks.new-project]
 description = "🆕 Criar projeto a partir dos starters (java|python|go)"
-run = "bash $HOME/workstation/bin/bat_new_project.sh"
+run = "bat-new-project"
 
 [tasks.tmux-stack]
 description = "📐 Abrir sessão tmux com layout dev/test/logs (stack-aware)"
-run = "bash $HOME/workstation/bin/bat_tmux_stack.sh"
+run = "bat-tmux-layout"
