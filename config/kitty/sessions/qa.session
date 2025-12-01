@@ -1,0 +1,12 @@
+# Gotham QA session (lint + tests + logs)
+
+new_tab QA
+cd ~
+launch zsh -lc "mise run qa || echo 'Configure qa task'; read"
+
+split vsplit
+launch zsh -lc "mise run lint || echo 'Configure lint task'; read"
+
+new_tab Logs
+cd ~
+launch zsh -lc "tail -F logs/*.log 2>/dev/null || echo 'No logs/'; read"

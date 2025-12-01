@@ -1,0 +1,13 @@
+# Gotham Dev session (editor + dev server + tests)
+
+new_tab Dev
+cd ~
+launch zsh -lc "nvim ."
+
+# Dev server split
+split hsplit
+launch zsh -lc "mise run dev || echo 'Configure dev task (mise)'; read"
+
+# Tests split (below dev pane)
+split vsplit
+launch zsh -lc "mise run qa || mise run test || echo 'Configure qa/test task'; read"
